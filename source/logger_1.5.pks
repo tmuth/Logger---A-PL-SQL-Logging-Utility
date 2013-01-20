@@ -7,6 +7,7 @@ as
     val varchar2(4000));
   
   type tab_param is table of rec_param index by binary_integer;
+  gc_empty_tab_param tab_param;
   
   -- VARIABLES
 	g_logger_version    constant varchar2(10) := '1.4.0';
@@ -38,7 +39,8 @@ as
   procedure log_error(
     p_text          in varchar2 default null,
     p_scope         in varchar2 default null,
-    p_extra         in clob default null);
+    p_extra         in clob default null,
+    p_params        in tab_param default logger.gc_empty_tab_param);
 
   procedure log_permanent(
     p_text    in varchar2,
@@ -131,7 +133,7 @@ as
   
   
   procedure log_params(
-    p_params in tab_param,
+    p_params in logger.tab_param,
     p_scope in logger_logs.scope%type);
   
   procedure append_param(

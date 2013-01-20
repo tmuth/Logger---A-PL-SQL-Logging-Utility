@@ -28,6 +28,47 @@ as
   gc_date_format varchar2(255) := 'DD-MON-YYYY HH24:MI:SS';
   gc_timestamp_format varchar2(255) := gc_date_format || ':FF';
   gc_timestamp_tz_format varchar2(255) := gc_timestamp_format || ' TZR';
+  
+  
+  
+  -- PRIVATE
+  /**
+   * Returns the display/print friendly parameter information
+   * Private
+   *
+   * @author Martin D'Souza
+   * @created 20-Jan-2013
+   *
+   * @param p_parms Array of parameters (can be null)
+   * @return Clob of param information
+   */
+  function get_param_clob(p_params in logger.tab_param)
+    return clob
+  as
+    l_return clob;
+    l_no_vars constant varchar2(255) := 'No params defined';
+  begin
+    -- Generate line feed delimited list
+    if p_params.count > 0 then
+      for x in p_params.first..p_params.last loop
+        l_return := l_return || p_params(x).name || ': ' || p_params(x).val;
+        
+        if x != p_params.last then
+          l_return := l_return || gc_line_feed;
+        end if;
+      end loop;
+    end if; -- p_params.count > 0
+    
+    if l_return is null then
+      l_return := l_no_vars;
+    end if;
+    
+    return l_return;
+  end get_param_clob;
+   
+  
+  
+  -- PUBLIC
 
 
   function admin_security_check
@@ -373,13 +414,16 @@ as
   procedure log_error(
 		p_text          in varchar2 default null,
     p_scope         in varchar2 default null,
-    p_extra         in clob default null)
+    p_extra         in clob default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
   is
     l_proc_name     varchar2(100);
     l_lineno        varchar2(100);
     l_text          varchar2(4000);
     pragma autonomous_transaction;
     l_call_stack    varchar2(4000);
+    l_params        clob;
+    l_extra         clob;
 	begin
     $IF $$NO_OP $THEN
       null;
@@ -399,9 +443,15 @@ as
         end if;
   
         l_text := l_text || dbms_utility.format_error_stack();
+        
+        l_extra := p_extra;
+        if p_params is not null then
+          l_params := get_param_clob(p_params => p_params);
+          l_extra := l_extra || gc_line_feed || gc_line_feed || '*** Parameters ***' || gc_line_feed || gc_line_feed || l_params;
+        end if;
   
         insert into logger_logs (logger_level,text,unit_name,line_no,call_stack,scope,extra)
-        values	  (logger.g_error,l_text,l_proc_name,l_lineno,l_call_stack,p_scope,p_extra) returning id into g_log_id;
+        values	  (logger.g_error,l_text,l_proc_name,l_lineno,l_call_stack,p_scope,l_extra) returning id into g_log_id;
   
         commit;
       end if;
@@ -1121,30 +1171,17 @@ as
    * @param p_scope scope to log the parameters as
    */ 
   procedure log_params(
-    p_params in tab_param,
+    p_params in logger.tab_param,
     p_scope in logger_logs.scope%type)
   is
     l_clob clob;
-    l_no_vars constant varchar2(255) := 'No params defined';
+    
   begin
     $IF $$NO_OP $THEN
       null;
     $ELSE
       if ok_to_log(logger.g_debug) then
-        -- Generate line feed delimited list
-        if p_params.count > 0 then
-          for x in p_params.first..p_params.last loop
-            l_clob := l_clob || p_params(x).name || ': ' || p_params(x).val;
-            
-            if x != p_params.last then
-              l_clob := l_clob || gc_line_feed;
-            end if;
-          end loop;
-        end if; -- p_params.count > 0
-        
-        if l_clob is null then
-          l_clob := l_no_vars;
-        end if;
+        l_clob := get_param_clob(p_params => p_params);
       
         -- Support for long strings
         if dbms_lob.getlength(l_clob) > 4000 then
