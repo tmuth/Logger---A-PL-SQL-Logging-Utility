@@ -22,6 +22,11 @@ as
   G_Log_Id    	Number;
   g_proc_start_times ts_array;
   g_running_timers pls_integer := 0;
+  
+  -- CONSTANTS
+  gc_line_feed varchar2(1) := chr(10);
+  gc_date_format varchar2(255) := 'DD-MON-YYYY HH24:MI:SS';
+  gc_timestamp_format varchar2(255) := gc_date_format || ':FF TZR';
 
 
   function admin_security_check
@@ -1085,4 +1090,162 @@ as
   end sqlplus_format;
 
 
+  -- Handle Parameters
+  /**
+   * Logs parameters
+   * Parameters will be delimited by a linefeed (i.e. one on each line)
+   *
+   * Example:
+--   declare
+--      l_scope logger_logs.scope%type := 'test';
+--      l_params logger.tab_param;
+--    begin
+--      logger.append_param(l_params, 'abc', 'abc');
+--      logger.append_param(l_params, 'sysdate', sysdate);
+--      logger.append_param_ts(l_params, 'systimestamp', systimestamp);
+--      logger.append_param(l_params, 'boolean', true);
+--      logger.log_params(l_params, l_scope);
+--    end;
+--    /
+   *
+   * If the list of parameters is <= 4000 then will put in "TEXT" colun
+   * Otherwise it'll go into the "EXTRA" field
+   *
+   * No pragama autonomous_transaction since calls other procedure which commits
+   *
+   * @author Martin D'Souza
+   * @created 19-Jan-2013
+   *
+   * @param p_params Table of parameters. If none are provided message is still stored
+   * @param p_scope scope to log the parameters as
+   */ 
+  procedure log_params(
+    p_params in tab_param,
+    p_scope in logger_logs.scope%type)
+  is
+    l_clob clob;
+    l_no_vars constant varchar2(255) := 'No params defined';
+  begin
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      if ok_to_log(logger.g_debug) then
+        -- Generate line feed delimited list
+        if p_params.count > 0 then
+          for x in p_params.first..p_params.last loop
+            l_clob := l_clob || p_params(x).name || ': ' || p_params(x).val;
+            
+            if x != p_params.last then
+              l_clob := l_clob || gc_line_feed;
+            end if;
+          end loop;
+        end if; -- p_params.count > 0
+        
+        if l_clob is null then
+          l_clob := l_no_vars;
+        end if;
+      
+        -- Support for long strings
+        if dbms_lob.getlength(l_clob) > 4000 then
+          logger.log(
+            p_text => 'Parameters (see extra)',
+            p_scope => p_scope,
+            p_extra => l_clob);
+        else
+          logger.log(
+            p_text => l_clob,
+            p_scope => p_scope);
+        end if;
+      end if; -- ok_to_log
+    $END -- $$NO_OP
+  end log_params;
+  
+  
+  /**
+   * Append parameter to table of parameters
+   * Nothing is actually logged in this procedure
+   * This procedure is overloaded
+   *
+   * @author Martin D'Souza
+   * @created 19-Jan-2013
+   *
+   * @param p_params Table of parameters (param will be appended to this)
+   * @param p_name Name
+   * @param p_val Value in its format. Will be converted to string
+   */
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in varchar2
+  )
+  as
+    l_param logger.rec_param;
+  begin
+     $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      l_param.name := p_name;
+      l_param.val := p_val;
+      p_params(p_params.count + 1) := l_param;
+    $END  
+  end append_param;
+  
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in number)
+  as
+    l_param logger.rec_param;
+  begin
+     $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      logger.append_param(p_params => p_params, p_name => p_name, p_val => to_char(p_val));
+    $END  
+  end append_param;
+  
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in date)
+  as
+    l_param logger.rec_param;
+  begin
+     $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      logger.append_param(p_params => p_params, p_name => p_name, p_val => to_char(p_val, gc_date_format));
+    $END  
+  end append_param;
+  
+  -- Note: I tried to overload this method with timestamps but was receiving error: PLS-00307: too many declarations of 'APPEND_PARAM' match this call
+  -- When calling. It seems as though Oracle will try the implict conversion to date type when dealing with timestamps
+  -- See: https://forums.oracle.com/forums/thread.jspa?threadID=2488402&tstart=0
+  procedure append_param_ts(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in timestamp)
+  as
+    l_param logger.rec_param;
+  begin
+     $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      logger.append_param(p_params => p_params, p_name => p_name, p_val => to_char(p_val, gc_timestamp_format));
+    $END  
+  end append_param_ts;
+  
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in boolean)
+  as
+    l_param logger.rec_param;
+  begin
+     $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      logger.append_param(p_params => p_params, p_name => p_name, p_val => case when p_val then 'TRUE' else 'FALSE' end);
+    $END  
+  end append_param;
 end logger;

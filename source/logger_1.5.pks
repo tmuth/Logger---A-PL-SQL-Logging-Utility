@@ -1,6 +1,14 @@
 create or replace package logger
   authid definer
 as
+  -- TYPES
+  type rec_param is record(
+    name varchar2(255),
+    val varchar2(4000));
+  
+  type tab_param is table of rec_param index by binary_integer;
+  
+  -- VARIABLES
 	g_logger_version    constant varchar2(10) := '1.4.0';
 	g_context_name 		constant varchar2(35) := substr(sys_context('USERENV','CURRENT_SCHEMA'),1,23)||'_LOGCTX';
 
@@ -120,4 +128,34 @@ as
   -- Valid values for p_level are:
   -- OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING
   procedure set_level(p_level in varchar2 default 'DEBUG');
+  
+  
+  procedure log_params(
+    p_params in tab_param,
+    p_scope in logger_logs.scope%type);
+  
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in varchar2);
+    
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in number);
+    
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in date);
+    
+  procedure append_param_ts(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in timestamp);
+    
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in boolean);
 end logger;
