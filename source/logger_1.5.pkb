@@ -168,92 +168,92 @@ as
 
 
   function include_call_stack
-      return boolean
-      $IF $$RAC_LT_11_2 $THEN
-          $IF not dbms_db_version.ver_le_10_2 $THEN
-              $IF $$NO_OP is null or NOT $$NO_OP $THEN
-                  result_cache relies_on (logger_prefs)
-              $END
-          $END
+    return boolean
+    $IF $$RAC_LT_11_2 $THEN
+      $IF not dbms_db_version.ver_le_10_2 $THEN
+        $IF $$NO_OP is null or NOT $$NO_OP $THEN
+          result_cache relies_on (logger_prefs)
+        $END
       $END
+    $END
   is
-      l_call_stack_pref   varchar2(50);
+    l_call_stack_pref   varchar2(50);
   begin
-  $IF $$NO_OP $THEN
-          return false;
-  $ELSE
+    $IF $$NO_OP $THEN
+      return false;
+    $ELSE
       $IF $$RAC_LT_11_2 $THEN
-          l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
+        l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
       $ELSE
-          l_call_stack_pref := sys_context(g_context_name,'include_call_stack');
-          if l_call_stack_pref is null then
-              l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
-              save_global_context('include_call_stack',l_call_stack_pref);
-          end if;
+        l_call_stack_pref := sys_context(g_context_name,'include_call_stack');
+        if l_call_stack_pref is null then
+          l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
+          save_global_context('include_call_stack',l_call_stack_pref);
+        end if;
       $END
 
       if l_call_stack_pref = 'TRUE' then
-          return true;
+        return true;
       else
-          return false;
+        return false;
       end if;
-  $END
+    $END
   end include_call_stack;
 
 
-    function date_text_format_base (
-        p_date_start in date,
-        p_date_stop  in date)
+  function date_text_format_base (
+    p_date_start in date,
+    p_date_stop  in date)
+  return varchar2
+  as
+    x	varchar2(20);
+  begin
+    x := 	
+      case
+        when p_date_stop-p_date_start < 1/1440
+          then round(24*60*60*(p_date_stop-p_date_start)) || ' seconds'
+        when p_date_stop-p_date_start < 1/24
+          then round(24*60*(p_date_stop-p_date_start)) || ' minutes'
+        when p_date_stop-p_date_start < 1
+          then round(24*(p_date_stop-p_date_start)) || ' hours'
+        when p_date_stop-p_date_start < 14
+          then trunc(p_date_stop-p_date_start) || ' days'
+        when p_date_stop-p_date_start < 60
+          then trunc((p_date_stop-p_date_start)/7) || ' weeks'
+        when p_date_stop-p_date_start < 365
+          then round(months_between(p_date_stop,p_date_start)) || ' months'
+        else round(months_between(p_date_stop,p_date_start)/12,1) || ' years'
+      end;
+    x:= regexp_replace(x,'(^1 [[:alnum:]]{4,10})s','\1');
+    x:= x || ' ago';
+    return substr(x,1,20);
+  end date_text_format_base;
+
+
+
+  function date_text_format (p_date in date)
     return varchar2
-    as
-        x	varchar2(20);
-    begin
-        x := 	case
-                    when p_date_stop-p_date_start < 1/1440
-                        then round(24*60*60*(p_date_stop-p_date_start)) || ' seconds'
-                    when p_date_stop-p_date_start < 1/24
-                        then round(24*60*(p_date_stop-p_date_start)) || ' minutes'
-                    when p_date_stop-p_date_start < 1
-                        then round(24*(p_date_stop-p_date_start)) || ' hours'
-                    when p_date_stop-p_date_start < 14
-                        then trunc(p_date_stop-p_date_start) || ' days'
-                    when p_date_stop-p_date_start < 60
-                        then trunc((p_date_stop-p_date_start)/7) || ' weeks'
-                    when p_date_stop-p_date_start < 365
-                        then round(months_between(p_date_stop,p_date_start)) || ' months'
-                    else round(months_between(p_date_stop,p_date_start)/12,1) || ' years'
-               end;
-        x:= regexp_replace(x,'(^1 [[:alnum:]]{4,10})s','\1');
-        x:= x || ' ago';
-        return substr(x,1,20);
-    end date_text_format_base;
+  as
+  begin
+    return date_text_format_base(
+      p_date_start => p_date   ,
+      p_date_stop  => sysdate);
 
-
-
-    function date_text_format (p_date in date)
-    return varchar2
-    as
-    begin
-        return date_text_format_base(
-                p_date_start => p_date   ,
-                p_date_stop  => sysdate);
-
-    end date_text_format;
+  end date_text_format;
 
 	function get_character_codes(
 		p_string 				in varchar2,
 		p_show_common_codes 	in boolean default true)
-	return varchar2
+  	return varchar2
 	is
 		l_string	varchar2(32767);
 		l_dump		varchar2(32767);
 		l_return	varchar2(32767);
 	begin
 		-- replace tabs with ^
-        l_string := replace(p_string,chr(9),'^');
+    l_string := replace(p_string,chr(9),'^');
 		-- replace all other control characters such as carriage return / line feeds with ~
 		l_string := regexp_replace(l_string,'[[:cntrl:]]','~',1,0,'m');
-
 
 		select dump(p_string) into l_dump from dual;
 
@@ -263,12 +263,10 @@ as
 		l_dump 	:= regexp_replace(l_dump,'(,)([[:digit:]]{1})(,)','\1  \2\3',1,0); -- lpad all single digit numbers out to 3
 		l_dump 	:= regexp_replace(l_dump,'(,)([[:digit:]]{2})(,)','\1 \2\3',1,0);  -- lpad all double digit numbers out to 3
 		l_dump	:= ltrim(replace(l_dump,',,',','),','); -- remove the double commas
-        l_dump  := lpad(' ',(5-instr(l_dump,',')),' ')||l_dump;
+    l_dump  := lpad(' ',(5-instr(l_dump,',')),' ')||l_dump;
 
 		-- replace every individual character with 2 spaces, itself and a comma so it lines up with the dump output
 		l_string := ' '||regexp_replace(l_string,'(.){1}','  \1,',1,0);
-
-
 
 		l_return := rtrim(l_dump,',') || chr(10) || rtrim(l_string,',');
 
@@ -280,432 +278,434 @@ as
 
 	end get_character_codes;
 
-    procedure get_debug_info(
-        p_callstack     in clob,
-        o_unit          out varchar2,
-        o_lineno        out varchar2 ) as
+  procedure get_debug_info(
+    p_callstack     in clob,
+    o_unit          out varchar2,
+    o_lineno        out varchar2 ) 
+  as
     --
-        l_callstack varchar2(3000) := p_callstack;
-    begin
-      l_callstack := substr( l_callstack, instr( l_callstack, chr(10), 1, 5 )+1 );
-      l_callstack := substr( l_callstack, 1, instr( l_callstack, chr(10), 1, 1 )-1 );
-      l_callstack := trim( substr( l_callstack, instr( l_callstack, ' ' ) ) );
-      o_lineno := substr( l_callstack, 1, instr( l_callstack, ' ' )-1 );
-      o_unit := trim(substr( l_callstack, instr( l_callstack, ' ', -1, 1 ) ));
-    end get_debug_info;
+    l_callstack varchar2(3000) := p_callstack;
+  begin
+    l_callstack := substr( l_callstack, instr( l_callstack, chr(10), 1, 5 )+1 );
+    l_callstack := substr( l_callstack, 1, instr( l_callstack, chr(10), 1, 1 )-1 );
+    l_callstack := trim( substr( l_callstack, instr( l_callstack, ' ' ) ) );
+    o_lineno := substr( l_callstack, 1, instr( l_callstack, ' ' )-1 );
+    o_unit := trim(substr( l_callstack, instr( l_callstack, ' ', -1, 1 ) ));
+  end get_debug_info;
 
 
-    procedure  log_internal(
-            p_text				in varchar2,
-            p_log_level			in number,
-            p_scope             in varchar2,
-            p_extra             in clob default null,
-            p_callstack         in varchar2 default null)
-	is
-        l_proc_name     	varchar2(100);
-        l_lineno        	varchar2(100);
-        l_text 				varchar2(4000);
-        l_callstack         varchar2(3000);
-	begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-            l_text := p_text;
-            if p_callstack is not null and include_call_stack then
-                get_debug_info(
-                    p_callstack     => p_callstack,
-                    o_unit          => l_proc_name,
-                    o_lineno        => l_lineno);
+  procedure  log_internal(
+    p_text				in varchar2,
+    p_log_level			in number,
+    p_scope             in varchar2,
+    p_extra             in clob default null,
+    p_callstack         in varchar2 default null)
+  is
+    l_proc_name     	varchar2(100);
+    l_lineno        	varchar2(100);
+    l_text 				varchar2(4000);
+    l_callstack         varchar2(3000);
+  begin
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      l_text := p_text;
+      if p_callstack is not null and include_call_stack then
+        get_debug_info(
+          p_callstack     => p_callstack,
+          o_unit          => l_proc_name,
+          o_lineno        => l_lineno);
 
-                l_callstack  := regexp_replace(p_callstack,'^.*$','',1,4,'m');
-                l_callstack  := regexp_replace(l_callstack,'^.*$','',1,1,'m');
-                l_callstack  := ltrim(replace(l_callstack,chr(10)||chr(10),chr(10)),chr(10));
+        l_callstack  := regexp_replace(p_callstack,'^.*$','',1,4,'m');
+        l_callstack  := regexp_replace(l_callstack,'^.*$','',1,1,'m');
+        l_callstack  := ltrim(replace(l_callstack,chr(10)||chr(10),chr(10)),chr(10));
 
-            end if;
+      end if;
 
-            insert into logger_logs (logger_level,text,call_stack,unit_name,line_no,scope,extra)
-                values	  			(p_log_level,l_text,l_callstack,l_proc_name,l_lineno,lower(p_scope), p_extra) returning id into g_log_id ;
-            commit;
-        $END
-	end log_internal;
+      insert into logger_logs (logger_level,text,call_stack,unit_name,line_no,scope,extra)
+      values (p_log_level,l_text,l_callstack,l_proc_name,l_lineno,lower(p_scope), p_extra) returning id into g_log_id ;
+      commit;
+    $END
+  end log_internal;
 
-    procedure snapshot_apex_items(
-        p_log_id in number)
-    is
-        l_app_session number;
-        l_app_id       number;
-    begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-            $IF $$APEX $THEN
-                l_app_session := v('APP_SESSION');
-                l_app_id := v('APP_ID');
-                for c1 in (select item_name
-                             from apex_application_items
-                            where application_id = l_app_id)
-                loop
-                    insert into logger_logs_apex_items(log_id,app_session,item_name,item_value)
-                    values
-                    (p_log_id,l_app_session,c1.item_name,v(c1.item_name));
-                end loop; --c1
+  procedure snapshot_apex_items(
+    p_log_id in number)
+  is
+    l_app_session number;
+    l_app_id       number;
+  begin
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      $IF $$APEX $THEN
+        l_app_session := v('APP_SESSION');
+        l_app_id := v('APP_ID');
+        for c1 in (
+          select item_name
+          from apex_application_items
+          where application_id = l_app_id)
+        loop
+          insert into logger_logs_apex_items(log_id,app_session,item_name,item_value)
+          values (p_log_id,l_app_session,c1.item_name,v(c1.item_name));
+        end loop; --c1
 
-				for c1 in (select item_name
-                             from apex_application_page_items
-                            where application_id = l_app_id)
-                loop
-                    insert into logger_logs_apex_items(log_id,app_session,item_name,item_value)
-                    values
-                    (p_log_id,l_app_session,c1.item_name,v(c1.item_name));
-                end loop; --c1
+        for c1 in (
+          select item_name
+          from apex_application_page_items
+          where application_id = l_app_id)
+        loop
+          insert into logger_logs_apex_items(log_id,app_session,item_name,item_value)
+          values (p_log_id,l_app_session,c1.item_name,v(c1.item_name));
+        end loop; --c1
 
-            $END
-            null;
-        $END
-    end snapshot_apex_items;
+      $END
+      null;
+    $END
+  end snapshot_apex_items;
 
 
-    procedure log_error(
+  procedure log_error(
 		p_text          in varchar2 default null,
-        p_scope         in varchar2 default null,
-        p_extra         in clob default null)
-	is
-        l_proc_name     varchar2(100);
-        l_lineno        varchar2(100);
-        l_text          varchar2(4000);
-		pragma autonomous_transaction;
-        l_call_stack    varchar2(4000);
+    p_scope         in varchar2 default null,
+    p_extra         in clob default null)
+  is
+    l_proc_name     varchar2(100);
+    l_lineno        varchar2(100);
+    l_text          varchar2(4000);
+    pragma autonomous_transaction;
+    l_call_stack    varchar2(4000);
 	begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-            if ok_to_log(logger.g_error) then
-                -- get_debug_info( l_proc_name, l_lineno );
-
-                get_debug_info(
-                    p_callstack     => dbms_utility.format_call_stack,
-                    o_unit          => l_proc_name,
-                    o_lineno        => l_lineno);
-
-                l_call_stack := dbms_utility.format_error_stack() ||chr(10)||dbms_utility.format_error_backtrace;
-
-                if p_text is not null then
-                    l_text := p_text ||' '|| chr(10)||chr(10);
-                end if;
-
-                l_text := l_text || dbms_utility.format_error_stack();
-
-                insert into logger_logs (logger_level,text,unit_name,line_no,call_stack,scope,extra)
-                            values	  (logger.g_error,l_text,l_proc_name,l_lineno,l_call_stack,p_scope,p_extra) returning id into g_log_id;
-
-                commit;
-            end if;
-        $END
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      if ok_to_log(logger.g_error) then
+        -- get_debug_info( l_proc_name, l_lineno );
+  
+        get_debug_info(
+          p_callstack     => dbms_utility.format_call_stack,
+          o_unit          => l_proc_name,
+          o_lineno        => l_lineno);
+  
+        l_call_stack := dbms_utility.format_error_stack() ||chr(10)||dbms_utility.format_error_backtrace;
+  
+        if p_text is not null then
+          l_text := p_text ||' '|| chr(10)||chr(10);
+        end if;
+  
+        l_text := l_text || dbms_utility.format_error_stack();
+  
+        insert into logger_logs (logger_level,text,unit_name,line_no,call_stack,scope,extra)
+        values	  (logger.g_error,l_text,l_proc_name,l_lineno,l_call_stack,p_scope,p_extra) returning id into g_log_id;
+  
+        commit;
+      end if;
+    $END
 	end log_error;
 
 
-    procedure log_permanent(p_text    in varchar2,
-                            p_scope   in varchar2 default null,
-                            p_extra   in clob default null)
-	is
-        pragma autonomous_transaction;
-	begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-            if ok_to_log(logger.g_permanent) then
-                log_internal(
-                    p_text				=> p_text,
-                    p_log_level			=> logger.g_permanent,
-                    p_scope             => p_scope,
-                    p_extra             => p_extra,
-                    p_callstack         => dbms_utility.format_call_stack);
-                commit;
-            end if;
-        $END
-	end log_permanent;
+  procedure log_permanent(
+    p_text    in varchar2,
+    p_scope   in varchar2 default null,
+    p_extra   in clob default null)
+  is
+    pragma autonomous_transaction;
+  begin
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      if ok_to_log(logger.g_permanent) then
+        log_internal(
+          p_text				=> p_text,
+          p_log_level			=> logger.g_permanent,
+          p_scope             => p_scope,
+          p_extra             => p_extra,
+          p_callstack         => dbms_utility.format_call_stack);
+        commit;
+      end if;
+    $END
+  end log_permanent;
 
 
-    procedure log_warning(p_text    in varchar2,
-                          p_scope   in varchar2 default null,
-                          p_extra   in clob default null)
-	is
-        pragma autonomous_transaction;
-	begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-        if ok_to_log(logger.g_warning) then
-            log_internal(
-                p_text				=> p_text,
-                p_log_level			=> logger.g_warning,
-                p_scope             => p_scope,
-                p_extra             => p_extra,
-                p_callstack         => dbms_utility.format_call_stack);
-            commit;
-        end if;
-        $END
-	end log_warning;
+  procedure log_warning(
+    p_text    in varchar2,
+    p_scope   in varchar2 default null,
+    p_extra   in clob default null)
+  is
+    pragma autonomous_transaction;
+  begin
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      if ok_to_log(logger.g_warning) then
+        log_internal(
+          p_text				=> p_text,
+          p_log_level			=> logger.g_warning,
+          p_scope             => p_scope,
+          p_extra             => p_extra,
+          p_callstack         => dbms_utility.format_call_stack);
+        commit;
+      end if;
+    $END
+  end log_warning;
 
-    procedure log_information(p_text    in varchar2,
-                              p_scope   in varchar2 default null,
-                              p_extra   in clob default null)
+  procedure log_information(
+    p_text    in varchar2,
+    p_scope   in varchar2 default null,
+    p_extra   in clob default null)
 	is
-        pragma autonomous_transaction;
+    pragma autonomous_transaction;
 	begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-            if ok_to_log(logger.g_information) then
-                log_internal(
-                    p_text				=> p_text,
-                    p_log_level			=> logger.g_information,
-                    p_scope             => p_scope,
-                    p_extra             => p_extra,
-                    p_callstack         => dbms_utility.format_call_stack);
-                commit;
-            end if;
-        $END
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      if ok_to_log(logger.g_information) then
+        log_internal(
+          p_text				=> p_text,
+          p_log_level			=> logger.g_information,
+          p_scope             => p_scope,
+          p_extra             => p_extra,
+          p_callstack         => dbms_utility.format_call_stack);
+        commit;
+      end if;
+    $END
 	end log_information;
 
-	procedure log(p_text    in varchar2,
-                  p_scope   in varchar2 default null,
-                  p_extra   in clob default null)
+	procedure log(
+    p_text    in varchar2,
+    p_scope   in varchar2 default null,
+    p_extra   in clob default null)
 	is
-        pragma autonomous_transaction;
+    pragma autonomous_transaction;
 	begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-            if ok_to_log(logger.g_debug) then
-                log_internal(
-                    p_text				=> p_text,
-                    p_log_level			=> logger.g_debug,
-                    p_scope             => p_scope,
-                    p_extra             => p_extra,
-                    p_callstack         => dbms_utility.format_call_stack);
-                commit;
-            end if;
-        $END
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      if ok_to_log(logger.g_debug) then
+        log_internal(
+          p_text				=> p_text,
+          p_log_level			=> logger.g_debug,
+          p_scope             => p_scope,
+          p_extra             => p_extra,
+          p_callstack         => dbms_utility.format_call_stack);
+        commit;
+      end if;
+    $END
 	end log;
 
-    function get_sys_context(p_detail_level in varchar2 default 'USER', -- ALL, NLS, USER, INSTANCE
-                             p_vertical     in boolean default false,
-							 p_show_null	in boolean default false) -- vertical name value pairs or comma sep list.
+  function get_sys_context(
+    p_detail_level in varchar2 default 'USER', -- ALL, NLS, USER, INSTANCE
+    p_vertical     in boolean default false,
+    p_show_null	in boolean default false) -- vertical name value pairs or comma sep list.
     return clob
+  is
+    l_ctx   clob;
+    l_detail_level varchar2(20) := upper(p_detail_level);
+
+    procedure append_ctx(p_name in varchar2)
     is
-        l_ctx   clob;
-        l_detail_level varchar2(20) := upper(p_detail_level);
-
-        procedure append_ctx(p_name in varchar2)
-        is
-            r_pad                   number := 30;
-            l_crlf                  varchar2(10) := chr(13)||chr(10);
-            invalid_userenv_parm    exception;
-            pragma 				    exception_init(invalid_userenv_parm, -2003);
-        begin
-			if p_show_null or sys_context('USERENV',p_name) is not null then
-				if p_vertical then
-					l_ctx := l_ctx || rpad(p_name,r_pad,' ')||': '||sys_context('USERENV',p_name)||l_crlf;
-				else
-					l_ctx := l_ctx || p_name||': '||sys_context('USERENV',p_name)||', ';
-				end if;
-			end if;
-            exception when invalid_userenv_parm then
-                --log_warning('Invalid SYS_CONTEXT Parameter: '||p_name);
-                null;
-        end append_ctx;
+      r_pad                   number := 30;
+      l_crlf                  varchar2(10) := chr(13)||chr(10);
+      invalid_userenv_parm    exception;
+      pragma 				    exception_init(invalid_userenv_parm, -2003);
     begin
-
-        if l_detail_level in ('ALL','NLS','INSTANCE') then
-            append_ctx('NLS_CALENDAR');
-            append_ctx('NLS_CURRENCY');
-            append_ctx('NLS_DATE_FORMAT');
-            append_ctx('NLS_DATE_LANGUAGE');
-            append_ctx('NLS_SORT');
-            append_ctx('NLS_TERRITORY');
-            append_ctx('LANG');
-            append_ctx('LANGUAGE');
+      if p_show_null or sys_context('USERENV',p_name) is not null then
+        if p_vertical then
+          l_ctx := l_ctx || rpad(p_name,r_pad,' ')||': '||sys_context('USERENV',p_name)||l_crlf;
+        else
+          l_ctx := l_ctx || p_name||': '||sys_context('USERENV',p_name)||', ';
         end if;
+      end if;
+    exception 
+      when invalid_userenv_parm then
+        --log_warning('Invalid SYS_CONTEXT Parameter: '||p_name);
+        null;
+    end append_ctx;
+  
+  begin
 
-        if l_detail_level in ('ALL','USER') then
-            append_ctx('CURRENT_SCHEMA');
-            append_ctx('SESSION_USER');
-            append_ctx('OS_USER');
-            append_ctx('CLIENT_IDENTIFIER');
-            append_ctx('CLIENT_INFO');
-            append_ctx('IP_ADDRESS');
-            append_ctx('HOST');
-            append_ctx('TERMINAL');
-        end if;
+    if l_detail_level in ('ALL','NLS','INSTANCE') then
+      append_ctx('NLS_CALENDAR');
+      append_ctx('NLS_CURRENCY');
+      append_ctx('NLS_DATE_FORMAT');
+      append_ctx('NLS_DATE_LANGUAGE');
+      append_ctx('NLS_SORT');
+      append_ctx('NLS_TERRITORY');
+      append_ctx('LANG');
+      append_ctx('LANGUAGE');
+    end if;
 
-        if l_detail_level in ('ALL','USER') then
-            append_ctx('AUTHENTICATED_IDENTITY');
-            append_ctx('AUTHENTICATION_DATA');
-            append_ctx('AUTHENTICATION_METHOD');
-            append_ctx('ENTERPRISE_IDENTITY');
-            append_ctx('POLICY_INVOKER');
-            append_ctx('PROXY_ENTERPRISE_IDENTITY');
-            append_ctx('PROXY_GLOBAL_UID');
-            append_ctx('PROXY_USER');
-            append_ctx('PROXY_USERID');
-            append_ctx('IDENTIFICATION_TYPE');
-            append_ctx('ISDBA');
-        end if;
+    if l_detail_level in ('ALL','USER') then
+      append_ctx('CURRENT_SCHEMA');
+      append_ctx('SESSION_USER');
+      append_ctx('OS_USER');
+      append_ctx('CLIENT_IDENTIFIER');
+      append_ctx('CLIENT_INFO');
+      append_ctx('IP_ADDRESS');
+      append_ctx('HOST');
+      append_ctx('TERMINAL');
+    end if;
 
-        if l_detail_level in ('ALL','INSTANCE') then
-            append_ctx('DB_DOMAIN');
-            append_ctx('DB_NAME');
-            append_ctx('DB_UNIQUE_NAME');
-            append_ctx('INSTANCE');
-            append_ctx('INSTANCE_NAME');
-            append_ctx('SERVER_HOST');
-            append_ctx('SERVICE_NAME');
-        end if;
+    if l_detail_level in ('ALL','USER') then
+      append_ctx('AUTHENTICATED_IDENTITY');
+      append_ctx('AUTHENTICATION_DATA');
+      append_ctx('AUTHENTICATION_METHOD');
+      append_ctx('ENTERPRISE_IDENTITY');
+      append_ctx('POLICY_INVOKER');
+      append_ctx('PROXY_ENTERPRISE_IDENTITY');
+      append_ctx('PROXY_GLOBAL_UID');
+      append_ctx('PROXY_USER');
+      append_ctx('PROXY_USERID');
+      append_ctx('IDENTIFICATION_TYPE');
+      append_ctx('ISDBA');
+    end if;
 
+    if l_detail_level in ('ALL','INSTANCE') then
+      append_ctx('DB_DOMAIN');
+      append_ctx('DB_NAME');
+      append_ctx('DB_UNIQUE_NAME');
+      append_ctx('INSTANCE');
+      append_ctx('INSTANCE_NAME');
+      append_ctx('SERVER_HOST');
+      append_ctx('SERVICE_NAME');
+    end if;
 
+    if l_detail_level in ('ALL') then
+      append_ctx('ACTION');
+      append_ctx('AUDITED_CURSORID');
+      append_ctx('BG_JOB_ID');
+      append_ctx('CURRENT_BIND');
+      append_ctx('CURRENT_SCHEMAID');
+      append_ctx('CURRENT_SQL');
+      append_ctx('CURRENT_SQLn');
+      append_ctx('CURRENT_SQL_LENGTH');
+      append_ctx('ENTRYID');
+      append_ctx('FG_JOB_ID');
+      append_ctx('GLOBAL_CONTEXT_MEMORY');
+      append_ctx('GLOBAL_UID');
+      append_ctx('MODULE');
+      append_ctx('NETWORK_PROTOCOL');
+      append_ctx('SESSION_USERID');
+      append_ctx('SESSIONID');
+      append_ctx('SID');
+      append_ctx('STATEMENTID');
+    end if;
 
-        if l_detail_level in ('ALL') then
-            append_ctx('ACTION');
-            append_ctx('AUDITED_CURSORID');
-            append_ctx('BG_JOB_ID');
-            append_ctx('CURRENT_BIND');
-            append_ctx('CURRENT_SCHEMAID');
-            append_ctx('CURRENT_SQL');
-            append_ctx('CURRENT_SQLn');
-            append_ctx('CURRENT_SQL_LENGTH');
-            append_ctx('ENTRYID');
-            append_ctx('FG_JOB_ID');
-            append_ctx('GLOBAL_CONTEXT_MEMORY');
-            append_ctx('GLOBAL_UID');
-            append_ctx('MODULE');
-            append_ctx('NETWORK_PROTOCOL');
-            append_ctx('SESSION_USERID');
-            append_ctx('SESSIONID');
-            append_ctx('SID');
-            append_ctx('STATEMENTID');
-        end if;
-
-
-
-
-        return rtrim(l_ctx,', ');
-    end get_sys_context;
+    return rtrim(l_ctx,', ');
+  end get_sys_context;
 
 
 	function get_cgi_env(
-			p_show_null		in boolean default false)
-	return clob
+    p_show_null		in boolean default false)
+  	return clob
 	is
 		l_cgienv clob;
 
 		procedure append_cgi_env(
 			p_name 		in varchar2,
 			p_val	 	in varchar2)
-        is
-            r_pad                   number := 30;
-            l_crlf                  varchar2(10) := chr(13)||chr(10);
-            --invalid_userenv_parm    exception;
-            --pragma 				    exception_init(invalid_userenv_parm, -2003);
-        begin
+    is
+      r_pad                   number := 30;
+      l_crlf                  varchar2(10) := chr(13)||chr(10);
+      --invalid_userenv_parm    exception;
+      --pragma 				    exception_init(invalid_userenv_parm, -2003);
+    begin
 			if p_show_null or p_val is not null then
-                l_cgienv := l_cgienv || rpad(p_name,r_pad,' ')||': '||p_val||l_crlf;
+        l_cgienv := l_cgienv || rpad(p_name,r_pad,' ')||': '||p_val||l_crlf;
 			end if;
-            --exception when invalid_userenv_parm then
-                --log_warning('Invalid SYS_CONTEXT Parameter: '||p_name);
-                null;
-        end append_cgi_env;
+      --exception when invalid_userenv_parm then
+      --log_warning('Invalid SYS_CONTEXT Parameter: '||p_name);
+      null;
+    end append_cgi_env;
+
 	begin
-        $IF $$NO_OP $THEN
-            return null;
-        $ELSE
-            for i in 1..owa.num_cgi_vars loop
-                append_cgi_env(
-                    p_name      => owa.cgi_var_name(i),
-                    p_val       => owa.cgi_var_val(i));
+    $IF $$NO_OP $THEN
+      return null;
+    $ELSE
+      for i in 1..owa.num_cgi_vars loop
+        append_cgi_env(
+          p_name      => owa.cgi_var_name(i),
+          p_val       => owa.cgi_var_val(i));
 
-            end loop;
+      end loop;
 
-            return l_cgienv;
-        $END
+      return l_cgienv;
+    $END
 	end get_cgi_env;
 
-    procedure log_userenv(
-        p_detail_level  in varchar2 default 'USER',-- ALL, NLS, USER, INSTANCE,
+  procedure log_userenv(
+    p_detail_level  in varchar2 default 'USER',-- ALL, NLS, USER, INSTANCE,
+    p_show_null 	in boolean default false,
+    p_scope         in varchar2 default null)
+  is
+    l_extra	clob;
+    pragma autonomous_transaction;
+  begin
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      if ok_to_log(logger.g_debug) then
+        l_extra := get_sys_context(
+          p_detail_level	=> p_detail_level,
+          p_vertical		=> true,
+          p_show_null		=> p_show_null);
+  
+        log_internal(
+            p_text				=> 'USERENV values stored in the EXTRA column',
+            p_log_level			=> logger.g_sys_context,
+            p_scope             => p_scope,
+            p_extra             => l_extra);
+        commit;
+      end if;
+    $END
+  end log_userenv;
+
+
+  procedure log_cgi_env(
 		p_show_null 	in boolean default false,
-        p_scope         in varchar2 default null)
-    is
+    p_scope         in varchar2 default null)
+  is
 		l_extra	clob;
     pragma autonomous_transaction;
-    begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-             if ok_to_log(logger.g_debug) then
-				l_extra := get_sys_context(
-								p_detail_level	=> p_detail_level,
-								p_vertical		=> true,
-								p_show_null		=> p_show_null);
-
-                log_internal(
-                    p_text				=> 'USERENV values stored in the EXTRA column',
-                    p_log_level			=> logger.g_sys_context,
-                    p_scope             => p_scope,
-                    p_extra             => l_extra);
-                commit;
-            end if;
-        $END
-    end log_userenv;
-
-
-
-    procedure log_cgi_env(
-		p_show_null 	in boolean default false,
-        p_scope         in varchar2 default null)
-    is
-		l_extra	clob;
-    pragma autonomous_transaction;
-    begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-             if ok_to_log(logger.g_debug) then
-				l_extra := get_cgi_env(p_show_null		=> p_show_null);
-
-                log_internal(
-                    p_text				=> 'CGI ENV values stored in the EXTRA column',
-                    p_log_level			=> logger.g_sys_context,
-                    p_scope             => p_scope,
-                    p_extra             => l_extra);
-                commit;
-            end if;
-        $END
-    end log_cgi_env;
+  begin
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      if ok_to_log(logger.g_debug) then
+        l_extra := get_cgi_env(p_show_null		=> p_show_null);
+        log_internal(
+          p_text				=> 'CGI ENV values stored in the EXTRA column',
+          p_log_level			=> logger.g_sys_context,
+          p_scope             => p_scope,
+          p_extra             => l_extra);
+        commit;
+      end if;
+    $END
+  end log_cgi_env;
 
 
 
 	procedure log_character_codes(
 		p_text					in varchar2,
-        p_scope					in varchar2 default null,
+    p_scope					in varchar2 default null,
 		p_show_common_codes 	in boolean default true)
-    is
-        l_error varchar2(4000);
+  is
+    l_error varchar2(4000);
 		l_dump clob;
-	pragma autonomous_transaction;
-    begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-			if ok_to_log(logger.g_debug) then
-				l_dump := get_character_codes(p_text,p_show_common_codes);
+    pragma autonomous_transaction;
+  begin
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      if ok_to_log(logger.g_debug) then
+        l_dump := get_character_codes(p_text,p_show_common_codes);
 
-                log_internal(
-                    p_text				=> 'GET_CHARACTER_CODES output stored in the EXTRA column',
-                    p_log_level			=> logger.g_debug,
-                    p_scope             => p_scope,
-                    p_extra             => l_dump);
-                commit;
-            end if;
+        log_internal(
+          p_text				=> 'GET_CHARACTER_CODES output stored in the EXTRA column',
+          p_log_level			=> logger.g_debug,
+          p_scope             => p_scope,
+          p_extra             => l_dump);
+        commit;
+      end if;
 		$END
 	end log_character_codes;
 
@@ -713,210 +713,209 @@ as
 
 	procedure log_apex_items(
 		p_text		in varchar2 default 'Log APEX Items',
-        p_scope		in varchar2 default null)
-    is
-        l_error varchar2(4000);
-	pragma autonomous_transaction;
-    begin
-        $IF $$NO_OP $THEN
-            null;
+    p_scope		in varchar2 default null)
+  is
+    l_error varchar2(4000);
+  	pragma autonomous_transaction;
+  begin
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      if ok_to_log(logger.g_debug) then
+
+        $IF $$APEX $THEN
+          log_internal(
+            p_text				=> p_text,
+            p_log_level			=> logger.g_apex,
+            p_scope             => p_scope);
+
+          snapshot_apex_items(p_log_id => g_log_id);
         $ELSE
-            if ok_to_log(logger.g_debug) then
+          l_error := 'Error! Logger is not configured for APEX yet. '||
+                     'Please check the CONFIGURATION section at https://logger.samplecode.oracle.com ';
 
-                $IF $$APEX $THEN
-                    log_internal(
-                        p_text				=> p_text,
-                        p_log_level			=> logger.g_apex,
-                        p_scope             => p_scope);
-
-                    snapshot_apex_items(p_log_id => g_log_id);
-                $ELSE
-                    l_error := 'Error! Logger is not configured for APEX yet. '||
-                               'Please check the CONFIGURATION section at https://logger.samplecode.oracle.com ';
-
-                    log_internal(
-                        p_text				=> l_error,
-                        p_log_level			=> logger.g_apex,
-                        p_scope             => p_scope);
-                $END
-            end if;
+          log_internal(
+            p_text				=> l_error,
+            p_log_level			=> logger.g_apex,
+            p_scope             => p_scope);
         $END
-        commit;
-    end log_apex_items;
+      end if;
+    $END
+    commit;
+  end log_apex_items;
 
 	PROCEDURE time_start(
 		p_unit				IN VARCHAR2,
-        p_log_in_table 	    IN boolean default true)
+    p_log_in_table 	    IN boolean default true)
 	is
 		l_proc_name     	varchar2(100);
 		l_text 				varchar2(4000);
-        l_pad               varchar2(100);
+    l_pad               varchar2(100);
 		pragma autonomous_transaction;
 	begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-            if ok_to_log(logger.g_debug) then
-                g_running_timers := g_running_timers + 1;
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      if ok_to_log(logger.g_debug) then
+        g_running_timers := g_running_timers + 1;
 
-                if g_running_timers > 1 then
-                    l_pad := lpad(' ',g_running_timers,'>')||' ';
-                end if;
+        if g_running_timers > 1 then
+          l_pad := lpad(' ',g_running_timers,'>')||' ';
+        end if;
 
-                g_proc_start_times(p_unit) := systimestamp;
+        g_proc_start_times(p_unit) := systimestamp;
 
-                l_text := l_pad||'START: '||p_unit;
-                
-                IF p_log_in_table THEN
-                    insert into logger_logs (logger_level,text,unit_name)
-                            VALUES	    (g_timing,l_text,p_unit) RETURNING ID INTO g_log_id ;
-                end if;
-                commit;
-            end if;
-        $END
+        l_text := l_pad||'START: '||p_unit;
+        
+        if p_log_in_table then
+            insert into logger_logs (logger_level,text,unit_name)
+            values	    (g_timing,l_text,p_unit) returning id into g_log_id ;
+        end if;
+        commit;
+      end if;
+    $END
 	end time_start;
 
 	procedure time_stop(
 		p_unit				IN VARCHAR2,
-        p_scope             in varchar2 default null)
+    p_scope             in varchar2 default null)
 	is
 		l_time_string   	varchar2(50);
-        l_text 				varchar2(4000);
-        l_pad               varchar2(100);
+    l_text 				varchar2(4000);
+    l_pad               varchar2(100);
 
-        pragma autonomous_transaction;
+    pragma autonomous_transaction;
 	begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-            if ok_to_log(logger.g_debug) then
-                if g_proc_start_times.exists(p_unit) then
+    $IF $$NO_OP $THEN
+        null;
+    $ELSE
+      if ok_to_log(logger.g_debug) then
+        if g_proc_start_times.exists(p_unit) then
 
-                    if g_running_timers > 1 then
-                        l_pad := lpad(' ',g_running_timers,'>')||' ';
-                    end if;
+          if g_running_timers > 1 then
+            l_pad := lpad(' ',g_running_timers,'>')||' ';
+          end if;
 
-                    --l_time_string := rtrim(regexp_replace(systimestamp-(g_proc_start_times(p_unit)),'.+?[[:space:]](.*)','\1',1,0),0);
-                    l_time_string := time_stop(
-                                            p_unit => p_unit,
-                                            p_log_in_table => false);
+          --l_time_string := rtrim(regexp_replace(systimestamp-(g_proc_start_times(p_unit)),'.+?[[:space:]](.*)','\1',1,0),0);
+          l_time_string := time_stop(
+            p_unit => p_unit,
+            p_log_in_table => false);
 
-                    l_text := l_pad||'STOP : '||p_unit ||' - '||l_time_string;
+          l_text := l_pad||'STOP : '||p_unit ||' - '||l_time_string;
 
-                    g_proc_start_times.delete(p_unit);
-                    g_running_timers := g_running_timers - 1;
+          g_proc_start_times.delete(p_unit);
+          g_running_timers := g_running_timers - 1;
 
-                    INSERT INTO logger_logs (logger_level,text,unit_name,SCOPE)
-                                values	    (g_timing,l_text,p_unit,p_scope) returning id into g_log_id ;
-                    commit;
-                end if;
-            end if;
-        $END
+          insert into logger_logs (logger_level,text,unit_name,scope)
+          values	    (g_timing,l_text,p_unit,p_scope) returning id into g_log_id ;
+          commit;
+        end if;
+      end if;
+    $END
 	END time_stop;
     
-    FUNCTION time_stop(
-		p_unit				IN VARCHAR2,
-        p_scope             in varchar2 default null,
-        p_log_in_table 	    IN boolean default true
-        )
-        return varchar2
-    is
-		l_time_string   	varchar2(50);
+  FUNCTION time_stop(
+    p_unit				IN VARCHAR2,
+    p_scope             in varchar2 default null,
+    p_log_in_table 	    IN boolean default true
+    )
+    return varchar2
+  is
+    l_time_string   	varchar2(50);
 
-        pragma autonomous_transaction;
-    begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-            if ok_to_log(logger.g_debug) then
-                if g_proc_start_times.exists(p_unit) then
+    pragma autonomous_transaction;
+  begin
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      if ok_to_log(logger.g_debug) then
+        if g_proc_start_times.exists(p_unit) then
 
-                    l_time_string := rtrim(regexp_replace(systimestamp-(g_proc_start_times(p_unit)),'.+?[[:space:]](.*)','\1',1,0),0);
+          l_time_string := rtrim(regexp_replace(systimestamp-(g_proc_start_times(p_unit)),'.+?[[:space:]](.*)','\1',1,0),0);
 
-                    g_proc_start_times.delete(p_unit);
-                    g_running_timers := g_running_timers - 1;
-                    
-                    IF p_log_in_table THEN
-                        INSERT INTO logger_logs (logger_level,text,unit_name,SCOPE)
-                                    VALUES	    (g_timing,l_time_string,p_unit,p_scope) RETURNING ID INTO g_log_id ;
-                    END IF;
-                    
-                    commit;
-                    return l_time_string;
-                    
-                end if;
-            END IF;
-        $END
-    END time_stop;
+          g_proc_start_times.delete(p_unit);
+          g_running_timers := g_running_timers - 1;
+          
+          IF p_log_in_table THEN
+            INSERT INTO logger_logs (logger_level,text,unit_name,SCOPE)
+            VALUES	    (g_timing,l_time_string,p_unit,p_scope) RETURNING ID INTO g_log_id ;
+          END IF;
+          
+          commit;
+          return l_time_string;
+            
+        end if;
+      END IF;
+    $END
+  END time_stop;
     
-    FUNCTION time_stop_seconds(
+  FUNCTION time_stop_seconds(
 		p_unit				IN VARCHAR2,
-        p_scope             in varchar2 default null,
-        p_log_in_table 	    IN boolean default true
-        )
-        return number
-    is
+    p_scope             in varchar2 default null,
+    p_log_in_table 	    IN boolean default true
+    )
+    return number
+  is
 		l_time_string   	varchar2(50);
 		l_seconds   NUMBER;
 		l_interval 	INTERVAL day to second;
 		
-        pragma autonomous_transaction;
-    begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-            if ok_to_log(logger.g_debug) then
-                IF g_proc_start_times.EXISTS(p_unit) THEN
-					l_interval := systimestamp-(g_proc_start_times(p_unit));
-					l_seconds := EXTRACT(DAY FROM l_interval) * 86400 + EXTRACT(HOUR FROM l_interval) * 3600 + EXTRACT(MINUTE FROM l_interval) * 60 + EXTRACT(SECOND FROM l_interval);
-                    
-
-                    g_proc_start_times.delete(p_unit);
-                    g_running_timers := g_running_timers - 1;
-                    
-                    IF p_log_in_table THEN
-                        INSERT INTO logger_logs (logger_level,text,unit_name,SCOPE)
-                                    VALUES	    (g_timing,l_seconds,p_unit,p_scope) RETURNING ID INTO g_log_id ;
-                    END IF;
-                    
-                    commit;
-                    return l_seconds;
-                    
-                end if;
-            END IF;
-        $END
-    END time_stop_seconds;
+    pragma autonomous_transaction;
+  begin
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      if ok_to_log(logger.g_debug) then
+        IF g_proc_start_times.EXISTS(p_unit) THEN
+          l_interval := systimestamp-(g_proc_start_times(p_unit));
+          l_seconds := EXTRACT(DAY FROM l_interval) * 86400 + EXTRACT(HOUR FROM l_interval) * 3600 + EXTRACT(MINUTE FROM l_interval) * 60 + EXTRACT(SECOND FROM l_interval);
+                
+          g_proc_start_times.delete(p_unit);
+          g_running_timers := g_running_timers - 1;
+                
+          IF p_log_in_table THEN
+              INSERT INTO logger_logs (logger_level,text,unit_name,SCOPE)
+              VALUES	    (g_timing,l_seconds,p_unit,p_scope) RETURNING ID INTO g_log_id ;
+          END IF;
+          
+          commit;
+          return l_seconds;
+                
+        end if;
+      END IF;
+    $END
+  END time_stop_seconds;
     
 
-    procedure time_reset
-    is
-    begin
-        if ok_to_log(logger.g_debug) then
-            g_running_timers := 0;
-            g_proc_start_times.delete;
-        end if;
-    end time_reset;
+  procedure time_reset
+  is
+  begin
+    if ok_to_log(logger.g_debug) then
+      g_running_timers := 0;
+      g_proc_start_times.delete;
+    end if;
+  end time_reset;
 
 	function get_pref(
 		p_pref_name		in	varchar2)
 		return varchar2
 		$IF not dbms_db_version.ver_le_10_2  $THEN
 			result_cache
-            $IF $$NO_OP is null or NOT $$NO_OP $THEN
-                relies_on (logger_prefs)
-            $END
+      $IF $$NO_OP is null or NOT $$NO_OP $THEN
+        relies_on (logger_prefs)
+      $END
 		$END
 	is
 	begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-            for c1 in (select pref_value from logger_prefs where pref_name = p_pref_name)
-            loop
-                return c1.pref_value;
-            end loop; --c1
-            return null;
-        $END
+    $IF $$NO_OP $THEN
+        null;
+    $ELSE
+      for c1 in (select pref_value from logger_prefs where pref_name = p_pref_name)
+      loop
+        return c1.pref_value;
+      end loop; --c1
+      return null;
+    $END
 	end get_pref;
 
 	procedure purge(
@@ -925,40 +924,40 @@ as
 
 	is
 		$IF $$NO_OP is null or NOT $$NO_OP $THEN
-            l_purge_min_level	    number	:= convert_level_char_to_num(nvl(p_purge_min_level,get_pref('PURGE_MIN_LEVEL')));
-            l_purge_after_days	    number	:= nvl(p_purge_after_days,get_pref('PURGE_AFTER_DAYS'));
-        $END
-        pragma autonomous_transaction;
+      l_purge_min_level	    number	:= convert_level_char_to_num(nvl(p_purge_min_level,get_pref('PURGE_MIN_LEVEL')));
+      l_purge_after_days	    number	:= nvl(p_purge_after_days,get_pref('PURGE_AFTER_DAYS'));
+    $END
+    pragma autonomous_transaction;
 	begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-            if admin_security_check then
-                delete
-                  from logger_logs
-                 where logger_level >= l_purge_min_level
-                   and time_stamp < systimestamp - NUMTODSINTERVAL(l_purge_after_days, 'day')
-                   and logger_level > g_permanent;
-            end if;
-        $END
-        commit;
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      if admin_security_check then
+        delete
+          from logger_logs
+         where logger_level >= l_purge_min_level
+           and time_stamp < systimestamp - NUMTODSINTERVAL(l_purge_after_days, 'day')
+           and logger_level > g_permanent;
+      end if;
+    $END
+    commit;
 	end purge;
 
 
 	procedure purge_all
 	is
 		l_purge_level	number	:= g_permanent;
-        pragma autonomous_transaction;
+    pragma autonomous_transaction;
 	begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-            if admin_security_check then
-                delete from logger_logs where logger_level > l_purge_level;
-            end if;
-        $END
-        commit;
-	end purge_all;
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      if admin_security_check then
+          delete from logger_logs where logger_level > l_purge_level;
+      end if;
+    $END
+    commit;
+  end purge_all;
 
 	procedure status(
 		p_output_format	in varchar2 default null) -- SQL-DEVELOPER | HTML | DBMS_OUPUT
@@ -969,7 +968,7 @@ as
 		l_flashback		varchar2(50) := 'Disabled';
 		dummy			varchar2(255);
 		l_output_format	varchar2(30);
-        l_version       varchar2(20);
+    l_version       varchar2(20);
 
 		procedure display_output(
 			p_name	in varchar2,
@@ -999,98 +998,91 @@ as
 			l_output_format := p_output_format;
 		end if;
 
-        display_output('Project Home Page','https://logger.samplecode.oracle.com/');
+    display_output('Project Home Page','https://logger.samplecode.oracle.com/');
 
-        $IF $$NO_OP $THEN
-            display_output('Debug Level','NO-OP, Logger completely disabled.');
-        $ELSE
-            $IF $$APEX $THEN
-                l_apex := 'Enabled';
-            $END
+    $IF $$NO_OP $THEN
+      display_output('Debug Level','NO-OP, Logger completely disabled.');
+    $ELSE
+      $IF $$APEX $THEN
+          l_apex := 'Enabled';
+      $END
 
-            for c1 in (select pref_value from logger_prefs where pref_name = 'LEVEL')
-            loop
-                l_debug := c1.pref_value;
-            end loop; --c1
+      for c1 in (select pref_value from logger_prefs where pref_name = 'LEVEL')
+      loop
+        l_debug := c1.pref_value;
+      end loop; --c1
 
+      $IF $$FLASHBACK_ENABLED $THEN
+        l_flashback := 'Enabled';
+      $END
 
+      l_version := get_pref('LOGGER_VERSION');
 
-
-            $IF $$FLASHBACK_ENABLED $THEN
-                l_flashback := 'Enabled';
-            $END
-
-            l_version := get_pref('LOGGER_VERSION');
-
-
-
-            display_output('Logger Version',l_version);
-            display_output('Debug Level',l_debug);
-            display_output('Capture Call Stack',get_pref('INCLUDE_CALL_STACK'));
-            display_output('Protect Admin Procedures',get_pref('PROTECT_ADMIN_PROCS'));
-            display_output('APEX Tracing',l_apex);
-            display_output('SCN Capture',l_flashback);
-            display_output('Min. Purge Level',get_pref('PURGE_MIN_LEVEL'));
-            display_output('Purge Older Than',get_pref('PURGE_AFTER_DAYS')||' days');
-            $IF $$RAC_LT_11_2  $THEN
-                display_output('RAC pre-11.2 Code','TRUE');
-            $END
-        $END
-
-
+      display_output('Logger Version',l_version);
+      display_output('Debug Level',l_debug);
+      display_output('Capture Call Stack',get_pref('INCLUDE_CALL_STACK'));
+      display_output('Protect Admin Procedures',get_pref('PROTECT_ADMIN_PROCS'));
+      display_output('APEX Tracing',l_apex);
+      display_output('SCN Capture',l_flashback);
+      display_output('Min. Purge Level',get_pref('PURGE_MIN_LEVEL'));
+      display_output('Purge Older Than',get_pref('PURGE_AFTER_DAYS')||' days');
+      $IF $$RAC_LT_11_2  $THEN
+          display_output('RAC pre-11.2 Code','TRUE');
+      $END
+    $END
 	end status;
 
-    -- Valid values for p_level are:
-    -- OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING
-    procedure set_level(p_level in varchar2 default 'DEBUG')
-    is
-        l_level varchar2(20);
-        l_ctx   varchar2(2000);
-        l_old_level varchar2(20);
-        pragma autonomous_transaction;
-    begin
-        l_level := replace(upper(p_level),' ');
+  -- Valid values for p_level are:
+  -- OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING
+  procedure set_level(p_level in varchar2 default 'DEBUG')
+  is
+    l_level varchar2(20);
+    l_ctx   varchar2(2000);
+    l_old_level varchar2(20);
+    pragma autonomous_transaction;
+  begin
+    l_level := replace(upper(p_level),' ');
 
-        if l_level not in ('OFF','PERMANENT','ERROR','WARNING','INFORMATION','DEBUG','TIMING') then
-            raise_application_error (-20000,
-                '"LEVEL" must be one of the following values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING');
-        end if;
+    if l_level not in ('OFF','PERMANENT','ERROR','WARNING','INFORMATION','DEBUG','TIMING') then
+      raise_application_error (-20000,
+          '"LEVEL" must be one of the following values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING');
+    end if;
 
-        $IF $$NO_OP $THEN
-            raise_application_error (-20000,
-                'Either the NO-OP version of Logger is installed or it is compiled for NO-OP,  so you cannot set the level.');
-        $ELSE
-            if admin_security_check then
-                l_ctx := 'Host: '||sys_context('USERENV','HOST');
-                l_ctx := l_ctx || ', IP: '||sys_context('USERENV','IP_ADDRESS');
-                l_ctx := l_ctx || ', TERMINAL: '||sys_context('USERENV','TERMINAL');
-                l_ctx := l_ctx || ', OS_USER: '||sys_context('USERENV','OS_USER');
-                l_ctx := l_ctx || ', CURRENT_USER: '||sys_context('USERENV','CURRENT_USER');
-                l_ctx := l_ctx || ', SESSION_USER: '||sys_context('USERENV','SESSION_USER');
+    $IF $$NO_OP $THEN
+      raise_application_error (-20000,
+          'Either the NO-OP version of Logger is installed or it is compiled for NO-OP,  so you cannot set the level.');
+    $ELSE
+      if admin_security_check then
+        l_ctx := 'Host: '||sys_context('USERENV','HOST');
+        l_ctx := l_ctx || ', IP: '||sys_context('USERENV','IP_ADDRESS');
+        l_ctx := l_ctx || ', TERMINAL: '||sys_context('USERENV','TERMINAL');
+        l_ctx := l_ctx || ', OS_USER: '||sys_context('USERENV','OS_USER');
+        l_ctx := l_ctx || ', CURRENT_USER: '||sys_context('USERENV','CURRENT_USER');
+        l_ctx := l_ctx || ', SESSION_USER: '||sys_context('USERENV','SESSION_USER');
+  
+        l_old_level := logger.get_pref('LEVEL');
+  
+        update logger_prefs set pref_value = l_level where pref_name = 'LEVEL';
+        logger.save_global_context('level',logger.convert_level_char_to_num(l_level));
+        logger.log_information('Log level changed from '||l_old_level||' to '||l_level||' by '||l_ctx);
+      end if;
+    $END
+    commit;
+  end set_level;
 
-                l_old_level := logger.get_pref('LEVEL');
+  procedure sqlplus_format
+  is
+  begin
+    execute immediate 'begin dbms_output.enable(1000000); end;';
+    dbms_output.put_line('set linesize 200');
+    dbms_output.put_line('set pagesize 100');
 
-                update logger_prefs set pref_value = l_level where pref_name = 'LEVEL';
-                logger.save_global_context('level',logger.convert_level_char_to_num(l_level));
-                logger.log_information('Log level changed from '||l_old_level||' to '||l_level||' by '||l_ctx);
-            end if;
-        $END
-        commit;
-    end set_level;
+    dbms_output.put_line('column id format 999999');
+    dbms_output.put_line('column text format a75');
+    dbms_output.put_line('column call_stack format a100');
+    dbms_output.put_line('column extra format a100');
 
-    procedure sqlplus_format
-    is
-    begin
-        execute immediate 'begin dbms_output.enable(1000000); end;';
-        dbms_output.put_line('set linesize 200');
-        dbms_output.put_line('set pagesize 100');
-
-        dbms_output.put_line('column id format 999999');
-        dbms_output.put_line('column text format a75');
-        dbms_output.put_line('column call_stack format a100');
-        dbms_output.put_line('column extra format a100');
-
-    end sqlplus_format;
+  end sqlplus_format;
 
 
 end logger;
