@@ -1,204 +1,204 @@
-create or replace
-package body logger
+create or replace package body logger
 as
-    g_log_id    	number;
+
+  -- Definitions of conditional compilation variables:
+  -- $$NO_OP              : When true, completely disables all logger DML.  Also used to
+  --                      : generate the logger_no_op.sql code path
+  --
+  -- $$RAC_LT_11_2        : Set in logger_configure to handle the fact that RAC doesn't
+  --                      : support global app contexts until 11.2
+  --
+  -- $$FLASHBACK_ENABLED  : Set in logger_configure to determine whether or not we can grab the scn from dbms_flashback.
+  --                      : Primarily used in the trigger on logger_logs.
+  --
+  -- $$APEX               : Set in logger_configure.  True if we can query a local synonym to wwv_flow_data to snapshot
+  --                      : the APEX session state.
+
+  
+  -- TYPES
+  type ts_array is table of timestamp index by varchar2(100);
+  
+  -- VARIABLES
+  G_Log_Id    	Number;
+  g_proc_start_times ts_array;
+  g_running_timers pls_integer := 0;
 
 
-    -- Definitions of conditional compilation variables:
-    -- $$NO_OP              : When true, completely disables all logger DML.  Also used to
-    --                      : generate the logger_no_op.sql code path
-    --
-    -- $$RAC_LT_11_2        : Set in logger_configure to handle the fact that RAC doesn't
-    --                      : support global app contexts until 11.2
-    --
-    -- $$FLASHBACK_ENABLED  : Set in logger_configure to determine whether or not we can grab the scn from dbms_flashback.
-    --                      : Primarily used in the trigger on logger_logs.
-    --
-    -- $$APEX               : Set in logger_configure.  True if we can query a local synonym to wwv_flow_data to snapshot
-    --                      : the APEX session state.
-
-
-    type ts_array is table of timestamp index by varchar2(100);
-    g_proc_start_times ts_array;
-    g_running_timers        pls_integer := 0;
-
-    function admin_security_check
+  function admin_security_check
     return boolean
-    is
-        l_protect_admin_procs	varchar2(50)	:= get_pref('PROTECT_ADMIN_PROCS');
-        l_return                boolean default false;
-    begin
-        if get_pref('PROTECT_ADMIN_PROCS') = 'TRUE' then
-            if get_pref('INSTALL_SCHEMA') = sys_context('USERENV','SESSION_USER') then
-                l_return := true;
-            else
-                l_return := false;
-                raise_application_error (-20000,
-                    'You are not authorized to call this procedure.');
-            end if;
-        else
-            l_return := true;
-        end if;
+  is
+    l_protect_admin_procs	varchar2(50)	:= get_pref('PROTECT_ADMIN_PROCS');
+    l_return                boolean default false;
+  begin
+    if get_pref('PROTECT_ADMIN_PROCS') = 'TRUE' then
+      if get_pref('INSTALL_SCHEMA') = sys_context('USERENV','SESSION_USER') then
+        l_return := true;
+      else
+        l_return := false;
+        raise_application_error (-20000, 'You are not authorized to call this procedure.');
+      end if;
+    else
+        l_return := true;
+    end if;
 
-        return l_return;
+    return l_return;
 
-    end admin_security_check;
+  end admin_security_check;
 
-    procedure null_global_contexts
-    is
+  procedure null_global_contexts
+  is
     pragma autonomous_transaction;
-    begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-            $IF $$RAC_LT_11_2 $THEN
-                null;
-            $ELSE
-                dbms_session.set_context(
-                    namespace  => g_context_name,
-                    attribute  => 'level',
-                    value      => null);
+  begin
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      $IF $$RAC_LT_11_2 $THEN
+        null;
+      $ELSE
+        dbms_session.set_context(
+          namespace  => g_context_name,
+          attribute  => 'level',
+          value      => null);
 
-                dbms_session.set_context(
-                    namespace  => g_context_name,
-                    attribute  => 'include_call_stack',
-                    value      => null);
-            $END
+        dbms_session.set_context(
+          namespace  => g_context_name,
+          attribute  => 'include_call_stack',
+          value      => null);
+      $END
+    $END
+    commit;
+  end null_global_contexts;
 
-        $END
-        commit;
-    end null_global_contexts;
-
-    procedure save_global_context(
-        p_attribute     in varchar2,
-        p_value         in varchar2)
-    is
+  procedure save_global_context(
+    p_attribute     in varchar2,
+    p_value         in varchar2)
+  is
     pragma autonomous_transaction;
-    begin
-        $IF $$NO_OP $THEN
-            null;
-        $ELSE
-            dbms_session.set_context(
-                namespace  => g_context_name,
-                attribute  => p_attribute,
-                value      => p_value);
-           commit;
-        $END
-    end save_global_context;
-
-    function convert_level_char_to_num(
-        p_level in varchar2)
-    return number
-    is
-        l_level         number;
-    begin
-        case p_level
-            when 'OFF'          then l_level := 0;
-            when 'PERMANENT'    then l_level := 1;
-            when 'ERROR'        then l_level := 2;
-            when 'WARNING'      then l_level := 4;
-            when 'INFORMATION'  then l_level := 8;
-            when 'DEBUG'        then l_level := 16;
-            when 'TIMING'       then l_level := 32;
-            when 'SYS_CONTEXT'  then l_level := 64;
-        else l_level := -1;
-        end case;
-
-        return l_level;
-    end convert_level_char_to_num;
-
-    function get_level_number
-    return number
-        $IF $$RAC_LT_11_2 $THEN
-            $IF not dbms_db_version.ver_le_10_2 $THEN
-                result_cache relies_on (logger_prefs)
-            $END
-        $END
-    is
-        l_level         number;
-        l_level_char    varchar2(50);
-    begin
-        $IF $$NO_OP $THEN
-            return 0;
-        $ELSE
-            for c1 in (select pref_value from logger_prefs where pref_name = 'LEVEL')
-            loop
-                l_level_char := c1.pref_value;
-            end loop; --c1
-
-            l_level := convert_level_char_to_num(l_level_char);
-
-            return l_level;
-        $END
-    end get_level_number;
-
-    function ok_to_log(p_level  in  number)
-        return boolean
-        $IF $$RAC_LT_11_2 $THEN
-            $IF not dbms_db_version.ver_le_10_2 $THEN
-                $IF $$NO_OP is null or NOT $$NO_OP $THEN
-                    result_cache relies_on (logger_prefs)
-                $END
-            $END
-        $END
-    is
-        l_level         number;
-        l_level_char    varchar2(50);
-    begin
+  begin
     $IF $$NO_OP $THEN
-            return false;
+      null;
     $ELSE
-        $IF $$RAC_LT_11_2 $THEN
-            l_level := get_level_number;
-        $ELSE
-            l_level := sys_context(g_context_name,'level');
-            if l_level is null then
-                l_level := get_level_number;
-                save_global_context('level',l_level);
-            end if;
-        $END
-
-        if l_level >= p_level then
-            return true;
-        else
-            return false;
-        end if;
+      dbms_session.set_context(
+          namespace  => g_context_name,
+          attribute  => p_attribute,
+          value      => p_value);
+     commit;
     $END
-    end ok_to_log;
+  end save_global_context;
 
+  function convert_level_char_to_num(
+      p_level in varchar2)
+    return number
+  is
+    l_level         number;
+  begin
+    case p_level
+      when 'OFF'          then l_level := 0;
+      when 'PERMANENT'    then l_level := 1;
+      when 'ERROR'        then l_level := 2;
+      when 'WARNING'      then l_level := 4;
+      when 'INFORMATION'  then l_level := 8;
+      when 'DEBUG'        then l_level := 16;
+      when 'TIMING'       then l_level := 32;
+      when 'SYS_CONTEXT'  then l_level := 64;
+    else l_level := -1;
+    end case;
 
-    function include_call_stack
-        return boolean
-        $IF $$RAC_LT_11_2 $THEN
-            $IF not dbms_db_version.ver_le_10_2 $THEN
-                $IF $$NO_OP is null or NOT $$NO_OP $THEN
-                    result_cache relies_on (logger_prefs)
-                $END
-            $END
-        $END
-    is
-        l_call_stack_pref   varchar2(50);
-    begin
+    return l_level;
+  end convert_level_char_to_num;
+
+  function get_level_number
+    return number
+    $IF $$RAC_LT_11_2 $THEN
+      $IF not dbms_db_version.ver_le_10_2 $THEN
+        result_cache relies_on (logger_prefs)
+      $END
+    $END
+  is
+    l_level         number;
+    l_level_char    varchar2(50);
+  begin
     $IF $$NO_OP $THEN
-            return false;
+      return 0;
     $ELSE
-        $IF $$RAC_LT_11_2 $THEN
-            l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
-        $ELSE
-            l_call_stack_pref := sys_context(g_context_name,'include_call_stack');
-            if l_call_stack_pref is null then
-                l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
-                save_global_context('include_call_stack',l_call_stack_pref);
-            end if;
-        $END
+      for c1 in (select pref_value from logger_prefs where pref_name = 'LEVEL')
+      loop
+        l_level_char := c1.pref_value;
+      end loop; --c1
 
-        if l_call_stack_pref = 'TRUE' then
-            return true;
-        else
-            return false;
-        end if;
+      l_level := convert_level_char_to_num(l_level_char);
+
+      return l_level;
     $END
-    end include_call_stack;
+  end get_level_number;
+
+  function ok_to_log(p_level  in  number)
+    return boolean
+    $IF $$RAC_LT_11_2 $THEN
+      $IF not dbms_db_version.ver_le_10_2 $THEN
+        $IF $$NO_OP is null or NOT $$NO_OP $THEN
+          result_cache relies_on (logger_prefs)
+        $END
+      $END
+    $END
+  is
+    l_level         number;
+    l_level_char    varchar2(50);
+  begin
+    $IF $$NO_OP $THEN
+      return false;
+    $ELSE
+      $IF $$RAC_LT_11_2 $THEN
+        l_level := get_level_number;
+      $ELSE
+        l_level := sys_context(g_context_name,'level');
+        if l_level is null then
+          l_level := get_level_number;
+          save_global_context('level',l_level);
+        end if;
+      $END
+
+      if l_level >= p_level then
+        return true;
+      else
+        return false;
+      end if;
+   $END
+  end ok_to_log;
+
+
+  function include_call_stack
+      return boolean
+      $IF $$RAC_LT_11_2 $THEN
+          $IF not dbms_db_version.ver_le_10_2 $THEN
+              $IF $$NO_OP is null or NOT $$NO_OP $THEN
+                  result_cache relies_on (logger_prefs)
+              $END
+          $END
+      $END
+  is
+      l_call_stack_pref   varchar2(50);
+  begin
+  $IF $$NO_OP $THEN
+          return false;
+  $ELSE
+      $IF $$RAC_LT_11_2 $THEN
+          l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
+      $ELSE
+          l_call_stack_pref := sys_context(g_context_name,'include_call_stack');
+          if l_call_stack_pref is null then
+              l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
+              save_global_context('include_call_stack',l_call_stack_pref);
+          end if;
+      $END
+
+      if l_call_stack_pref = 'TRUE' then
+          return true;
+      else
+          return false;
+      end if;
+  $END
+  end include_call_stack;
 
 
     function date_text_format_base (
