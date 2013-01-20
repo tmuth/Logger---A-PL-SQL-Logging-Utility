@@ -149,10 +149,20 @@ as
     p_name in varchar2,
     p_val in date);
     
-  procedure append_param_ts(
+  procedure append_param(
     p_params in out nocopy logger.tab_param,
     p_name in varchar2,
     p_val in timestamp);
+    
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in timestamp with time zone);
+    
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in timestamp with local time zone);
     
   procedure append_param(
     p_params in out nocopy logger.tab_param,

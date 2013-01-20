@@ -19,14 +19,15 @@ as
   type ts_array is table of timestamp index by varchar2(100);
   
   -- VARIABLES
-  G_Log_Id    	Number;
+  g_Log_Id    	Number;
   g_proc_start_times ts_array;
   g_running_timers pls_integer := 0;
   
   -- CONSTANTS
   gc_line_feed varchar2(1) := chr(10);
   gc_date_format varchar2(255) := 'DD-MON-YYYY HH24:MI:SS';
-  gc_timestamp_format varchar2(255) := gc_date_format || ':FF TZR';
+  gc_timestamp_format varchar2(255) := gc_date_format || ':FF';
+  gc_timestamp_tz_format varchar2(255) := gc_timestamp_format || ' TZR';
 
 
   function admin_security_check
@@ -1218,10 +1219,7 @@ as
     $END  
   end append_param;
   
-  -- Note: I tried to overload this method with timestamps but was receiving error: PLS-00307: too many declarations of 'APPEND_PARAM' match this call
-  -- When calling. It seems as though Oracle will try the implict conversion to date type when dealing with timestamps
-  -- See: https://forums.oracle.com/forums/thread.jspa?threadID=2488402&tstart=0
-  procedure append_param_ts(
+  procedure append_param(
     p_params in out nocopy logger.tab_param,
     p_name in varchar2,
     p_val in timestamp)
@@ -1233,7 +1231,35 @@ as
     $ELSE
       logger.append_param(p_params => p_params, p_name => p_name, p_val => to_char(p_val, gc_timestamp_format));
     $END  
-  end append_param_ts;
+  end append_param;
+  
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in timestamp with time zone)
+  as
+    l_param logger.rec_param;
+  begin
+     $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      logger.append_param(p_params => p_params, p_name => p_name, p_val => to_char(p_val, gc_timestamp_tz_format));
+    $END  
+  end append_param;
+  
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in timestamp with local time zone)
+  as
+    l_param logger.rec_param;
+  begin
+     $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      logger.append_param(p_params => p_params, p_name => p_name, p_val => to_char(p_val, gc_timestamp_tz_format));
+    $END  
+  end append_param;
   
   procedure append_param(
     p_params in out nocopy logger.tab_param,
