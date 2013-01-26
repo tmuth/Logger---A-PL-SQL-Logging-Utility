@@ -15,3 +15,11 @@ This is a PL/SQL logging and debugging framework. The goal of logger is to be as
 
 ##To install into an existing schema:
 1. If possible, connect as a privilidged user and issue the following grants to your "exising_user":
+
+```sql
+grant connect,create view, create job, create table, create sequence,
+create trigger, create procedure, create any context to existing_user
+/
+```
+
+2. ssdsd
