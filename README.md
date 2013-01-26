@@ -43,7 +43,6 @@ begin
   logger.append_param(l_params, 'p_empno', p_empno);
   logger.append_param(l_params, 'p_ename', p_ename);
   logger.log_params(l_params, l_scope);
-  
   -- ...
 end p_demo_function;
 /
