@@ -21,6 +21,9 @@ grant connect,create view, create job, create table, create sequence,
 create trigger, create procedure, create any context to existing_user
 /
 ```
+2. Install logger
 
-2. adadad
-3. adada
+```sql
+@logger_install.sql
+```
+
