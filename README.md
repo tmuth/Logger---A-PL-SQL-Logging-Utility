@@ -48,7 +48,7 @@ begin
   -- ...
 exception
   when others then
-    logger.log_error('Unhandeled Exception', l_scope, null, l_params);
+    logger.log_error('Unhandled Exception', l_scope, null, l_params);
 end p_demo_function;
 /
 ```
