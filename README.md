@@ -27,3 +27,28 @@ create trigger, create procedure, create any context to existing_user
 @logger_install.sql
 ```
 
+#Advanced use
+TODO other items
+##Log Params
+Logger has wrapper functions to quickly and easily log parameters. These parameters will be logged using the DEBUG level (i.e its the same as calling logger.log). The following example highlights how to use the log parameter wrappers:
+
+```sql
+create or replace procedure p_demo_function(
+  p_empno in emp.empno%type,
+  p_ename in emp.ename%type)
+as
+  l_scope logger_logs.scope%type := 'p_demo_function';
+  l_params logger.tab_param;
+begin
+  logger.append_param(l_params, 'p_empno', p_empno);
+  logger.append_param(l_params, 'p_ename', p_ename);
+  logger.log_params(l_params, l_scope);
+  
+  -- ...
+end p_demo_function;
+/
+```
+
+#Change Log
+##Version 1.5.0
+* Added log_params and append_param functions
