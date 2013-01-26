@@ -30,7 +30,9 @@ create trigger, create procedure, create any context to existing_user
 #Advanced use
 TODO other items
 ##Log Params
-Logger has wrapper functions to quickly and easily log parameters. These parameters will be logged using the DEBUG level (i.e its the same as calling logger.log). The following example highlights how to use the log parameter wrappers:
+Logger has wrapper functions to quickly and easily log parameters. These parameters will be logged using the DEBUG level (i.e its the same as calling logger.log). The parameters will be stored either in the text field or (if they exceed 4000 characters) in the extra column.
+
+The following example highlights how to use the log parameter wrappers:
 
 ```sql
 create or replace procedure p_demo_function(
@@ -44,9 +46,14 @@ begin
   logger.append_param(l_params, 'p_ename', p_ename);
   logger.log_params(l_params, l_scope);
   -- ...
+exception
+  when others then
+    logger.log_error('Unhandeled Exception', l_scope, null, l_params);
 end p_demo_function;
 /
 ```
+
+Parameters can also be passed in as the last (4th) parameter in the log_error procedure. This is useful in production instances where the logger level is usually set to ERROR. When an error occurs parameters will be logged in the extra column.
 
 #Change Log
 ##Version 1.5.0
