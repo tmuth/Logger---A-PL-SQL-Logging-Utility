@@ -30,7 +30,7 @@ create trigger, create procedure, create any context to existing_user
 #Advanced use
 TODO other items
 ##Log Params
-Logger has wrapper functions to quickly and easily log parameters. These parameters will be logged using the DEBUG level (i.e its the same as calling logger.log). The parameters will be stored either in the text field or (if they exceed 4000 characters) in the extra column.
+Logger has wrapper functions to quickly and easily log parameters. These parameters will be logged using the DEBUG level (i.e its the same as calling logger.log) except when explicitly used in the log_error procedure. The parameters will be stored either in the text field or (if they exceed 4000 characters) in the extra column.
 
 The following example highlights how to use the log parameter wrappers:
 
