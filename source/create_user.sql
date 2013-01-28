@@ -24,7 +24,7 @@ prompt You will be prompted for a username, tablespace, temporary tablespace and
 prompt
 
 
-define LOGGER_USER=LOGGER
+define LOGGER_USER=LOGGER_USER
 accept LOGGER_USER char default &LOGGER_USER prompt 'Name of the new logger schema to create       [&LOGGER_USER] :'
 
 define LOGGER_TABLESPACE=USERS
