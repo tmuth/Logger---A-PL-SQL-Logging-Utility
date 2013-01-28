@@ -21,6 +21,7 @@ begin
     /* ************************************************************************** */
     -- Check to see if we are in a RAC Database, 11.1 or lower.
     --
+	-- Tyler to check if this works
     if dbms_utility.is_cluster_database then
         l_rac_lt_11_2 := 'TRUE';
     else
