@@ -1,6 +1,8 @@
 create or replace procedure logger_configure
 is
-    l_rac_lt_11_2       varchar2(50) := 'FALSE';  -- is this a RAC instance less than 11.2, no GAC support
+    -- Note: The license is defined in the package specification of the logger package
+	--
+	l_rac_lt_11_2       varchar2(50) := 'FALSE';  -- is this a RAC instance less than 11.2, no GAC support
     
     l_apex              varchar2(50) := 'FALSE';
     tbl_not_exist       exception;

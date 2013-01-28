@@ -1,6 +1,10 @@
 create or replace package body logger
 as
-
+  -- Note: The license is defined in the package specification of the logger package
+  --
+  -- _______________________________________________________________________________
+  -- 
+  --
   -- Definitions of conditional compilation variables:
   -- $$NO_OP              : When true, completely disables all logger DML.  Also used to
   --                      : generate the logger_no_op.sql code path
