@@ -1,17 +1,21 @@
 Logger---A-PL-SQL-Logging-Utility
 =================================
-[What is Logger?][what-is-logger]
+* [What is Logger?](#what-is-logger)
+* [Installation](#installation)
+* [Change log](#change-log)
+* [License](#license)
  
-
 Logger is used by Oracle developers to instrument their PL/SQL code
 
-#What is Logger?
+#What is Logger? 
 This is a PL/SQL logging and debugging framework. The goal of logger is to be as simple as possible to install and use. The primary use cases for this utility include:
 
 * Debugging: It's often difficult to track down the source of an error without some form of debugging instrumentation. This is particularly true in multi-tier, stateless architectures such as Application Express.
 * Error Logging: While most experts agree that it's important not to mask errors, it's also nice to have a persistent record of them.
 * Timing: Logger has a very simple timing framework built-in that makes it easy to benchmark sections of code.
 * Instrumentation: Because it's easy to "turn-off" logger globally with virtually no performance impact, it's easy to get in the habit of leaving debug calls in production code. Now, when something does go wrong, you simply flip the switch and logger is enabled making it much quicker to debug errors.
+
+[top](#logger---a-pl-sql-logging-utility)
 
 #Installation
 
@@ -28,7 +32,7 @@ create trigger, create procedure, create any context to existing_user
 ```sql
 @logger_install.sql
 ```
-
+[top](#logger---a-pl-sql-logging-utility)
 #Advanced use
 TODO other items
 ##Log Params
@@ -56,11 +60,12 @@ end p_demo_function;
 ```
 
 Parameters can also be passed in as the last (4th) parameter in the log_error procedure. This is useful in production instances where the logger level is usually set to ERROR. When an error occurs parameters will be logged in the extra column.
-
+[top](#logger---a-pl-sql-logging-utility)
 #Change Log
 ##Version 1.5.0
 * Added log_params and append_param functions
 
+[top](#logger---a-pl-sql-logging-utility)
 #License
 
 Copyright (c) 2013, Tyler D. Muth, tylermuth.wordpress.com 
@@ -90,3 +95,4 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+[top](#logger---a-pl-sql-logging-utility)
