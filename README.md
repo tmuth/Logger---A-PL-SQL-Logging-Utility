@@ -1,5 +1,7 @@
 Logger---A-PL-SQL-Logging-Utility
 =================================
+[What is Logger?][what-is-logger]
+ 
 
 Logger is used by Oracle developers to instrument their PL/SQL code
 
