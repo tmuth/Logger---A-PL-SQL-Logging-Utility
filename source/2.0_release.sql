@@ -1,2 +1,0 @@
--- Put any new objects / contexts / etc (i.e. besides recompiling logger package) into here
--- I'll (martin) create the appropriate upgrade script based on this.
