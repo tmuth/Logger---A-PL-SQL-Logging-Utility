@@ -120,7 +120,7 @@ as
     commit; -- MD: moved commit to outside of the NO_OP check since commit or rollback must occur in this procedure
   end save_global_context;
 
-  
+  -- TODO test
   -- PUBLIC
 
 
