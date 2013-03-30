@@ -156,10 +156,9 @@ as
 
   procedure sqlplus_format;
 
-  -- Valid values for p_level are:
-  -- OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING
-  procedure set_level(p_level in varchar2 default 'DEBUG');
-  
+  procedure set_level(
+    p_level in varchar2 default 'DEBUG',
+    p_client_id in varchar2 default null);
   
   procedure log_params(
     p_params in logger.tab_param,

@@ -71,6 +71,55 @@ as
   end get_param_clob;
    
   
+  /**
+   * Validates assertion. Will raise an application error if assertion is false
+   * Private
+   *
+   * @author Martin D'Souza
+   * @created 29-Mar-2013
+   *
+   * @param p_condition Boolean condition to validate
+   * @param p_message Message to include in application error if p_condition fails
+   */
+  procedure assert(
+    p_condition in boolean,
+    p_message in varchar2)
+  as
+  begin
+    if not p_condition or p_condition is null then
+      raise_application_error(-20000, p_message);
+    end if;
+  end assert;
+  
+  /**
+   * Sets the global context
+   *
+   * @author Tyler Muth
+   * @created ???
+   *
+   * @param p_attribute Attribute for context to set
+   * @param p_value Value
+   * @param p_client_id Optional client_id. If specified will only set the attribute/value for specific client_id (not global)
+   */
+  procedure save_global_context(
+    p_attribute in varchar2,
+    p_value in varchar2,
+    p_client_id in varchar2 default null)
+  is
+    pragma autonomous_transaction;
+  begin
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      dbms_session.set_context(
+        namespace => g_context_name,
+        attribute => p_attribute,
+        value => p_value,
+        client_id => p_client_id);
+    $END
+    commit; -- MD: moved commit to outside of the NO_OP check since commit or rollback must occur in this procedure
+  end save_global_context;
+
   
   -- PUBLIC
 
@@ -120,22 +169,6 @@ as
     commit;
   end null_global_contexts;
 
-  procedure save_global_context(
-    p_attribute     in varchar2,
-    p_value         in varchar2)
-  is
-    pragma autonomous_transaction;
-  begin
-    $IF $$NO_OP $THEN
-      null;
-    $ELSE
-      dbms_session.set_context(
-          namespace  => g_context_name,
-          attribute  => p_attribute,
-          value      => p_value);
-     commit;
-    $END
-  end save_global_context;
 
   function convert_level_char_to_num(
       p_level in varchar2)
@@ -162,7 +195,7 @@ as
     return number
     $IF $$RAC_LT_11_2 $THEN
       $IF not dbms_db_version.ver_le_10_2 $THEN
-        result_cache relies_on (logger_prefs)
+        result_cache relies_on (logger_prefs) -- TODO will need to modify this to include new table with logger_session_config
       $END
     $END
   is
@@ -172,11 +205,14 @@ as
     $IF $$NO_OP $THEN
       return 0;
     $ELSE
+      -- TODO check $$SESSION_LEVEL_ENABLED (or whatever I call it)
+      -- If enabled then first try to get the levle from it. If not go to the original code below
       for c1 in (select pref_value from logger_prefs where pref_name = 'LEVEL')
       loop
         l_level_char := c1.pref_value;
       end loop; --c1
 
+      -- TODO md: this remains the same
       l_level := convert_level_char_to_num(l_level_char);
 
       return l_level;
@@ -188,7 +224,7 @@ as
     $IF $$RAC_LT_11_2 $THEN
       $IF not dbms_db_version.ver_le_10_2 $THEN
         $IF $$NO_OP is null or NOT $$NO_OP $THEN
-          result_cache relies_on (logger_prefs)
+          result_cache relies_on (logger_prefs) -- TODO will need to modify this to include new table with logger_session_config
         $END
       $END
     $END
@@ -200,8 +236,10 @@ as
       return false;
     $ELSE
       $IF $$RAC_LT_11_2 $THEN
+        -- TODO will need to modify get_level_number
         l_level := get_level_number;
       $ELSE
+        -- TODO find this value
         l_level := sys_context(g_context_name,'level');
         if l_level is null then
           l_level := get_level_number;
@@ -1093,8 +1131,19 @@ as
 	end status;
 
   -- Valid values for p_level are:
-  -- OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING
-  procedure set_level(p_level in varchar2 default 'DEBUG')
+  -- 
+  /**
+   * Sets the logger level
+   * 
+   * @author Tyler Muth
+   * @created ???
+   *
+   * @param p_level Valid values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING
+   * @param p_client_id Optional: If defined, will set the level for the given client identifier. If null will affect global settings
+   */
+  procedure set_level(
+    p_level in varchar2 default 'DEBUG',
+    p_client_id in varchar2 default null)
   is
     l_level varchar2(20);
     l_ctx   varchar2(2000);
@@ -1103,11 +1152,9 @@ as
   begin
     l_level := replace(upper(p_level),' ');
 
-    if l_level not in ('OFF','PERMANENT','ERROR','WARNING','INFORMATION','DEBUG','TIMING') then
-      raise_application_error (-20000,
-          '"LEVEL" must be one of the following values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING');
-    end if;
-
+    assert(l_level in ('OFF','PERMANENT','ERROR','WARNING','INFORMATION','DEBUG','TIMING'),
+      '"LEVEL" must be one of the following values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING');
+    
     $IF $$NO_OP $THEN
       raise_application_error (-20000,
           'Either the NO-OP version of Logger is installed or it is compiled for NO-OP,  so you cannot set the level.');
@@ -1120,10 +1167,23 @@ as
         l_ctx := l_ctx || ', CURRENT_USER: '||sys_context('USERENV','CURRENT_USER');
         l_ctx := l_ctx || ', SESSION_USER: '||sys_context('USERENV','SESSION_USER');
   
-        l_old_level := logger.get_pref('LEVEL');
-  
-        update logger_prefs set pref_value = l_level where pref_name = 'LEVEL';
-        logger.save_global_context('level',logger.convert_level_char_to_num(l_level));
+        -- Separate updates/inserts for client_id or global settings
+        if p_client_id is not null then
+          -- TODO find old settings if applicable for l_old_level (not high priority)
+          l_old_level := 'TODO';
+          -- TODO merge into logger_TODO
+        else
+          -- Global settings
+          l_old_level := logger.get_pref('LEVEL');
+          update logger_prefs set pref_value = l_level where pref_name = 'LEVEL';
+        end if;
+        
+        logger.save_global_context(
+          p_attribute => 'level',
+          p_value => logger.convert_level_char_to_num(l_level),
+          p_client_id => p_client_id);
+        
+        -- TODO Need to integrate the client_id into this message.
         logger.log_information('Log level changed from '||l_old_level||' to '||l_level||' by '||l_ctx);
       end if;
     $END
