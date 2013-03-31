@@ -1,17 +1,69 @@
 #!/cygdrive/c/cygwin/bin/bash
-INSTALL="../build/logger_install.sql"
-NO_OP="../build/logger_no_op.sql"
+#!/bin/bash
 
-read -p "New Version Number x.x.x ?" VERSION_NUMBER
-echo $VERSION_NUMBER
+#*** PARAMETERS ***
+#	$1 = VERSION_NUMBER x.x.x (ex 1.0.5)
+#		This will be used to generate the release folder etc
+#		OLD: #read -p "New Version Number x.x.x ?" VERSION_NUMBER
+
+VERSION_NUMBER=$1
 
 
-rm -f ../build/logger_install.sql
-rm -f ../build/logger_latest.zip
-rm -f ../build/logger_no_op.sql
+{
+if [ -z "${VERSION_NUMBER}" ]; then 
+	echo "VERSION_NUMBER (parameter 1) is not defined"
+	exit 0
+fi
+}
 
+echo "Building release $VERSION_NUMBER"
+
+
+
+#*** VARIABLES ***
+INSTALL="logger_install.sql"
+NO_OP="logger_no_op.sql"
+
+
+#Clear release folder (if it exists) and make directory
+rm -rf ../releases/$VERSION_NUMBER
+mkdir ../releases/$VERSION_NUMBER
+
+
+#Build files
+
+#rm -f ../build/logger_install.sql
+#rm -f ../build/logger_latest.zip
+#rm -f ../build/logger_no_op.sql
+
+#TODO sort out the tables etc
 cat logger.sql > $INSTALL
 printf '\n' >> $INSTALL
+
+#TABLES
+cat ../source/tables/logger_logs.sql >> $INSTALL
+printf '\n' >> $INSTALL
+cat ../source/tables/logger_prefs.sql >> $INSTALL
+printf '\n' >> $INSTALL
+
+
+#CONTEXTS
+cat ../source/contexts/logger_context.sql >> $INSTALL
+printf '\n' >> $INSTALL
+
+#JOBS
+cat ../source/jobs/logger_purge_job.sql >> $INSTALL
+printf '\n' >> $INSTALL
+
+#VIEWS
+cat ../source/views/logger_logs_5_min.sql >> $INSTALL
+printf '\n' >> $INSTALL
+cat ../source/views/logger_logs_60_min.sql >> $INSTALL
+printf '\n' >> $INSTALL
+cat ../source/views/logger_logs_terse.sql >> $INSTALL
+printf '\n' >> $INSTALL
+
+
 cat logger.pks >> $INSTALL
 printf '\n' >> $INSTALL
 cat logger.pkb >> $INSTALL

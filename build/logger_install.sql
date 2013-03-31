@@ -1,6 +1,7 @@
 whenever sqlerror exit
 set serveroutput on
 
+-- TODO Mdsouza: Break up into separate files?
 declare
     type t_sess_privs is table of pls_integer index by varchar2(50);
     l_sess_privs t_sess_privs;
@@ -31,7 +32,7 @@ begin
     exit when l_priv is null;
         begin
             l_dummy := l_sess_privs(l_priv);
-        exception when no_data_found then
+            exception when no_data_found then
             dbms_output.put_line('Error, the current schema is missing the following privilege: '||l_priv);
             l_priv_error := true;
         end;
@@ -54,7 +55,11 @@ end;
 whenever sqlerror continue
 
 
+-- DDL START
+-- All objects past 1.4.0 will require separate alter statements
+-- Put the appropriate alter statements in the appropriate sections
 
+-- *** LOGGER_LOGS START ***
 create table logger_logs(
 	id				    number,
 	logger_level	    number,
@@ -75,7 +80,6 @@ create table logger_logs(
 )
 /
 
-
 create sequence logger_logs_seq
     minvalue 1
     maxvalue 999999999999999999999999999
@@ -84,11 +88,12 @@ create sequence logger_logs_seq
     cache 20
 /
 
+-- TODO mdsouza: move this into a file
 create or replace trigger  bi_logger_logs 
-before insert on logger_logs 
-for each row 
+  before insert on logger_logs 
+  for each row 
 begin	
-	select logger_logs_seq.nextval into :new.id from dual;
+  :new.id := logger_logs_seq.nextval;
 	:new.time_stamp 	:= systimestamp;
 	:new.client_identifier	:= sys_context('userenv','client_identifier');
 	:new.module 		:= sys_context('userenv','module');
@@ -109,10 +114,11 @@ show errors
 create index logger_logs_idx1 on logger_logs(time_stamp,logger_level)
 /
 
+-- *** LOGGER_LOGS END ***
 
-
+-- *** LOGGER_PREFS START ***
 create table logger_prefs(
-	pref_name	varchar2(255),
+	pref_name	varchar2(255) not null,
 	pref_value	varchar2(255) not null,
 	constraint logger_prefs_pk primary key (pref_name) enable
 )
@@ -142,23 +148,35 @@ end;
 /
 
 
+-- TODO mdsouza test this. Really only the logger_version should be changed on update
 merge into logger_prefs p
 using (
     select 'PURGE_AFTER_DAYS'       PREF_NAME,  '7' PREF_VALUE from dual union
     select 'PURGE_MIN_LEVEL'        PREF_NAME,  'DEBUG' PREF_VALUE from dual union
-    select 'LOGGER_VERSION'         PREF_NAME,  '1.4.0' PREF_VALUE from dual union
+    select 'LOGGER_VERSION'         PREF_NAME,  '2.0.0' PREF_VALUE from dual union
     select 'LEVEL'                  PREF_NAME,  'DEBUG' PREF_VALUE from dual union
     select 'PROTECT_ADMIN_PROCS'    PREF_NAME,  'TRUE' PREF_VALUE from dual union
     select 'INCLUDE_CALL_STACK'     PREF_NAME,  'TRUE' PREF_VALUE from dual union
     select 'INSTALL_SCHEMA'         PREF_NAME,  sys_context('USERENV','CURRENT_SCHEMA') PREF_VALUE from dual) d
     on (p.pref_name = d.pref_name)
 when matched then 
-    update set p.pref_value = d.pref_value
+    update set p.pref_value = 
+      case 
+        when p.pref_name = 'LOGGER_VERSION' THEN d.pref_value
+        else p.pref_value
+      end
 when not matched then 
     insert (p.pref_name,p.pref_value)
     values (d.pref_name,d.pref_value);
 
+-- 2.0.0
+alter table logger_prefs modify pref_name not null;
 
+-- *** LOGGER_PREFS END ***
+
+
+
+-- *** LOGGER_LOGS_APEX_ITEMS START ***
 create table logger_logs_apex_items(
     id				number not null,
     log_id          number not null,
@@ -182,17 +200,19 @@ create sequence logger_apx_items_seq
     cache 20
 /
 
-
+-- TODO move into file?
 create or replace
 TRIGGER  biu_logger_apex_items BEFORE INSERT or update ON logger_logs_apex_items 
 FOR EACH ROW 
 begin
-	select logger_apx_items_seq.nextval into :new.id from dual;
+  :new.id := logger_apx_items_seq.nextval;
 end;
 /
 
+-- *** LOGGER_LOGS_APEX_ITEMS START ***
 
 
+-- *** JOBS START ***
 begin
   dbms_scheduler.create_job(
      job_name => 'LOGGER_PURGE_JOB',
@@ -205,7 +225,10 @@ begin
 end;
 /
 
+-- *** JOBS END ***
 
+
+-- TODO move to file?
 create or replace force view logger_logs_5_min as
 	select * 
       from logger_logs 
@@ -233,6 +256,9 @@ create or replace force view logger_logs_terse as
 set termout on
 
 
+
+-- TODO mdsouza: Modify this to check if the context already exists if so, don't create
+-- TODO mdsouza: Move to its own file
 declare 
 	-- the following line is also used in a constant declaration in logger.pkb  
 	l_ctx_name varchar2(35) := substr(sys_context('USERENV','CURRENT_SCHEMA'),1,23)||'_LOGCTX';
@@ -250,6 +276,8 @@ begin
 end;
 /
 
+
+-- TODO move to file
 create or replace package logger
 authid definer
 as
