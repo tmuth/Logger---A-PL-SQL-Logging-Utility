@@ -45,6 +45,8 @@ cat ../source/tables/logger_logs.sql >> $INSTALL
 printf '\n' >> $INSTALL
 cat ../source/tables/logger_prefs.sql >> $INSTALL
 printf '\n' >> $INSTALL
+cat ../source/tables/logger_logs_apex_items.sql >> $INSTALL
+printf '\n' >> $INSTALL
 
 
 #CONTEXTS

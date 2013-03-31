@@ -15,25 +15,25 @@ begin
   
   if l_count = 0 then
     execute immediate '
-      create table logger_logs(
-        id				    number,
-        logger_level	    number,
-        text	            varchar2(4000),
-        time_stamp		    timestamp,
-        scope               varchar2(1000),
-        module			    varchar2(100),
-        action			    varchar2(100),
-        user_name	        varchar2(255),
-        client_identifier   varchar2(255),
-        call_stack		    varchar2(4000),
-        unit_name		    varchar2(255),
-        line_no			    varchar2(100),
-        scn                 number,
-        extra               clob,
-        constraint logger_logs_pk primary key (id) enable,
-        constraint logger_logs_lvl_ck check(logger_level in (1,2,4,8,16,32,64,128))
-      )
-      ';
+create table logger_logs(
+  id				    number,
+  logger_level	    number,
+  text	            varchar2(4000),
+  time_stamp		    timestamp,
+  scope               varchar2(1000),
+  module			    varchar2(100),
+  action			    varchar2(100),
+  user_name	        varchar2(255),
+  client_identifier   varchar2(255),
+  call_stack		    varchar2(4000),
+  unit_name		    varchar2(255),
+  line_no			    varchar2(100),
+  scn                 number,
+  extra               clob,
+  constraint logger_logs_pk primary key (id) enable,
+  constraint logger_logs_lvl_ck check(logger_level in (1,2,4,8,16,32,64,128))
+)
+    ';
   end if;
   
   -- 2.0.0
