@@ -21,8 +21,9 @@ echo "Building release $VERSION_NUMBER"
 
 
 #*** VARIABLES ***
-INSTALL="logger_install.sql"
-NO_OP="logger_no_op.sql"
+RELEASE_FOLDER=../releases/$VERSION_NUMBER
+INSTALL=$RELEASE_FOLDER/"logger_install.sql"
+NO_OP=$RELEASE_FOLDER/"logger_no_op.sql"
 
 
 #Clear release folder (if it exists) and make directory
@@ -37,7 +38,7 @@ mkdir ../releases/$VERSION_NUMBER
 #rm -f ../build/logger_no_op.sql
 
 #TODO sort out the tables etc
-cat logger.sql > $INSTALL
+cat ../source/install/logger_install_prereqs.sql > $INSTALL
 printf '\n' >> $INSTALL
 
 #TABLES
@@ -65,31 +66,32 @@ printf '\n' >> $INSTALL
 cat ../source/views/logger_logs_terse.sql >> $INSTALL
 printf '\n' >> $INSTALL
 
-
-cat logger.pks >> $INSTALL
+#PACKAGES
+cat ../source/packages/logger.pks >> $INSTALL
 printf '\n' >> $INSTALL
-cat logger.pkb >> $INSTALL
+cat ../source/packages/logger.pkb >> $INSTALL
 printf '\n' >> $INSTALL
-cat logger_configure.sql >> $INSTALL
-printf '\n\nbegin \n\tlogger_configure; \n end;\n/\n\n' >> $INSTALL
-printf "begin \n\tlogger.set_level('DEBUG'); \nend;\n/\n\n" >> $INSTALL
-printf 'prompt \n'  >> $INSTALL
-printf 'prompt ************************************************* \n'  >> $INSTALL
-printf 'prompt Now executing LOGGER.STATUS...\n'  >> $INSTALL
-printf 'prompt \n'  >> $INSTALL
-printf '\nbegin \n\tlogger.status; \nend;\n/\n\n' >> $INSTALL
-printf 'prompt ************************************************* \n'  >> $INSTALL
-printf "begin \n\tlogger.log_permanent('Logger version '||logger.get_pref('LOGGER_VERSION')||' installed.'); \nend;\n/\n\n" >> $INSTALL
-printf '\n\n' >> $INSTALL
 
 
+#PROCEDURES
+cat ../source/procedures/logger_configure.sql >> $INSTALL
+printf '\n' >> $INSTALL
+
+
+#Post install
+cat ../source/install/post_install_configuration.sql >> $INSTALL
+printf '\n' >> $INSTALL
+
+
+
+#NO OP Code
 printf "\x2d\x2d This file installs a NO-OP version of the logger package that has all of the same procedures and functions,\n " > $NO_OP
 printf "\x2d\x2d but does not actually write to any tables. Additionally, it has no other object dependencies.\n" >> $NO_OP
 printf "\x2d\x2d You can review the documentation at https://logger.samplecode.oracle.com/ for more information.\n" >> $NO_OP
 printf '\n' >> $NO_OP
-cat logger.pks >> $NO_OP
+cat ../source/packages/logger.pks >> $NO_OP
 printf '\n' >> $NO_OP
-cat logger_no_op.pkb >> $NO_OP
+cat ../source/packages/logger_no_op.pkb >> $NO_OP
 printf '\n\nprompt\n' >> $NO_OP
 printf 'prompt *************************************************\n' >> $NO_OP
 printf 'prompt Now executing LOGGER.STATUS...\n' >> $NO_OP
@@ -99,16 +101,21 @@ printf 'prompt *************************************************\n' >> $NO_OP
 printf '\n\n' >> $NO_OP
 
 
-cp -f drop_logger.sql ../build/
-cp -f create_user.sql ../build/
 
+#Copy "other" scripts
+cp -f ../source/install/create_user.sql $RELEASE_FOLDER
+cp -f ../source/install/drop_logger.sql $RELEASE_FOLDER
+
+#TODO mdsouza: find a way to convert Githup .md to html
 sed -i "s/tags\/[0-9]\.[0-9]\.[0-9]\/logger_[0-9]\.[0-9]\.[0-9].zip/tags\/$VERSION_NUMBER\/logger_$VERSION_NUMBER\.zip/g" ../www/index.html
 cp -f ../www/index.html ../build/readme.html
 
-chmod 777 ../build/*.*
+chmod 777 $RELEASE_FOLDER/*.*
 
-sed -i "s/x\.x\.x/$VERSION_NUMBER/g" ../build/logger_install.sql
+sed -i "s/x\.x\.x/$VERSION_NUMBER/g" $RELEASE_FOLDERlogger_install.sql
 
 
-7za a -tzip ../build/logger_$VERSION_NUMBER.zip ../build/*.sql ../build/*.html
+#TODO mdsouza: resolve this
+#Old windows zip7za a -tzip $/logger_$VERSION_NUMBER.zip ../build/*.sql ../build/*.html
+zip -r -j $RELEASE_FOLDER/logger_$VERSION_NUMBER.zip $RELEASE_FOLDER
 

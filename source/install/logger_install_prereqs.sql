@@ -1,3 +1,4 @@
+#This file contains the start and pre installation requirements for Logger
 whenever sqlerror exit
 set serveroutput on
 
