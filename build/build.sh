@@ -37,7 +37,7 @@ mkdir ../releases/$VERSION_NUMBER
 #rm -f ../build/logger_latest.zip
 #rm -f ../build/logger_no_op.sql
 
-#TODO sort out the tables etc
+#PREINSTALL
 cat ../source/install/logger_install_prereqs.sql > $INSTALL
 printf '\n' >> $INSTALL
 
@@ -106,16 +106,19 @@ printf '\n\n' >> $NO_OP
 cp -f ../source/install/create_user.sql $RELEASE_FOLDER
 cp -f ../source/install/drop_logger.sql $RELEASE_FOLDER
 
-#TODO mdsouza: find a way to convert Githup .md to html
-sed -i "s/tags\/[0-9]\.[0-9]\.[0-9]\/logger_[0-9]\.[0-9]\.[0-9].zip/tags\/$VERSION_NUMBER\/logger_$VERSION_NUMBER\.zip/g" ../www/index.html
-cp -f ../www/index.html ../build/readme.html
+#sed -i "s/tags\/[0-9]\.[0-9]\.[0-9]\/logger_[0-9]\.[0-9]\.[0-9].zip/tags\/$VERSION_NUMBER\/logger_$VERSION_NUMBER\.zip/g" ../www/index.html
+#cp -f ../www/index.html ../build/readme.html
+#Generate readme.html
+#Using https://github.com/evilstreak/markdown-js to convert Markdown (.md) file to html
+#To install: npm install -g markdown
+md2html ../README.md > $RELEASE_FOLDER/readme.html
 
 chmod 777 $RELEASE_FOLDER/*.*
 
+#Replace any references for the version number
 sed -i "s/x\.x\.x/$VERSION_NUMBER/g" $RELEASE_FOLDERlogger_install.sql
 
 
-#TODO mdsouza: resolve this
 #Old windows zip7za a -tzip $/logger_$VERSION_NUMBER.zip ../build/*.sql ../build/*.html
 zip -r -j $RELEASE_FOLDER/logger_$VERSION_NUMBER.zip $RELEASE_FOLDER
 
