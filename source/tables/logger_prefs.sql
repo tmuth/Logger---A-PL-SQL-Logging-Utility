@@ -58,6 +58,7 @@ using (
   select 'LEVEL'                  PREF_NAME,  'DEBUG' PREF_VALUE from dual union
   select 'PROTECT_ADMIN_PROCS'    PREF_NAME,  'TRUE' PREF_VALUE from dual union
   select 'INCLUDE_CALL_STACK'     PREF_NAME,  'TRUE' PREF_VALUE from dual union
+  select 'PREF_BY_CLIENT_ID_EXPIRE_HOURS'     PREF_NAME,  '12' PREF_VALUE from dual union
   select 'INSTALL_SCHEMA'         PREF_NAME,  sys_context('USERENV','CURRENT_SCHEMA') PREF_VALUE from dual) d
   on (p.pref_name = d.pref_name)
 when matched then 

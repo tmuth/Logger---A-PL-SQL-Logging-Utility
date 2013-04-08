@@ -1,124 +1,142 @@
-create or replace
-package body logger
+create or replace package body logger
 as
-g_log_id    	number;
--- Definitions of conditional compilation variables:
--- $$NO_OP              : When true, completely disables all logger DML.  Also used to
---                      : generate the logger_no_op.sql code path
---
--- $$RAC_LT_11_2        : Set in logger_configure to handle the fact that RAC doesn't
---                      : support global app contexts until 11.2
---
--- $$FLASHBACK_ENABLED  : Set in logger_configure to determine whether or not we can grab the scn from dbms_flashback.
---                      : Primarily used in the trigger on logger_logs.
---
--- $$APEX               : Set in logger_configure.  True if we can query a local synonym to wwv_flow_data to snapshot
---                      : the APEX session state.
-type ts_array is table of timestamp index by varchar2(100);
-g_proc_start_times ts_array;
-g_running_timers        pls_integer := 0;
-function admin_security_check
-return boolean
-is
-l_protect_admin_procs	varchar2(50)	:= get_pref('PROTECT_ADMIN_PROCS');
-l_return                boolean default false;
-begin
-if get_pref('PROTECT_ADMIN_PROCS') = 'TRUE' then
-if get_pref('INSTALL_SCHEMA') = sys_context('USERENV','SESSION_USER') then
-l_return := true;
-else
-l_return := false;
-raise_application_error (-20000,
-'You are not authorized to call this procedure.');
-end if;
-else
-l_return := true;
-end if;
-return l_return;
-end admin_security_check;
-procedure null_global_contexts
-is
-pragma autonomous_transaction;
-begin
-null;
-commit;
-end null_global_contexts;
-procedure save_global_context(
-p_attribute     in varchar2,
-p_value         in varchar2)
-is
-pragma autonomous_transaction;
-begin
-null;
-end save_global_context;
-function convert_level_char_to_num(
-p_level in varchar2)
-return number
-is
-l_level         number;
-begin
-case p_level
-when 'OFF'          then l_level := 0;
-when 'PERMANENT'    then l_level := 1;
-when 'ERROR'        then l_level := 2;
-when 'WARNING'      then l_level := 4;
-when 'INFORMATION'  then l_level := 8;
-when 'DEBUG'        then l_level := 16;
-when 'TIMING'       then l_level := 32;
-when 'SYS_CONTEXT'  then l_level := 64;
-else l_level := -1;
-end case;
-return l_level;
-end convert_level_char_to_num;
-function get_level_number
-return number
-is
-l_level         number;
-l_level_char    varchar2(50);
-begin
-return 0;
-end get_level_number;
-function ok_to_log(p_level  in  number)
-return boolean
-is
-l_level         number;
-l_level_char    varchar2(50);
-begin
-return false;
-end ok_to_log;
-function include_call_stack
-return boolean
-is
-l_call_stack_pref   varchar2(50);
-begin
-return false;
-end include_call_stack;
-function date_text_format_base (
-p_date_start in date,
-p_date_stop  in date)
-return varchar2
-as
-x	varchar2(20);
-begin
-x := 	case
-when p_date_stop-p_date_start < 1/1440
-then round(24*60*60*(p_date_stop-p_date_start)) || ' seconds'
-when p_date_stop-p_date_start < 1/24
-then round(24*60*(p_date_stop-p_date_start)) || ' minutes'
-when p_date_stop-p_date_start < 1
-then round(24*(p_date_stop-p_date_start)) || ' hours'
-when p_date_stop-p_date_start < 14
-then trunc(p_date_stop-p_date_start) || ' days'
-when p_date_stop-p_date_start < 60
-then trunc((p_date_stop-p_date_start)/7) || ' weeks'
-when p_date_stop-p_date_start < 365
-then round(months_between(p_date_stop,p_date_start)) || ' months'
-else round(months_between(p_date_stop,p_date_start)/12,1) || ' years'
-end;
-x:= regexp_replace(x,'(^1 [[:alnum:]]{4,10})s','\1');
-x:= x || ' ago';
-return substr(x,1,20);
-end date_text_format_base;
+  g_log_id    	number;
+  -- Definitions of conditional compilation variables:
+  -- $$NO_OP              : When true, completely disables all logger DML.  Also used to
+  --                      : generate the logger_no_op.sql code path
+  --
+  -- $$RAC_LT_11_2        : Set in logger_configure to handle the fact that RAC doesn't
+  --                      : support global app contexts until 11.2
+  --
+  -- $$FLASHBACK_ENABLED  : Set in logger_configure to determine whether or not we can grab the scn from dbms_flashback.
+  --                      : Primarily used in the trigger on logger_logs.
+  --
+  -- $$APEX               : Set in logger_configure.  True if we can query a local synonym to wwv_flow_data to snapshot
+  --                      : the APEX session state.
+  type ts_array is table of timestamp index by varchar2(100);
+
+  g_proc_start_times ts_array;
+  g_running_timers        pls_integer := 0;
+
+
+  function admin_security_check
+    return boolean
+  is
+    l_protect_admin_procs	varchar2(50)	:= get_pref('PROTECT_ADMIN_PROCS');
+    l_return                boolean default false;
+  begin
+    if get_pref('PROTECT_ADMIN_PROCS') = 'TRUE' then
+      if get_pref('INSTALL_SCHEMA') = sys_context('USERENV','SESSION_USER') then
+        l_return := true;
+      else
+        l_return := false;
+        raise_application_error (-20000, 'You are not authorized to call this procedure.');
+      end if;
+    else
+      l_return := true;
+    end if;
+    
+    return l_return;
+  end admin_security_check;
+
+
+  procedure null_global_contexts
+  is
+    pragma autonomous_transaction;
+  begin
+    null;
+    commit;
+  end null_global_contexts;
+  
+  procedure save_global_context(
+    p_attribute     in varchar2,
+    p_value         in varchar2)
+  is
+    pragma autonomous_transaction;
+  begin
+    null;
+  end save_global_context;
+  
+  
+  function convert_level_char_to_num(
+    p_level in varchar2)
+    return number
+  is
+    l_level         number;
+  begin
+    case p_level
+      when 'OFF'          then l_level := 0;
+      when 'PERMANENT'    then l_level := 1;
+      when 'ERROR'        then l_level := 2;
+      when 'WARNING'      then l_level := 4;
+      when 'INFORMATION'  then l_level := 8;
+      when 'DEBUG'        then l_level := 16;
+      when 'TIMING'       then l_level := 32;
+      when 'SYS_CONTEXT'  then l_level := 64;
+      else l_level := -1;
+    end case;
+    return l_level;
+  end convert_level_char_to_num;
+
+
+  function get_level_number
+    return number
+  is
+    l_level         number;
+    l_level_char    varchar2(50);
+  begin
+    return 0;
+  end get_level_number;
+
+
+  function ok_to_log(p_level  in  number)
+    return boolean
+  is
+    l_level         number;
+    l_level_char    varchar2(50);
+  begin
+    return false;
+  end ok_to_log;
+
+
+  function include_call_stack
+    return boolean
+  is
+    l_call_stack_pref   varchar2(50);
+  begin
+    return false;
+  end include_call_stack;
+  
+  
+  function date_text_format_base (
+    p_date_start in date,
+    p_date_stop  in date)
+    return varchar2
+  as
+    x	varchar2(20);
+  begin
+    x := 	
+      case
+        when p_date_stop-p_date_start < 1/1440
+        then round(24*60*60*(p_date_stop-p_date_start)) || ' seconds'
+        when p_date_stop-p_date_start < 1/24
+        then round(24*60*(p_date_stop-p_date_start)) || ' minutes'
+        when p_date_stop-p_date_start < 1
+        then round(24*(p_date_stop-p_date_start)) || ' hours'
+        when p_date_stop-p_date_start < 14
+        then trunc(p_date_stop-p_date_start) || ' days'
+        when p_date_stop-p_date_start < 60
+        then trunc((p_date_stop-p_date_start)/7) || ' weeks'
+        when p_date_stop-p_date_start < 365
+        then round(months_between(p_date_stop,p_date_start)) || ' months'
+        else round(months_between(p_date_stop,p_date_start)/12,1) || ' years'
+      end;
+    x:= regexp_replace(x,'(^1 [[:alnum:]]{4,10})s','\1');
+    x:= x || ' ago';
+    return substr(x,1,20);
+  end date_text_format_base;
+
+
 function date_text_format (p_date in date)
 return varchar2
 as
@@ -191,19 +209,25 @@ l_app_id       number;
 begin
 null;
 end snapshot_apex_items;
-procedure log_error(
-		p_text          in varchar2 default null,
-p_scope         in varchar2 default null,
-p_extra         in clob default null)
-	is
-l_proc_name     varchar2(100);
-l_lineno        varchar2(100);
-l_text          varchar2(4000);
-		pragma autonomous_transaction;
-l_call_stack    varchar2(4000);
-	begin
-null;
+
+
+  procedure log_error(
+    p_text          in varchar2 default null,
+    p_scope         in varchar2 default null,
+    p_extra         in clob default null,
+    p_params        in tab_param default logger.gc_empty_tab_param
+    )
+  is
+    l_proc_name     varchar2(100);
+    l_lineno        varchar2(100);
+    l_text          varchar2(4000);
+    pragma autonomous_transaction;
+    l_call_stack    varchar2(4000);
+  begin
+    null;
 	end log_error;
+  
+  
 procedure log_permanent(p_text    in varchar2,
 p_scope   in varchar2 default null,
 p_extra   in clob default null)
@@ -390,26 +414,58 @@ begin
 null;
 commit;
 end log_apex_items;
-	procedure time_start(
-		p_unit				in varchar2)
+	
+    
+  procedure time_start(
+		p_unit				in varchar2,
+    p_log_in_table 	    IN boolean default true)
 	is
 		l_proc_name     	varchar2(100);
 		l_text 				varchar2(4000);
-l_pad               varchar2(100);
+    l_pad               varchar2(100);
 		pragma autonomous_transaction;
 	begin
-null;
+    null;
 	end time_start;
-	procedure time_stop(
-		p_unit				in varchar2)
+	
+  
+  procedure time_stop(
+		p_unit				in varchar2,
+    p_scope             in varchar2 default null)
 	is
 		l_time_string   	varchar2(50);
-l_text 				varchar2(4000);
-l_pad               varchar2(100);
-pragma autonomous_transaction;
-	begin
-null;
-	end time_stop;
+    l_text 				varchar2(4000);
+    l_pad               varchar2(100);
+    pragma autonomous_transaction;
+  begin
+    null;
+  end time_stop;
+  
+  
+  function time_stop(
+    p_unit				IN VARCHAR2,
+    p_scope             in varchar2 default null,
+    p_log_in_table 	    IN boolean default true
+    )
+    return varchar2
+  is    
+  begin
+    return null;
+  end time_stop;
+  
+  
+  function time_stop_seconds(
+    p_unit				in varchar2,
+    p_scope             in varchar2 default null,
+    p_log_in_table 	    in boolean default true
+    )
+    return number
+  is
+  begin
+    return null;
+  end time_stop_seconds;
+      
+  
 procedure time_reset
 is
 begin
@@ -484,34 +540,129 @@ l_version       varchar2(20);
 display_output('Project Home Page','https://logger.samplecode.oracle.com/');
 display_output('Debug Level','NO-OP, Logger completely disabled.');
 	end status;
--- Valid values for p_level are:
--- OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING
-procedure set_level(p_level in varchar2 default 'DEBUG')
-is
-l_level varchar2(20);
-l_ctx   varchar2(2000);
-l_old_level varchar2(20);
-pragma autonomous_transaction;
-begin
-l_level := replace(upper(p_level),' ');
-if l_level not in ('OFF','PERMANENT','ERROR','WARNING','INFORMATION','DEBUG','TIMING') then
-raise_application_error (-20000,
-'"LEVEL" must be one of the following values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING');
-end if;
-raise_application_error (-20000,
-'Either the NO-OP version of Logger is installed or it is compiled for NO-OP,  so you cannot set the level.');
-commit;
-end set_level;
-procedure sqlplus_format
-is
-begin
-execute immediate 'begin dbms_output.enable(1000000); end;';
-dbms_output.put_line('set linesize 200');
-dbms_output.put_line('set pagesize 100');
-dbms_output.put_line('column id format 999999');
-dbms_output.put_line('column text format a75');
-dbms_output.put_line('column call_stack format a100');
-dbms_output.put_line('column extra format a100');
-end sqlplus_format;
+  
+  
+  -- Valid values for p_level are:
+  -- OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING
+  procedure set_level(
+    p_level in varchar2 default 'DEBUG',
+    p_client_id in varchar2 default null,
+    p_include_call_stack in varchar2 default null,
+    p_client_id_expire_hours in number default null
+  )
+  is
+    l_level varchar2(20);
+    l_ctx   varchar2(2000);
+    l_old_level varchar2(20);
+    pragma autonomous_transaction;
+  begin
+    raise_application_error (-20000, 'Either the NO-OP version of Logger is installed or it is compiled for NO-OP,  so you cannot set the level.');
+    commit;
+  end set_level;
+  
+  
+  procedure unset_client_level(p_client_id in varchar2)
+  is
+  begin
+    null;
+  end unset_client_level;
+  
+  procedure unset_client_level
+  is
+  begin
+    null;
+  end unset_client_level;
+  
+  
+  procedure unset_client_level_all
+  as
+  begin
+    null;
+  end unset_client_level_all;
+
+
+  procedure sqlplus_format
+  is
+  begin
+    execute immediate 'begin dbms_output.enable(1000000); end;';
+    dbms_output.put_line('set linesize 200');
+    dbms_output.put_line('set pagesize 100');
+    dbms_output.put_line('column id format 999999');
+    dbms_output.put_line('column text format a75');
+    dbms_output.put_line('column call_stack format a100');
+    dbms_output.put_line('column extra format a100');
+  end sqlplus_format;
+  
+  procedure log_params(
+    p_params in logger.tab_param,
+    p_scope in logger_logs.scope%type)
+  is
+  begin
+    null;
+  end log_params;
+  
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in varchar2)
+  is
+  begin
+    null;
+  end append_param;
+    
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in number)
+  is
+  begin
+    null;
+  end append_param;
+    
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in date)
+  is
+  begin
+    null;
+  end append_param;
+    
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in timestamp)
+  is
+  begin
+    null;
+  end append_param;
+    
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in timestamp with time zone)
+  is
+  begin
+    null;
+  end append_param;
+    
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in timestamp with local time zone)
+  is
+  begin
+    null;
+  end append_param;
+    
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in boolean)
+  is
+  begin
+    null;
+  end append_param;
+  
 end logger;
 /

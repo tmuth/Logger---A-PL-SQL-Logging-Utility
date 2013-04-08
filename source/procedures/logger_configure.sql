@@ -10,7 +10,7 @@ is
     --no_data_found       exception;
     
     l_sql		        varchar2(32767);
-	l_variables	        varchar2(1000) := ' ';
+	  l_variables	        varchar2(1000) := ' ';
     l_dummy             number;
     l_flashback         varchar2(50) := 'FALSE';
     pragma 				exception_init(tbl_not_exist, -942);
@@ -82,7 +82,7 @@ begin
     
 	
 	l_sql := q'[alter package logger compile body PLSQL_CCFLAGS=']'||l_variables||q'['  reuse settings]';
-	
+
 	execute immediate l_sql;
 	
 	l_sql := q'[alter trigger BI_LOGGER_LOGS compile PLSQL_CCFLAGS=']'||l_variables||q'[' reuse settings]';

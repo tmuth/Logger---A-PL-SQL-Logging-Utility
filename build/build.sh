@@ -1,4 +1,4 @@
-#!/cygdrive/c/cygwin/bin/bash
+##!/cygdrive/c/cygwin/bin/bash
 #!/bin/bash
 
 #*** PARAMETERS ***
@@ -48,6 +48,8 @@ cat ../source/tables/logger_prefs.sql >> $INSTALL
 printf '\n' >> $INSTALL
 cat ../source/tables/logger_logs_apex_items.sql >> $INSTALL
 printf '\n' >> $INSTALL
+cat ../source/tables/logger_prefs_by_client_id.sql >> $INSTALL
+printf '\n' >> $INSTALL
 
 
 #CONTEXTS
@@ -56,6 +58,8 @@ printf '\n' >> $INSTALL
 
 #JOBS
 cat ../source/jobs/logger_purge_job.sql >> $INSTALL
+printf '\n' >> $INSTALL
+cat ../source/jobs/logger_unset_prefs_by_client.sql >> $INSTALL
 printf '\n' >> $INSTALL
 
 #VIEWS

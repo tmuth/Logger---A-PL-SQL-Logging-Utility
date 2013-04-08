@@ -158,7 +158,16 @@ as
 
   procedure set_level(
     p_level in varchar2 default 'DEBUG',
-    p_client_id in varchar2 default null);
+    p_client_id in varchar2 default null,
+    p_include_call_stack in varchar2 default null,
+    p_client_id_expire_hours in number default null
+ );
+    
+  procedure unset_client_level(p_client_id in varchar2);
+  
+  procedure unset_client_level;
+  
+  procedure unset_client_level_all;
   
   procedure log_params(
     p_params in logger.tab_param,
@@ -199,3 +208,4 @@ as
     p_name in varchar2,
     p_val in boolean);
 end logger;
+/

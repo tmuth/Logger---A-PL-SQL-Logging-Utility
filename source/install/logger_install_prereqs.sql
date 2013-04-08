@@ -7,7 +7,7 @@ declare
     type t_sess_privs is table of pls_integer index by varchar2(50);
     l_sess_privs t_sess_privs;
     l_req_privs t_sess_privs;
-    l_priv  varchar2(50);
+    l_priv varchar2(50);
     l_dummy pls_integer;
     l_priv_error  boolean := false;
 begin

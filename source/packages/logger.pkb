@@ -17,6 +17,9 @@ as
   --
   -- $$APEX               : Set in logger_configure.  True if we can query a local synonym to wwv_flow_data to snapshot
   --                      : the APEX session state.
+  --
+  -- $$LOGGER_DEBUG       : Only to be used during development of logger
+  --                      : Primarily used for dbms_output.put_line calls
 
   
   -- TYPES
@@ -32,6 +35,9 @@ as
   gc_date_format varchar2(255) := 'DD-MON-YYYY HH24:MI:SS';
   gc_timestamp_format varchar2(255) := gc_date_format || ':FF';
   gc_timestamp_tz_format varchar2(255) := gc_timestamp_format || ' TZR';
+  
+  gc_ctx_attr_level varchar2(5) := 'level';
+  gc_ctx_attr_include_call_stack varchar2(18) := 'include_call_stack';
   
   
   
@@ -120,11 +126,9 @@ as
     commit; -- MD: moved commit to outside of the NO_OP check since commit or rollback must occur in this procedure
   end save_global_context;
 
-  -- TODO test
   -- PUBLIC
 
-
-  function admin_security_check
+ function admin_security_check
     return boolean
   is
     l_protect_admin_procs	varchar2(50)	:= get_pref('PROTECT_ADMIN_PROCS');
@@ -157,12 +161,12 @@ as
       $ELSE
         dbms_session.set_context(
           namespace  => g_context_name,
-          attribute  => 'level',
+          attribute  => gc_ctx_attr_level,
           value      => null);
 
         dbms_session.set_context(
           namespace  => g_context_name,
-          attribute  => 'include_call_stack',
+          attribute  => gc_ctx_attr_include_call_stack,
           value      => null);
       $END
     $END
@@ -195,24 +199,40 @@ as
     return number
     $IF $$RAC_LT_11_2 $THEN
       $IF not dbms_db_version.ver_le_10_2 $THEN
-        result_cache relies_on (logger_prefs) -- TODO will need to modify this to include new table with logger_session_config
+        result_cache relies_on (logger_prefs, logger_prefs_by_client_id)
       $END
     $END
   is
     l_level         number;
     l_level_char    varchar2(50);
+    l_scope varchar2(30) := 'get_level_number';
   begin
     $IF $$NO_OP $THEN
       return 0;
     $ELSE
-      -- TODO check $$SESSION_LEVEL_ENABLED (or whatever I call it)
+      $IF $$LOGGER_DEBUG $THEN
+        dbms_output.put_line(l_scope || ': select logger_level');
+      $END
+      
       -- If enabled then first try to get the levle from it. If not go to the original code below
-      for c1 in (select pref_value from logger_prefs where pref_name = 'LEVEL')
-      loop
-        l_level_char := c1.pref_value;
-      end loop; --c1
+      select logger_level
+      into l_level_char
+      from (
+        select logger_level, row_number () over (order by rank) rn
+        from (
+          -- Client specific logger levels trump system level logger level
+          select logger_level, 1 rank
+          from logger_prefs_by_client_id
+          where client_id = sys_context('userenv','client_identifier')
+          union
+          -- System level configuration
+          select pref_value logger_level, 2 rank
+          from logger_prefs 
+          where pref_name = 'LEVEL'
+        )
+      )
+      where rn = 1;
 
-      -- TODO md: this remains the same
       l_level := convert_level_char_to_num(l_level_char);
 
       return l_level;
@@ -224,7 +244,7 @@ as
     $IF $$RAC_LT_11_2 $THEN
       $IF not dbms_db_version.ver_le_10_2 $THEN
         $IF $$NO_OP is null or NOT $$NO_OP $THEN
-          result_cache relies_on (logger_prefs) -- TODO will need to modify this to include new table with logger_session_config
+          result_cache relies_on (logger_prefs, logger_prefs_by_client_id)
         $END
       $END
     $END
@@ -236,14 +256,12 @@ as
       return false;
     $ELSE
       $IF $$RAC_LT_11_2 $THEN
-        -- TODO will need to modify get_level_number
         l_level := get_level_number;
       $ELSE
-        -- TODO find this value
-        l_level := sys_context(g_context_name,'level');
+        l_level := sys_context(g_context_name,gc_ctx_attr_level);
         if l_level is null then
           l_level := get_level_number;
-          save_global_context('level',l_level);
+          save_global_context(gc_ctx_attr_level,l_level);
         end if;
       $END
 
@@ -261,7 +279,7 @@ as
     $IF $$RAC_LT_11_2 $THEN
       $IF not dbms_db_version.ver_le_10_2 $THEN
         $IF $$NO_OP is null or NOT $$NO_OP $THEN
-          result_cache relies_on (logger_prefs)
+          result_cache relies_on (logger_prefs, logger_prefs_by_client_id)
         $END
       $END
     $END
@@ -274,10 +292,10 @@ as
       $IF $$RAC_LT_11_2 $THEN
         l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
       $ELSE
-        l_call_stack_pref := sys_context(g_context_name,'include_call_stack');
+        l_call_stack_pref := sys_context(g_context_name,gc_ctx_attr_include_call_stack);
         if l_call_stack_pref is null then
           l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
-          save_global_context('include_call_stack',l_call_stack_pref);
+          save_global_context(gc_ctx_attr_include_call_stack,l_call_stack_pref);
         end if;
       $END
 
@@ -575,6 +593,7 @@ as
 	is
     pragma autonomous_transaction;
 	begin
+    
     $IF $$NO_OP $THEN
       null;
     $ELSE
@@ -994,26 +1013,67 @@ as
     end if;
   end time_reset;
 
+  /**
+   * Returns Global or User preference
+   * User preference is only valid for LEVEL and INCLUDE_CALL_STACK
+   *  - If a user setting exists, it will be returned, if not the system level preference will be return
+   *
+   * Updates
+   *  - 2.0.0: Added user preference support
+   *
+   * @author Tyler Muth
+   * @created ???
+   *
+   * @param p_pref_name
+   */
 	function get_pref(
 		p_pref_name		in	varchar2)
 		return varchar2
 		$IF not dbms_db_version.ver_le_10_2  $THEN
 			result_cache
       $IF $$NO_OP is null or NOT $$NO_OP $THEN
-        relies_on (logger_prefs)
+        relies_on (logger_prefs, logger_prefs_by_client_id)
       $END
 		$END
 	is
+    l_scope varchar2(30) := 'get_pref';
+    l_pref_value logger_prefs.pref_value%type;
 	begin
     $IF $$NO_OP $THEN
         null;
     $ELSE
-      for c1 in (select pref_value from logger_prefs where pref_name = p_pref_name)
-      loop
-        return c1.pref_value;
-      end loop; --c1
-      return null;
+      $IF $$LOGGER_DEBUG $THEN
+        dbms_output.put_line(l_scope || ' select pref');
+      $END
+      
+      select logger_level
+      into l_pref_value
+      from (
+        select logger_level, row_number () over (order by rank) rn
+        from (
+          -- Client specific logger levels trump system level logger level
+          select logger_level, 1 rank
+          from logger_prefs_by_client_id
+          where 1=1
+            and client_id = sys_context('userenv','client_identifier')
+            -- Only try to get prefs at a client level if pref is in LEVEL or INCLUDE_CALL_STACK
+            and p_pref_name in ('LEVEL', 'INCLUDE_CALL_STACK')
+          union
+          -- System level configuration
+          select pref_value, 2 rank
+          from logger_prefs 
+          where pref_name = p_pref_name
+        )
+      )
+      where rn = 1;
+      return l_pref_value;
+
     $END
+  exception
+    when no_data_found then
+      return null;
+    when others then
+      raise;
 	end get_pref;
 
 	procedure purge(
@@ -1124,6 +1184,7 @@ as
       display_output('SCN Capture',l_flashback);
       display_output('Min. Purge Level',get_pref('PURGE_MIN_LEVEL'));
       display_output('Purge Older Than',get_pref('PURGE_AFTER_DAYS')||' days');
+      display_output('Pref by client_id expire hours',get_pref('PREF_BY_CLIENT_ID_EXPIRE_HOURS')||' hours');
       $IF $$RAC_LT_11_2  $THEN
           display_output('RAC pre-11.2 Code','TRUE');
       $END
@@ -1140,20 +1201,30 @@ as
    *
    * @param p_level Valid values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING
    * @param p_client_id Optional: If defined, will set the level for the given client identifier. If null will affect global settings
+   * @param p_include_call_stack Optional: Only valid if p_client_id is defined Valid values: TRUE (default), FALSE
+   * @param p_client_id_expire_hours If p_client_id, expire after number of hours. If not defined, will default to system preference PREF_BY_CLIENT_ID_EXPIRE_HOURS: 
    */
   procedure set_level(
     p_level in varchar2 default 'DEBUG',
-    p_client_id in varchar2 default null)
+    p_client_id in varchar2 default null,
+    p_include_call_stack in varchar2 default null,
+    p_client_id_expire_hours in number default null
+  )
   is
     l_level varchar2(20);
     l_ctx   varchar2(2000);
     l_old_level varchar2(20);
+    l_include_call_stack varchar2(255);
+    l_client_id_expire_hours number;
+    l_expiry_date logger_prefs_by_client_id.expiry_date%type;
     pragma autonomous_transaction;
   begin
     l_level := replace(upper(p_level),' ');
-
+    l_include_call_stack := nvl(trim(upper(p_include_call_stack)), 'TRUE');
+    
     assert(l_level in ('OFF','PERMANENT','ERROR','WARNING','INFORMATION','DEBUG','TIMING'),
       '"LEVEL" must be one of the following values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING');
+    assert(l_include_call_stack in ('TRUE', 'FALSE'), 'l_include_call_stack must be TRUE or FALSE');
     
     $IF $$NO_OP $THEN
       raise_application_error (-20000,
@@ -1169,9 +1240,22 @@ as
   
         -- Separate updates/inserts for client_id or global settings
         if p_client_id is not null then
-          -- TODO find old settings if applicable for l_old_level (not high priority)
-          l_old_level := 'TODO';
-          -- TODO merge into logger_TODO
+          l_client_id_expire_hours := nvl(p_client_id_expire_hours, get_pref('PREF_BY_CLIENT_ID_EXPIRE_HOURS'));
+          l_expiry_date := sysdate + l_client_id_expire_hours/24;
+          
+          merge into logger_prefs_by_client_id ci 
+          using (select p_client_id client_id from dual) s
+            on (ci.client_id = s.client_id)
+          when matched then update
+            set logger_level = l_level,
+              include_call_stack = l_include_call_stack,
+              expiry_date = l_expiry_date,
+              created_date = sysdate
+          when not matched then
+            insert(ci.client_id, ci.logger_level, ci.include_call_stack, ci.created_date, ci.expiry_date)
+            values(p_client_id, l_level, l_include_call_stack, sysdate, l_expiry_date)
+          ;
+          
         else
           -- Global settings
           l_old_level := logger.get_pref('LEVEL');
@@ -1179,17 +1263,107 @@ as
         end if;
         
         logger.save_global_context(
-          p_attribute => 'level',
+          p_attribute => gc_ctx_attr_level,
           p_value => logger.convert_level_char_to_num(l_level),
           p_client_id => p_client_id);
+          
+        if p_client_id is not null then
+          logger.save_global_context(
+            p_attribute => gc_ctx_attr_include_call_stack,
+            p_value => l_include_call_stack,
+            p_client_id => p_client_id);
+          
+        else
+          logger.log_information('Log level set to ' || l_level || ' for client_id: ' || p_client_id || ' include_call_stack=' || l_include_call_stack || ' by ' || l_ctx);
+        end if;
         
-        -- TODO Need to integrate the client_id into this message.
-        logger.log_information('Log level changed from '||l_old_level||' to '||l_level||' by '||l_ctx);
       end if;
     $END
     commit;
   end set_level;
+  
+  
+  /**
+   * Unsets a logger level for a given client_id
+   * This will only unset for client specific logger levels
+   * Note: An explicit commit will occur in this procedure
+   *
+   * @author Martin D'Souza
+   * @created 6-Apr-2013
+   *
+   * @param p_client_id Client identifier (case sensitive) to unset logger level in.
+   */
+  procedure unset_client_level(p_client_id in varchar2)
+  as
+  begin
+    $IF $$NO_OP $THEN
+      null;
+  
+    $ELSE
+      assert(p_client_id is not null, 'p_client_id is a required value');
+      
+      -- Remove from client specific table
+      delete from logger_prefs_by_client_id
+      where client_id = p_client_id;
+      
+      -- Remove context values
+      dbms_session.clear_context(
+       namespace => g_context_name,
+       client_id => p_client_id,
+       attribute => gc_ctx_attr_level);
+      
+      dbms_session.clear_context(
+       namespace => g_context_name,
+       client_id => p_client_id,
+       attribute => gc_ctx_attr_include_call_stack);
 
+    $END    
+    
+    commit;
+  end unset_client_level;
+  
+  
+  /**
+   * Unsets client_level that are stale (i.e. past thier expiry date)
+   *
+   * @author Martin D'Souza
+   * @created 7-Apr-2013
+   *
+   * @param p_unset_after_hours If null then preference UNSET_CLIENT_ID_LEVEL_AFTER_HOURS
+   */
+  procedure unset_client_level
+  as
+  begin
+    
+    for x in (
+      select client_id
+      from logger_prefs_by_client_id
+      where sysdate > expiry_date) loop
+      
+      unset_client_level(p_client_id => x.client_id);
+    end loop;
+  end unset_client_level;
+  
+  
+  /**
+   * Unsets all client specific preferences
+   * An implicit commit will occur as unset_client_level makes a commit
+   *
+   * @author Martin D'Souza
+   * @created 7-Apr-2013
+   *
+   */
+  procedure unset_client_level_all
+  as
+  begin
+  
+    for x in (select client_id from logger_prefs_by_client_id) loop
+      unset_client_level(p_client_id => x.client_id);
+    end loop;
+    
+  end unset_client_level_all;
+  
+ 
   procedure sqlplus_format
   is
   begin
@@ -1203,7 +1377,7 @@ as
     dbms_output.put_line('column extra format a100');
 
   end sqlplus_format;
-
+  
 
   -- Handle Parameters
   /**
@@ -1376,3 +1550,4 @@ as
     $END  
   end append_param;
 end logger;
+/

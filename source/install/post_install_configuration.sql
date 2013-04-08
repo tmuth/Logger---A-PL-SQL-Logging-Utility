@@ -7,10 +7,10 @@ end;
 
 -- Only set level if not in DEBUG mode
 declare
-  l_current_level logger_prefs.value%type;
+  l_current_level logger_prefs.pref_value%type;
 begin 
 
-  select value
+  select pref_value
   into l_current_level
   from logger_prefs
   where pref_name = 'LEVEL';
