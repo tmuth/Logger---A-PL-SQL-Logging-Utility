@@ -11,14 +11,28 @@ Logger is used by Oracle developers to instrument their PL/SQL code
 #What is Logger? 
 This is a PL/SQL logging and debugging framework. The goal of logger is to be as simple as possible to install and use. The primary use cases for this utility include:
 
-* Debugging: It's often difficult to track down the source of an error without some form of debugging instrumentation. This is particularly true in multi-tier, stateless architectures such as Application Express.
-* Error Logging: While most experts agree that it's important not to mask errors, it's also nice to have a persistent record of them.
-* Timing: Logger has a very simple timing framework built-in that makes it easy to benchmark sections of code.
-* Instrumentation: Because it's easy to "turn-off" logger globally with virtually no performance impact, it's easy to get in the habit of leaving debug calls in production code. Now, when something does go wrong, you simply flip the switch and logger is enabled making it much quicker to debug errors.
+* **Debugging**: It's often difficult to track down the source of an error without some form of debugging instrumentation. This is particularly true in multi-tier, stateless architectures such as Application Express.
+* **Error Logging**: While most experts agree that it's important not to mask errors, it's also nice to have a persistent record of them.
+* **Timing: Logger** has a very simple timing framework built-in that makes it easy to benchmark sections of code.
+* **Instrumentation**: Because it's easy to "turn-off" logger globally with virtually no performance impact, it's easy to get in the habit of leaving debug calls in production code. Now, when something does go wrong, you simply flip the switch and logger is enabled making it much quicker to debug errors.
 
 [top](#logger---a-pl-sql-logging-utility)
 
 #Installation
+
+##Pervious Installations
+Version 2.0.0 build scripts were completely re-written to make it easier for future development. The new build scripts were build off Logger 1.4.0. As such, **if your current version is before 1.4.0 you need to run the uninstall script for your specific version**. If you're currently at 1.4.0 or above the installation script will automatically update your current version.
+
+```sql
+select pref_value
+from logger_prefs
+where pref_name = 'LOGGER_VERSION';
+```
+
+To uninstall an older version of logger, see the Uninstall (TODO link) instructions. If necessary, you can download the correct version from the releases (TODO link) folder.
+
+TODO Test
+[license]
 
 ##To install into an existing schema:
 1. If possible, connect as a privilidged user and issue the following grants to your "exising_user":
@@ -67,6 +81,7 @@ Parameters can also be passed in as the last (4th) parameter in the log_error pr
 * Added log_params and append_param functions
 
 [top](#logger---a-pl-sql-logging-utility)
+<a name="page-license" />
 #License
 
 Copyright (c) 2013, Tyler D. Muth, tylermuth.wordpress.com 
