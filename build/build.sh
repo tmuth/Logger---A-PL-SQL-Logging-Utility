@@ -120,7 +120,10 @@ md2html ../README.md > $RELEASE_FOLDER/readme.html
 chmod 777 $RELEASE_FOLDER/*.*
 
 #Replace any references for the version number
-sed -i "s/x\.x\.x/$VERSION_NUMBER/g" $RELEASE_FOLDERlogger_install.sql
+sed -i.del "s/x\.x\.x/$VERSION_NUMBER/g" $RELEASE_FOLDER/logger_install.sql
+#need to remove the backup file required for sed call
+rm -rf $RELEASE_FOLDER/*.del 
+
 
 
 #Old windows zip7za a -tzip $/logger_$VERSION_NUMBER.zip ../build/*.sql ../build/*.html
