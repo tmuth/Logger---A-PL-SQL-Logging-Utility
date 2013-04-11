@@ -110,12 +110,16 @@ printf '\n\n' >> $NO_OP
 cp -f ../source/install/create_user.sql $RELEASE_FOLDER
 cp -f ../source/install/drop_logger.sql $RELEASE_FOLDER
 
+#Copy README
+cp -f ../README.md $RELEASE_FOLDER
+
 #sed -i "s/tags\/[0-9]\.[0-9]\.[0-9]\/logger_[0-9]\.[0-9]\.[0-9].zip/tags\/$VERSION_NUMBER\/logger_$VERSION_NUMBER\.zip/g" ../www/index.html
 #cp -f ../www/index.html ../build/readme.html
 #Generate readme.html
 #Using https://github.com/evilstreak/markdown-js to convert Markdown (.md) file to html
 #To install: npm install -g markdown
-md2html ../README.md > $RELEASE_FOLDER/readme.html
+#MD: I've taken this out since it wasn't converting very well
+#md2html ../README.md > $RELEASE_FOLDER/readme.html
 
 chmod 777 $RELEASE_FOLDER/*.*
 
