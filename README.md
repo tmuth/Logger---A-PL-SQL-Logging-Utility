@@ -25,7 +25,7 @@ This is a PL/SQL logging and debugging framework. The goal of logger is to be as
 ##Important Notes
 
 ###Pervious Installations
-Version 2.0.0 build scripts were completely re-written to make it easier for future development. The new build scripts were built off Logger 1.4.0. As such, **if your current version is before 1.4.0 you need to run the uninstall script for your specific version**. If you're currently at 1.4.0 or above the installation script will automatically update your current version.
+Version 2.0.0 build scripts were completely re-written to make it easier for future development. The new build scripts were built off Logger 1.4.0. As such, **if your current version is before 1.4.0 you need to run the uninstall script for your specific version**. If you're currently at 1.4.0 or above the installation script will automatically update your current version. The following query will identify your current version.
 
 ```sql
 select pref_value
@@ -82,15 +82,19 @@ select *
 from logger_logs;
 ```
 
-#Advanced use
+##TODO Main Logger Procs
+TODO highlight each one 
+TODO make note / reference to the various levels (which will be documented later on)
 
-#Parameters
-All logger procedures have three common parameters: *p_text*, *p_scope*, and *p_extra*. Each parameter is described below.
+##Parameters
+The primary logger procedures (TODO link to procs) have three common parameters: *p_text*, *p_scope*, and *p_extra*. Each parameter is described below.
 
-##*p_text*
-You should always include some message. *p_text* maps to the *text* column in *logger_logs*. As such it should not exceed 4000 characters. If you need to store more text you can use the *p_extra* column (TODO link)
+<a name="parameters-p_text"></a>
+###*p_text*
+You should always include some message. *p_text* maps to the *text* column in *logger_logs*. As such it should not exceed 4000 characters. If you need to store more text you can use the [*p_extra*](#parameters-p_extra) parameter.
 
-##*p_scope*
+<a name="parameters-p_scope"></a>
+###*p_scope* (optional *but highly recommend*)
 The idea behind scope is to give some context to the log message, such as the application, package.procedure where it was called. Logger does capture the call stack, as well as module and action which are great for APEX logging as they are app number / page number. However, none of these options gives you a clean, consistent way to group messages. So, the *p_scope* parameter is really nothing special as it simply performs a lower() on the input and stores it in the scope column.
 
 The following example demonstrates how to use *p_scope* when called from an APEX application:
@@ -105,30 +109,39 @@ select id,text,scope from logger_logs where scope like 'apex.my_app.%' order by 
    3 Some text		  apex.my_app.page4.some_process
 ```
 
-For packages the recommend practice is as follows:
+See the [Best Practices](#best-practices) section for scope standards.
+
+<a name="parameters-p_extra"></a>
+###*p_extra* (optional)
+When logging large (over 4000 characters) blocks of text, use the third parameter: *p_extra*. *p_extra* is a clob field and thus isn't restricted to the 4000 character limit.
+
+The following example highlights the p_extra usage:
 
 ```sql
-create or replace package body pkg_example
-as
+exec logger.log('Some text', 'a.scope', 'Large block of text');
 
-	gc_scope_prefix constant VARCHAR2(31) := lower($$PLSQL_UNIT) || '.';
-	
-	procedure demo_proc
-	as
-		l_scope logger_logs.scope%type := gc_scope_prefix || 'demo_proc'; -- Use the function or procedure name
-	begin
-		logger.log('START', l_scope);
-		...
-		-- All calls to logger should pass in the scope
-	 	... 
-		logger.log('END', l_scope);
-	end demo proc;
-...
+select id, text, scope, extra from logger_logs_5_min;
+
+ID   TEXT	    SCOPE	   EXTRA
+---- ---------- ---------- --------------------
+   4 Some text	a.scope    Large block of text
+
 ```
 
+<a name="parameters-p_params"></a>
+###*p_params* (optional)
+
+The parameter field is currently only available for *logger.log_error*. Since most production environments have their logging level set to ERROR (or anther low level) developers need to have an easy way to see the parameters that were passed into a procedure when an error occurs. 
+
+When calling *logger.log_error* it is highly recommended that you leverage this 4th parameter. See (TODO link to log params) for an example.
 
 TODO other items
 
+#Advanced use
+
+##Error Handling
+
+TODO
 
 ##Log Params
 Logger has wrapper functions to quickly and easily log parameters. These parameters will be logged using the DEBUG level (i.e its the same as calling logger.log) except when explicitly used in the log_error procedure. The values are explicitly converted to strings so you don't need to convert them. The parameters will be stored either in the text field or (if they exceed 4000 characters) in the extra column.
@@ -156,12 +169,42 @@ end p_demo_function;
 
 Parameters can also be passed in as the last (4th) parameter in the log_error procedure. This is useful in production instances where the logger level is usually set to ERROR. When an error occurs parameters will be logged in the extra column.
 [top](#logger---a-pl-sql-logging-utility)
+
+<a name="best-practices"></a>
+#TODO Best Practices
+
+##TODO APEX
+TODO provide a procedure template with everything in it
+
+For packages the recommended practice is as follows:
+
+```sql
+create or replace package body pkg_example
+as
+
+	gc_scope_prefix constant VARCHAR2(31) := lower($$PLSQL_UNIT) || '.';
+	
+	procedure demo_proc
+	as
+		l_scope logger_logs.scope%type := gc_scope_prefix || 'demo_proc'; -- Use the function or procedure name
+	begin
+		logger.log('START', l_scope);
+		TODO pameters
+		...
+		-- All calls to logger should pass in the scope
+	 	... 
+		logger.log('END', l_scope);
+	TODO exception
+	end demo proc;
+...
+```
+
 #Change Log
 ##Version 1.5.0
 * Added log_params and append_param functions
 
 [top](#logger---a-pl-sql-logging-utility)
-<a name="page-license" />
+<a name="license"></a>
 #License
 
 Copyright (c) 2013, Tyler D. Muth, tylermuth.wordpress.com 
