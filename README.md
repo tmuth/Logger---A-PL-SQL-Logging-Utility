@@ -1,14 +1,16 @@
 <a name="page-top" />
-Logger---A-PL-SQL-Logging-Utility
+Logger: A PL/SQL Logging Utility
 =================================
 * [What is Logger?](#what-is-logger)
+	* TODO menu
 * [Installation](#installation)
 * [Change log](#change-log)
 * [License](#license)
- 
-Logger is used by Oracle developers to instrument their PL/SQL code
+* TODO autogenerate TOC with http://stackoverflow.com/questions/9721944/automatic-toc-in-github-flavoured-markdown
 
 #What is Logger? 
+Logger is used by Oracle developers to instrument their PL/SQL code.
+
 This is a PL/SQL logging and debugging framework. The goal of logger is to be as simple as possible to install and use. The primary use cases for this utility include:
 
 * **Debugging**: It's often difficult to track down the source of an error without some form of debugging instrumentation. This is particularly true in multi-tier, stateless architectures such as Application Express.
@@ -16,12 +18,14 @@ This is a PL/SQL logging and debugging framework. The goal of logger is to be as
 * **Timing: Logger** has a very simple timing framework built-in that makes it easy to benchmark sections of code.
 * **Instrumentation**: Because it's easy to "turn-off" logger globally with virtually no performance impact, it's easy to get in the habit of leaving debug calls in production code. Now, when something does go wrong, you simply flip the switch and logger is enabled making it much quicker to debug errors.
 
-[top](#logger---a-pl-sql-logging-utility)
+[top](#page-top)
 
 #Installation
 
-##Pervious Installations
-Version 2.0.0 build scripts were completely re-written to make it easier for future development. The new build scripts were build off Logger 1.4.0. As such, **if your current version is before 1.4.0 you need to run the uninstall script for your specific version**. If you're currently at 1.4.0 or above the installation script will automatically update your current version.
+##Important Notes
+
+###Pervious Installations
+Version 2.0.0 build scripts were completely re-written to make it easier for future development. The new build scripts were built off Logger 1.4.0. As such, **if your current version is before 1.4.0 you need to run the uninstall script for your specific version**. If you're currently at 1.4.0 or above the installation script will automatically update your current version.
 
 ```sql
 select pref_value
@@ -29,27 +33,103 @@ from logger_prefs
 where pref_name = 'LOGGER_VERSION';
 ```
 
-To uninstall an older version of logger, see the Uninstall (TODO link) instructions. If necessary, you can download the correct version from the releases (TODO link) folder.
+To uninstall an older version of logger, see the Uninstall (TODO link) instructions. If necessary, you can download the correct version from the [releases](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/tree/master/releases) folder.
 
-TODO Test
-[license]
+###Install Through APEX
+Logger is no longer supported from a web-only installation if the schema was provisioned by APEX. Essentially the APEX team removed the "create any context" privilege when provisioning a new workspace, likely for security reasons. I agree with their choice, it unfortunately impacts logger. 
+
+##Install into a new schema
+
+1. Using sql*plus or SQL Developer, connect to the database as system or a user with the DBA role.
+
+1. Run:
+	```sql
+	@create_user.sql
+```
+
+1. Enter the username, tablespace, temporary tablespace and password for the new schema.
+
+1. Connect to the database as the newly created user.
+
+1. Follow the steps to install into an existing schema (below)  
 
 ##To install into an existing schema:
-1. If possible, connect as a privilidged user and issue the following grants to your "exising_user":
+1. If possible, connect as a privileged user and issue the following grants to your "exising_user":
 
-```sql
-grant connect,create view, create job, create table, create sequence,
+	```sql
+	grant connect,create view, create job, create table, create sequence,
 create trigger, create procedure, create any context to existing_user
 /
 ```
-2. Install logger
 
-```sql
+1. Run:
+	```sql
 @logger_install.sql
 ```
-[top](#logger---a-pl-sql-logging-utility)
+
+1. Once installed, logger is automatically set to **DEBUG** level. To configure the system logger level and other settings go to TODO link.
+
+[top](#page-top)
+
+#How to use Logger
+
+The following example is the most basic us of Logger. This use-case will never change for this project as one of the goals is to eliminate any learning curve for a debugging utility.
+
+```sql
+exec logger.log('hello world');
+
+select *
+from logger_logs;
+```
+
 #Advanced use
+
+#Parameters
+All logger procedures have three common parameters: *p_text*, *p_scope*, and *p_extra*. Each parameter is described below.
+
+##*p_text*
+You should always include some message. *p_text* maps to the *text* column in *logger_logs*. As such it should not exceed 4000 characters. If you need to store more text you can use the *p_extra* column (TODO link)
+
+##*p_scope*
+The idea behind scope is to give some context to the log message, such as the application, package.procedure where it was called. Logger does capture the call stack, as well as module and action which are great for APEX logging as they are app number / page number. However, none of these options gives you a clean, consistent way to group messages. So, the *p_scope* parameter is really nothing special as it simply performs a lower() on the input and stores it in the scope column.
+
+The following example demonstrates how to use *p_scope* when called from an APEX application:
+
+```sql
+exec logger.log('Some text', 'apex.my_app.page4.some_process');
+
+select id,text,scope from logger_logs where scope like 'apex.my_app.%' order by id;
+
+ ID  TEXT		          SCOPE
+---- -------------------- ----------------------------------------
+   3 Some text		  apex.my_app.page4.some_process
+```
+
+For packages the recommend practice is as follows:
+
+```sql
+create or replace package body pkg_example
+as
+
+	gc_scope_prefix constant VARCHAR2(31) := lower($$PLSQL_UNIT) || '.';
+	
+	procedure demo_proc
+	as
+		l_scope logger_logs.scope%type := gc_scope_prefix || 'demo_proc'; -- Use the function or procedure name
+	begin
+		logger.log('START', l_scope);
+		...
+		-- All calls to logger should pass in the scope
+	 	... 
+		logger.log('END', l_scope);
+	end demo proc;
+...
+```
+
+
 TODO other items
+
+
 ##Log Params
 Logger has wrapper functions to quickly and easily log parameters. These parameters will be logged using the DEBUG level (i.e its the same as calling logger.log) except when explicitly used in the log_error procedure. The values are explicitly converted to strings so you don't need to convert them. The parameters will be stored either in the text field or (if they exceed 4000 characters) in the extra column.
 
