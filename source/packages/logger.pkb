@@ -1156,7 +1156,7 @@ as
 			l_output_format := p_output_format;
 		end if;
 
-    display_output('Project Home Page','https://logger.samplecode.oracle.com/');
+    display_output('Project Home Page','https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/');
 
     $IF $$NO_OP $THEN
       display_output('Debug Level','NO-OP, Logger completely disabled.');
