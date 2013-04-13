@@ -1,14 +1,13 @@
 <a name="page-top" />
 Logger: A PL/SQL Logging Utility
 =================================
-* [What is Logger?](#what-is-logger)
-	* TODO menu
-* [Installation](#installation)
-* [Change log](#change-log)
-* [License](#license)
-* TODO autogenerate TOC with http://stackoverflow.com/questions/9721944/automatic-toc-in-github-flavoured-markdown
-
-
+- [What is Logger?](#what-is-logger)
+- [Installation](#installation)
+- [How to use Logger](#how-to-use-logger)
+- [Advanced use](#advanced-use)
+- [Best Practices](#best-practices)
+- [Change Log](#change-log)
+- [License](#license)
 
 
 
@@ -23,10 +22,7 @@ Logger is a PL/SQL logging and debugging framework. The goal of logger is to be 
 
 
 
-
-
 [top](#page-top)
-
 #Installation
 
 If you're new to Logger it's recommended you simply [install into an existing schema](install-into-existing-schema) on a development environment to get up and running as quickly as possible. You are encouraged to review the rest of the installation sections after you're more familiar with Logger. Once installed go to [How to use Logger](#how-to-use-logger) to get a quick tutorial. Once you are comfortable using Logger it is recommended that you read the [Best Practices](#best-practices) section
@@ -362,6 +358,7 @@ ID   TEXT	    SCOPE	   EXTRA
 The parameter field is currently only available for *logger.log_error*. Since most production environments have their logging level set to ERROR (or anther low level) developers need to have an easy way to see the parameters that were passed into a procedure when an error occurs. 
 
 When calling *logger.log_error* it is highly recommended that you leverage this 4th parameter. See [Log Params](#config-logger-levels) section for an example.
+
 
 
 [top](#page-top)
