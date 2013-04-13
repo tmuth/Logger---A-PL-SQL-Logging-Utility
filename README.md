@@ -168,7 +168,7 @@ order by id desc;
 
 exec logger.set_level ('ERROR');
 
-exec logger.log('Session-2: this should NOT show up');
+exec logger.log('Session-1: this should NOT show up');
 
 -- The previous line does not get logged since the logger level is set to ERROR and it made a .log call
 
@@ -179,7 +179,7 @@ exec dbms_session.set_identifier('my_identifier');
 -- This sets the logger level for current identifier
 exec logger.set_level('DEBUG', sys_context('userenv','client_identifier'));
 
-exec logger.log('Session-1: this should show up');
+exec logger.log('Session-2: this should show up');
 
 select id, logger_level, text, client_identifier, call_stack
 from logger_logs_5_min
