@@ -149,10 +149,82 @@ exec logger.set_level('ERROR');
 ```
 If you never want logger to run in an environment you can install the [NO-OP](#intsall-no-op) version.
 
-###Client specific configuration
-TODO Pref by client
 
 
+###Client Specific Configuration
+Prior to version 2.0.0 Logger only supported one logger level. The primary goal of this approach was to enable Logger at Debug level for development environments, then change it to Error levels in production environments so the logs did not slow down the system. Over time developers start to find that in some situations they needed to see what a particular user / session was doing in production. Their only option was to enable Logger for the entire system which could potentially slow everyone down.
+
+Starting in version 2.0.0 you can now specify the logger level along with call stack setting by specifying the *client_identifier*. If not explicitly unset, client specific configurations will expire after a set period of time. The following example highlights how this works:
+
+```sql
+-- In Oracle Session-1
+exec logger.set_level('DEBUG');
+
+exec logger.log('Session-1: this should show up');
+
+  ID LOGGER_LEVEL TEXT				      			  CLIENT_IDENTIFIER CALL_STACK
+---- ------------ ----------------------------------- ----------------- ----------------------------
+  31	       16 Session-1: this should show up			  			object      line  object
+
+exec logger.set_level ('ERROR');
+
+exec logger.log('Session-1: this should NOT show up');
+
+-- The previous line does not get logged since the logger level is set to ERROR and it made a .log call
+
+
+-- In Oracle Session-2 (i.e. a different session)
+exec dbms_session.set_identifier('my_identifier');
+
+-- This sets the logger level for current identifier
+exec logger.set_level('DEBUG', sys_context('userenv','client_identifier'));
+
+exec logger.log('Session-1: this should show up');
+
+
+  ID LOGGER_LEVEL TEXT				      			  CLIENT_IDENTIFIER CALL_STACK
+---- ------------ ----------------------------------- ----------------- ----------------------------
+  32	       16 Session-2: this should show up      my_identifier	  	object      line  object
+  31	       16 Session-1: this should show up			  			object      line  object
+  
+-- Notice how the *CLIENT_IDENTIFIER* field also contains the current *client_identifer*
+```
+
+The following is the header for the *set_level* procedure:
+  
+```sql
+procedure set_level(
+    p_level in varchar2 default 'DEBUG',
+    p_client_id in varchar2 default null, -- You must specify this to enable client_specific logging
+    p_include_call_stack in varchar2 default null, -- TRUE or FALSE. Default: TRUE
+    p_client_id_expire_hours in number default null -- Number of hours after which the client_id specific logging will be expired. Default is stored in logger_prefs: PREF_BY_CLIENT_ID_EXPIRE_HOURS
+)
+```
+
+####APEX CLIENT_ID
+In APEX the *client_identifier* is 
+```sql
+:APP_USER || ':' || :APP_SESSION 
+```
+
+####Unset Client Specific Logging
+They're a few options to unset client specific logging:
+
+Unset by specific *client_id*:
+```sql
+exec logger.unset_client_level('my_client_id');
+```
+
+Unset all expired *client_id*s. Note this run automatically each hour by the *LOGGER\_UNSET\_PREFS\_BY\_CLIENT* job.
+
+```sql
+exec logger.unset_client_level;
+```
+
+Unset all client configurations (regardless of expiry time):
+```sql
+exec logger.unset_client_level_all;
+```
 
 ###Status
 To view the status/configuration of the Logger:
@@ -175,9 +247,31 @@ Pref by client_id expire : 12 hours
 PL/SQL procedure successfully completed.
 ```
 
+###Other Options
+
+Once you perform the following described steps for the Flashback or APEX option, simply run the *logger_configure* procedure, then run *logger.status* to check validate your changes.
+
+```sql
+exec logger_configure;
+exec logger.status;
+```
+
+####Flashback
+To enable this option, grant execute on *dbms_flashback* to the user that owns the logger packages. Every insert into *logger_logs* will include the SCN (System Commit Number). This allows you to flashback a session to the time when the error occurred to help debug it or even undo any data corruption. As SYS from sql*plus: 
+
+```sql
+grant execute on dbms_flashback to logger;
+```
+
+####APEX
+This option allows you to call logger.log_apex_items which grabs the names and values of all APEX items from the current session and stores them in the logger_logs_apex_items table. This is extremely useful in debugging APEX issues. This option is enabled automatically by logger_configure if APEX is installed in the database.
 
 
+##Maintenance
 
+By default, the DBMS\_SCHEDULER job "LOGGER\_PURGE\_JOB" runs every night at 1:00am and deletes any logs older than 7 days that are of error level *g_debug* or higher which includes *g_debug* and *g_timing*. This means logs with any lower level such as *g_error* or *g_permanent* will never be purged. You can also manually purge all logs using *logger.purge_all*, but this will not delete logs of error level *g_permanent*.
+
+Starting in 2.0.0 a new job was *LOGGER\_UNSET\_PREFS\_BY\_CLIENT* introduced to remove [client specific logging](#client-specific-configuration). By default this job is run every hour on the hour. 
 
 [top](#page-top)
 
@@ -268,10 +362,6 @@ ID   TEXT	    SCOPE	   EXTRA
 The parameter field is currently only available for *logger.log_error*. Since most production environments have their logging level set to ERROR (or anther low level) developers need to have an easy way to see the parameters that were passed into a procedure when an error occurs. 
 
 When calling *logger.log_error* it is highly recommended that you leverage this 4th parameter. See [Log Params](#config-logger-levels) section for an example.
-
-TODO other items
-
-
 
 
 [top](#page-top)
@@ -523,7 +613,7 @@ as
 begin
   logger.append_param(l_params, 'p_empno', p_empno); -- Parameter name and value just stored in PL/SQL array and not logged yet
   logger.append_param(l_params, 'p_ename', p_ename); -- Parameter name and value just stored in PL/SQL array and not logged yet
-  logger.log_params(l_params, l_scope); -- All parameters are logged at this point
+  logger.log_params(l_params, l_scope); -- All parameters are logged at this point	
   -- ...
 exception
   when others then
@@ -537,10 +627,9 @@ Parameters can also be passed in as the last (4th) parameter in the *logger.log_
 [top](#page-top)
 
 <a name="best-practices"></a>
-#TODO Best Practices
+#Best Practices
 
-##TODO APEX
-TODO provide a procedure template with everything in it
+##PL/SQL Procedure / Function
 
 For packages the recommended practice is as follows:
 
@@ -550,27 +639,33 @@ as
 
 	gc_scope_prefix constant VARCHAR2(31) := lower($$PLSQL_UNIT) || '.';
 	
-	procedure demo_proc
+	procedure demo_proc(
+		p_param1 in varchar2)
 	as
 		l_scope logger_logs.scope%type := gc_scope_prefix || 'demo_proc'; -- Use the function or procedure name
+		l_params logger.tab_param;
 	begin
 		logger.log('START', l_scope);
-		TODO pameters
+		logger.append_param(l_params, 'p_param1', p_param1);
+		logger.log_params(l_params, l_scope);
+		
 		...
 		-- All calls to logger should pass in the scope
 	 	... 
+	 	
 		logger.log('END', l_scope);
-	TODO exception
+	exception
+  		when others then
+		    logger.log_error('Unhandled Exception', l_scope, null, l_params);
 	end demo proc;
 ...
 ```
 
 #Change Log
 ##[Version 2.0.0](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/tree/master/releases/2.0.0)
-TODO Links for each section
-* Moved to GitHub an restructured / updated documentation
+* Moved to GitHub and restructured / updated documentation
 * Added [log_params](#log-params) and [append_params](#log-params) functions
-* Client specific level setting (to enable logging based on client_id)
+* [Client specific level](#client-specific-configuration) setting (to enable logging based on client_id)
 * New build script which will allow for future versions of logger to be updated. This was built off a 1.4.0 release.
 * TODO Tyler: Add in your new features here
 
@@ -596,7 +691,10 @@ TODO Links for each section
 * Fixed set_level, purge and purge_all so they are now autonomous transactions (thanks Tony).
 
 [top](#page-top)
-<a name="license"></a>
+
+
+
+
 #License
 
 Copyright (c) 2013, Tyler D. Muth, tylermuth.wordpress.com 
