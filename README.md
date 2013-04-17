@@ -10,7 +10,7 @@ Logger: A PL/SQL Logging Utility
 - [License](#license)
 
 #2.0.0 Alpha/Beta Notes
-Please submit any issues for the alpha/beta release of Logger [here](https://docs.google.com/forms/d/1HRCYjTi3wkpjt1_mJepA9MgYxGHBtiSg3Dv1G14he_c/viewform).
+**Please submit any issues for the alpha/beta release of Logger [here](https://docs.google.com/forms/d/1HRCYjTi3wkpjt1_mJepA9MgYxGHBtiSg3Dv1G14he_c/viewform).**
 
 #What is Logger? 
 
@@ -161,7 +161,7 @@ exec logger.log('Session-1: this should show up');
 
 select id, logger_level, text, client_identifier, call_stack
 from logger_logs_5_min
-order by id desc;
+order by id;
 
   ID LOGGER_LEVEL TEXT				      			  CLIENT_IDENTIFIER CALL_STACK
 ---- ------------ ----------------------------------- ----------------- ----------------------------
@@ -184,12 +184,12 @@ exec logger.log('Session-2: this should show up');
 
 select id, logger_level, text, client_identifier, call_stack
 from logger_logs_5_min
-order by id desc;
+order by id;
 
   ID LOGGER_LEVEL TEXT				      			  CLIENT_IDENTIFIER CALL_STACK
 ---- ------------ ----------------------------------- ----------------- ----------------------------
-  32	       16 Session-2: this should show up      my_identifier	  	object      line  object
-  31	       16 Session-1: this should show up			  			object      line  object
+  31	       16 Session-1: this should show up      	  				object      line  object
+  32	       16 Session-2: this should show up	  my_identifier  	object      line  object
   
 -- Notice how the CLIENT_IDENTIFIER field also contains the current client_identifer
 ```
