@@ -16,7 +16,7 @@ begin
     execute immediate q'!
 create table logger_prefs_by_client_id(
   client_id varchar2(64) not null,
-  logger_level varchar2(10) not null,
+  logger_level varchar2(20) not null,
   include_call_stack varchar2(5) not null,
   created_date date default sysdate not null,
   expiry_date date not null,

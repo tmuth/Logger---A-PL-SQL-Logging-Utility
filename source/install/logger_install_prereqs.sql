@@ -1,8 +1,8 @@
-#This file contains the start and pre installation requirements for Logger
+-- This file contains the start and pre installation requirements for Logger
 whenever sqlerror exit
 set serveroutput on
 
-#SESSION PRIVILEGES
+-- SESSION PRIVILEGES
 declare
     type t_sess_privs is table of pls_integer index by varchar2(50);
     l_sess_privs t_sess_privs;
