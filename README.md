@@ -230,6 +230,18 @@ Unset all client configurations (regardless of expiry time):
 exec logger.unset_client_level_all;
 ```
 
+####View All Client Specific Configurations
+The following query shows all the current client specific log configurations:
+
+```sql
+select *
+from logger_prefs_by_client_id;
+
+CLIENT_ID	    LOGGER_LEVEL  INCLUDE_CALL_STACK CREATED_DATE	  EXPIRY_DATE
+------------------- ------------- ------------------ -------------------- --------------------
+logger_demo_session ERROR	  TRUE		     24-APR-2013 02:48:13 24-APR-2013 14:48:13
+```
+
 ###Status
 To view the status/configuration of the Logger:
 
@@ -250,6 +262,8 @@ Pref by client_id expire : 12 hours
 
 PL/SQL procedure successfully completed.
 ```
+
+TODO: If you want to see client specific status settings query: logger_prefs_by_client_id. TODO include a demo
 
 ###Other Options
 

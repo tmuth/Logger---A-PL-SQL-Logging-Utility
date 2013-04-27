@@ -1127,6 +1127,7 @@ as
 		dummy			varchar2(255);
 		l_output_format	varchar2(30);
     l_version       varchar2(20);
+    l_client_identifier logger_prefs_by_client_id.client_id%type;
 
 		procedure display_output(
 			p_name	in varchar2,
@@ -1134,7 +1135,7 @@ as
 		is
 		begin
 			if l_output_format = 'SQL-DEVELOPER' then
-				dbms_output.put_line('<pre>'||rpad(p_name,20)||': <strong>'||p_value||'</strong></pre>');
+				dbms_output.put_line('<pre>'||rpad(p_name,25)||': <strong>'||p_value||'</strong></pre>');
 			elsif l_output_format = 'HTTP' then
 				htp.p('<br />'||p_name||': <strong>'||p_value||'</strong>');
 			else
@@ -1186,8 +1187,28 @@ as
       display_output('Purge Older Than',get_pref('PURGE_AFTER_DAYS')||' days');
       display_output('Pref by client_id expire hours',get_pref('PREF_BY_CLIENT_ID_EXPIRE_HOURS')||' hours');
       $IF $$RAC_LT_11_2  $THEN
-          display_output('RAC pre-11.2 Code','TRUE');
+        display_output('RAC pre-11.2 Code','TRUE');
       $END
+      
+      
+      l_client_identifier := sys_context('userenv','client_identifier');
+      if l_client_identifier is not null then
+        -- Since the client_identifier exists, try to see if there exists a record session sepecfic logging level
+        -- Note: this query should only return 0..1 rows
+        for x in (
+          select logger_level, include_call_stack, to_char(expiry_date, 'DD-MON-YYYY HH24:MI:SS') expiry_date
+          from logger_prefs_by_client_id
+          where client_id = l_client_identifier) loop
+          
+          display_output('Client Identifier', l_client_identifier);
+          display_output('Client - Debug Level', x.logger_level);
+          display_output('Client - Call Stack', x.include_call_stack);
+          display_output('Client - Expiry Date', x.expiry_date);
+        end loop;
+      end if; -- client_identifier exists
+      
+      display_output('For all client info see', 'logger_prefs_by_client_id');
+      
     $END
 	end status;
 
