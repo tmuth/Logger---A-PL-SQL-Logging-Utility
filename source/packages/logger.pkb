@@ -1278,7 +1278,7 @@ as
    *
    * @param p_level Valid values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING
    * @param p_client_id Optional: If defined, will set the level for the given client identifier. If null will affect global settings
-   * @param p_include_call_stack Optional: Only valid if p_client_id is defined Valid values: TRUE (default), FALSE
+   * @param p_include_call_stack Optional: Only valid if p_client_id is defined Valid values: TRUE, FALSE. If not set will use the default system pref in logger_prefs.
    * @param p_client_id_expire_hours If p_client_id, expire after number of hours. If not defined, will default to system preference PREF_BY_CLIENT_ID_EXPIRE_HOURS: 
    */
   procedure set_level(
@@ -1297,7 +1297,7 @@ as
     pragma autonomous_transaction;
   begin
     l_level := replace(upper(p_level),' ');
-    l_include_call_stack := nvl(trim(upper(p_include_call_stack)), 'TRUE');
+    l_include_call_stack := nvl(trim(upper(p_include_call_stack)), get_pref('INCLUDE_CALL_STACK'));
     
     assert(l_level in ('OFF','PERMANENT','ERROR','WARNING','INFORMATION','DEBUG','TIMING'),
       '"LEVEL" must be one of the following values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING');

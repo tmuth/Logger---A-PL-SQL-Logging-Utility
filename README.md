@@ -378,7 +378,7 @@ ID   TEXT	    SCOPE	   EXTRA
 <a name="parameters-p_params"></a>
 ###*p_params* (optional)
 
-The p_params parameter is for storing the parameters object. The information from the parameters array will be appended to the *extra* column. See [Log Params](#config-logger-levels) section for an example.
+The p_params parameter is for storing the parameters object. The information from the parameters array will be appended to the *extra* column. See [Log Parameters](#log-parameters) section for an example.
 
 When calling *logger.log_error* it is highly recommended that you leverage this 4th parameter. 
 
