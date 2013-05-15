@@ -666,7 +666,7 @@ as
 		l_params logger.tab_param;
 	begin
 		logger.append_param(l_params, 'p_param1', p_param1);
-		logger.log('START', l_scope, null, l_paras);
+		logger.log('START', l_scope, null, l_params);
 		
 		...
 		-- All calls to logger should pass in the scope
