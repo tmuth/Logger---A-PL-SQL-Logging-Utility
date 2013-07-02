@@ -1,7 +1,117 @@
+-- This file installs a NO-OP version of the logger package that has all of the same procedures and functions,
+ -- but does not actually write to any tables. Additionally, it has no other object dependencies.
+-- You can review the documentation at https://logger.samplecode.oracle.com/ for more information.
+
+create or replace package logger
+authid definer
+as
+	g_logger_version    constant varchar2(10) := '1.2.0';
+    
+    g_permanent		    constant number := 1;
+	g_error 		    constant number := 2;
+	g_warning 		    constant number := 4;
+	g_information	    constant number := 8;
+    g_debug     	    constant number := 16;
+	g_timing     	    constant number := 32;
+    g_sys_context 	    constant number := 64;
+    g_apex 	            constant number := 128;
+    
+    procedure null_global_contexts;
+       
+    function convert_level_char_to_num(
+        p_level in varchar2)
+    return number;
+    
+    function date_text_format (p_date in date)
+        return varchar2;
+	
+	function get_character_codes(
+		p_string 				in varchar2,
+		p_show_common_codes 	in boolean default true)
+	return varchar2;
+    
+    procedure log_error(
+		p_text          in varchar2 default null,
+        p_scope         in varchar2 default null,
+        p_extra         in clob default null);
+        
+    procedure log_permanent(p_text    in varchar2,
+                            p_scope   in varchar2 default null,
+                            p_extra   in clob default null);
+                            
+    procedure log_warning(p_text    in varchar2,
+                          p_scope   in varchar2 default null,
+                          p_extra   in clob default null);
+                          
+    procedure log_information(p_text    in varchar2,
+                              p_scope   in varchar2 default null,
+                              p_extra   in clob default null);
+                              
+    procedure log(p_text    in varchar2,
+                  p_scope   in varchar2 default null,
+                  p_extra   in clob default null);
+    
+    function get_cgi_env(
+			p_show_null		in boolean default false)
+	return clob;
+    
+    procedure log_userenv(
+        p_detail_level  in varchar2 default 'USER',-- ALL, NLS, USER, INSTANCE,
+		p_show_null 	in boolean default false,
+        p_scope         in varchar2 default null);
+        
+    procedure log_cgi_env(
+		p_show_null 	in boolean default false,
+        p_scope         in varchar2 default null);
+    
+	procedure log_character_codes(
+		p_text					in varchar2,
+        p_scope					in varchar2 default null,
+		p_show_common_codes 	in boolean default true);
+		
+    procedure log_apex_items(
+		p_text		in varchar2 default 'Log APEX Items',
+        p_scope		in varchar2 default null);
+		
+	procedure time_start(
+		p_unit				in varchar2);
+		
+	procedure time_stop(
+		p_unit				in varchar2);
+        
+    procedure time_reset;
+        
+  
+	function get_pref(
+		p_pref_name			in	varchar2)
+	return varchar2
+	$IF not dbms_db_version.ver_le_10_2 $THEN
+		result_cache
+	$END
+	;
+	
+	procedure purge(
+		p_purge_after_days	in varchar2	default null,
+		p_purge_min_level	in varchar2	default null);
+	
+	procedure purge_all;
+	
+	procedure status(
+		p_output_format	in varchar2 default null); -- SQL-DEVELOPER | HTML | DBMS_OUPUT
+    
+    procedure sqlplus_format;
+        
+    -- Valid values for p_level are:
+    -- OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING
+    procedure set_level(p_level in varchar2 default 'DEBUG');
+end logger;
+/
+show errors
+
 create or replace
 package body logger
 as
-g_log_id    	number;
+g_log_id    number;
 -- Definitions of conditional compilation variables:
 -- $$NO_OP              : When true, completely disables all logger DML.  Also used to
 --                      : generate the logger_no_op.sql code path
@@ -24,7 +134,7 @@ l_protect_admin_procs	varchar2(50)	:= get_pref('PROTECT_ADMIN_PROCS');
 l_return                boolean default false;
 begin
 if get_pref('PROTECT_ADMIN_PROCS') = 'TRUE' then
-if get_pref('INSTALL_SCHEMA') = sys_context('USERENV','SESSION_USER') then
+if get_pref('INSTALL_SCHEMA') = sys_context('USERENV','CURRENT_SCHEMA') then
 l_return := true;
 else
 l_return := false;
@@ -93,39 +203,29 @@ l_call_stack_pref   varchar2(50);
 begin
 return false;
 end include_call_stack;
-function date_text_format_base (
-p_date_start in date,
-p_date_stop  in date)
+function date_text_format (p_date in date)
 return varchar2
 as
 x	varchar2(20);
 begin
 x := 	case
-when p_date_stop-p_date_start < 1/1440
-then round(24*60*60*(p_date_stop-p_date_start)) || ' seconds'
-when p_date_stop-p_date_start < 1/24
-then round(24*60*(p_date_stop-p_date_start)) || ' minutes'
-when p_date_stop-p_date_start < 1
-then round(24*(p_date_stop-p_date_start)) || ' hours'
-when p_date_stop-p_date_start < 14
-then trunc(p_date_stop-p_date_start) || ' days'
-when p_date_stop-p_date_start < 60
-then trunc((p_date_stop-p_date_start)/7) || ' weeks'
-when p_date_stop-p_date_start < 365
-then round(months_between(p_date_stop,p_date_start)) || ' months'
-else round(months_between(p_date_stop,p_date_start)/12,1) || ' years'
+when sysdate-p_date < 1/1440
+then round(24*60*60*(sysdate-p_date)) || ' seconds'
+when sysdate-p_date < 1/24
+then round(24*60*(sysdate-p_date)) || ' minutes'
+when sysdate-p_date < 1
+then round(24*(sysdate-p_date)) || ' hours'
+when sysdate-p_date < 14
+then trunc(sysdate-p_date) || ' days'
+when sysdate-p_date < 60
+then trunc((sysdate-p_date)/7) || ' weeks'
+when sysdate-p_date < 365
+then round(months_between(sysdate,p_date)) || ' months'
+else round(months_between(sysdate,p_date)/12,1) || ' years'
 end;
 x:= regexp_replace(x,'(^1 [[:alnum:]]{4,10})s','\1');
 x:= x || ' ago';
 return substr(x,1,20);
-end date_text_format_base;
-function date_text_format (p_date in date)
-return varchar2
-as
-begin
-return date_text_format_base(
-p_date_start => p_date   ,
-p_date_stop  => sysdate);
 end date_text_format;
 	function get_character_codes(
 		p_string 				in varchar2,
@@ -421,9 +521,7 @@ end time_reset;
 	function get_pref(
 		p_pref_name		in	varchar2)
 		return varchar2
-		
 			result_cache
-		
 	is
 	begin
 null;
@@ -432,7 +530,6 @@ null;
 		p_purge_after_days	in varchar2	default null,
 		p_purge_min_level	in varchar2	default null)
 	is
-		
 pragma autonomous_transaction;
 	begin
 null;
@@ -515,3 +612,17 @@ dbms_output.put_line('column extra format a100');
 end sqlplus_format;
 end logger;
 /
+
+
+prompt
+prompt *************************************************
+prompt Now executing LOGGER.STATUS...
+prompt 
+begin 
+	logger.status; 
+end;
+/
+
+prompt *************************************************
+
+

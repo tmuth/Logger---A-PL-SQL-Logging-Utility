@@ -74,22 +74,26 @@ as
   procedure log_permanent(
     p_text    in varchar2,
     p_scope   in varchar2 default null,
-    p_extra   in clob default null);
+    p_extra   in clob default null,
+    p_params  in tab_param default logger.gc_empty_tab_param);
 
   procedure log_warning(
     p_text    in varchar2,
     p_scope   in varchar2 default null,
-    p_extra   in clob default null);
+    p_extra   in clob default null,
+    p_params  in tab_param default logger.gc_empty_tab_param);
 
   procedure log_information(
     p_text    in varchar2,
     p_scope   in varchar2 default null,
-    p_extra   in clob default null);
+    p_extra   in clob default null,
+    p_params  in tab_param default logger.gc_empty_tab_param);
 
   procedure log(
     p_text    in varchar2,
     p_scope   in varchar2 default null,
-    p_extra   in clob default null);
+    p_extra   in clob default null,
+    p_params  in tab_param default logger.gc_empty_tab_param);
 
   function get_cgi_env(
     p_show_null		in boolean default false)
@@ -156,14 +160,18 @@ as
 
   procedure sqlplus_format;
 
-  -- Valid values for p_level are:
-  -- OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING
-  procedure set_level(p_level in varchar2 default 'DEBUG');
+  procedure set_level(
+    p_level in varchar2 default 'DEBUG',
+    p_client_id in varchar2 default null,
+    p_include_call_stack in varchar2 default null,
+    p_client_id_expire_hours in number default null
+ );
+    
+  procedure unset_client_level(p_client_id in varchar2);
   
+  procedure unset_client_level;
   
-  procedure log_params(
-    p_params in logger.tab_param,
-    p_scope in logger_logs.scope%type);
+  procedure unset_client_level_all;
   
   procedure append_param(
     p_params in out nocopy logger.tab_param,
@@ -200,3 +208,4 @@ as
     p_name in varchar2,
     p_val in boolean);
 end logger;
+/
