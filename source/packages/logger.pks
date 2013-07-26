@@ -7,6 +7,9 @@ as
   -- and contributors to the project at 
   -- https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility
   -- All rights reserved.
+  --
+  -- Project Contributors
+  --  - Martin Giffy D'Souza: http://www.talkapex.com
   -- 
   -- Redistribution and use in source and binary forms, with or without
   -- modification, are permitted provided that the following conditions are met:
@@ -36,10 +39,9 @@ as
     val varchar2(4000));
   
   type tab_param is table of rec_param index by binary_integer;
-  gc_empty_tab_param tab_param;
   
   -- VARIABLES
-	g_logger_version    constant varchar2(10) := '1.4.0';
+	g_logger_version    constant varchar2(10) := '$VERSION_NUMBER';
 	g_context_name 		constant varchar2(35) := substr(sys_context('USERENV','CURRENT_SCHEMA'),1,23)||'_LOGCTX';
 
   g_permanent		    constant number := 1;
@@ -51,11 +53,26 @@ as
   g_sys_context 	    constant number := 64;
   g_apex 	            constant number := 128;
 
+  gc_empty_tab_param tab_param;
+
+
+  -- PROCEDURES and FUNCTIONS
+  
   procedure null_global_contexts;
 
   function convert_level_char_to_num(
     p_level in varchar2)
     return number;
+
+  function ok_to_log(p_level  in  number)
+    return boolean
+    $IF $$RAC_LT_11_2 $THEN
+      $IF not dbms_db_version.ver_le_10_2 $THEN
+        $IF $$NO_OP is null or NOT $$NO_OP $THEN
+          result_cache relies_on (logger_prefs, logger_prefs_by_client_id)
+        $END
+      $END
+    $END;
 
   function date_text_format (p_date in date)
     return varchar2;

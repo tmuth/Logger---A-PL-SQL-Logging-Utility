@@ -38,7 +38,7 @@ as
   
   gc_ctx_attr_level varchar2(5) := 'level';
   gc_ctx_attr_include_call_stack varchar2(18) := 'include_call_stack';
-  
+
   
   
   -- PRIVATE
@@ -437,6 +437,23 @@ as
   end get_debug_info;
 
 
+  /**
+   * Main procedure that will store log data into logger_logs table
+   *
+   * @author Tyler Muth
+   * @created ???
+   * 
+   * Modifications
+   *  - 2.1.0: If text is > 4000 characters, it will be moved to the EXTRA column
+   *
+   * @param p_text
+   * @param p_log_level
+   * @param p_scope
+   * @param p_extra
+   * @param p_callstack
+   * @param p_params
+   *
+   */
   procedure log_internal(
     p_text				in varchar2,
     p_log_level			in number,
@@ -447,7 +464,7 @@ as
   is
     l_proc_name     	varchar2(100);
     l_lineno        	varchar2(100);
-    l_text 				varchar2(4000);
+    l_text 				varchar2(32767);
     l_callstack         varchar2(3000);
     l_extra logger_logs.extra%type;
   begin
@@ -468,6 +485,19 @@ as
       end if;
       
       l_extra := set_extra_with_params(p_extra => p_extra, p_params => p_params);
+
+      -- TODO should we do a check to see if we can find length of logger.text field as 
+      -- If text is too big for the text column, move it to the CLOB (extra) column
+      if length(l_text) > 4000 then
+        if l_extra is not null then
+          -- TODO find out quickest to append to clob
+          l_extra := l_extra || gc_line_feed || gc_line_feed;
+          l_extra := l_extra || '*** Content moved to EXTRA column ***' || gc_line_feed;
+        end if; -- l_extra is not null
+        l_extra := l_extra || l_text;
+
+        l_text := 'Text moved to EXTRA column';
+      end if; -- length(l_text)
 
       insert into logger_logs (logger_level,text,call_stack,unit_name,line_no,scope,extra)
       values (p_log_level,l_text,l_callstack,l_proc_name,l_lineno,lower(p_scope), l_extra) returning id into g_log_id ;
@@ -1279,7 +1309,7 @@ as
    * @param p_level Valid values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING
    * @param p_client_id Optional: If defined, will set the level for the given client identifier. If null will affect global settings
    * @param p_include_call_stack Optional: Only valid if p_client_id is defined Valid values: TRUE, FALSE. If not set will use the default system pref in logger_prefs.
-   * @param p_client_id_expire_hours If p_client_id, expire after number of hours. If not defined, will default to system preference PREF_BY_CLIENT_ID_EXPIRE_HOURS: 
+   * @param p_client_id_expire_hours If p_client_id, expire after number of hours. If not defined, will default to system preference PREF_BY_CLIENT_ID_EXPIRE_HOURS 
    */
   procedure set_level(
     p_level in varchar2 default 'DEBUG',
