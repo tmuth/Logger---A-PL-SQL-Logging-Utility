@@ -1,4 +1,3 @@
-TODO remove invalid link and link to wiki
 - [What is Logger?](#what-is-logger)
 - [Documentation](#Documentation)
 - [Change Log](#change-log)
@@ -69,10 +68,6 @@ In order to keep this page relatively small and for ease of use, the documentati
 * New: logger.log_character_codes procedure supplements the output of the SQL DUMP() function, great for finding hidden carriage return / line feeds or other non-printable characters.It's use is documented here.
 * Fixed set_level, purge and purge_all so they are now autonomous transactions (thanks Tony).
 
-[top](#page-top)
-
-
-
 
 #License
 
@@ -103,4 +98,3 @@ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-[top](#page-top)
