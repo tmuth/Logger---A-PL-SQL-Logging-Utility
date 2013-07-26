@@ -1,12 +1,6 @@
-<a name="page-top" />
-Logger: A PL/SQL Logging Utility
-=================================
 TODO remove invalid link and link to wiki
 - [What is Logger?](#what-is-logger)
-- [Installation](#installation)
-- [How to use Logger](#how-to-use-logger)
-- [Advanced use](#advanced-use)
-- [Best Practices](#best-practices)
+- [Documentation](#Documentation)
 - [Change Log](#change-log)
 - [License](#license)
 
@@ -31,6 +25,12 @@ select * from logger_logs;
 ```
 
 See the [Logger API](wiki/Logger-API) documentation for complete set of procedures.
+
+#Documentation
+In order to keep this page relatively small and for ease of use, the documentation has been moved to the [Logger Wiki](wiki). In there you you will find the following sections:
+- [Installation](wiki/Installation)
+- [Logger API](wiki/Logger-API)
+- [Best Practices](wiki/Best Practices)
 
 #Change Log
 ##[Version 2.1.0](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/tree/master/releases/2.0.1)
