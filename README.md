@@ -27,10 +27,10 @@ select * from logger_logs;
 See the [Logger API](../../wiki/Logger-API) documentation for complete set of procedures.
 
 #Documentation
-In order to keep this page relatively small and for ease of use, the documentation has been moved to the [Logger Wiki](/wiki). In there you you will find the following sections:
-- [Installation](wiki/Installation)
-- [Logger API](wiki/Logger-API)
-- [Best Practices](wiki/Best Practices)
+In order to keep this page relatively small and for ease of use, the documentation has been moved to the [Logger Wiki](../../wiki). In there you you will find the following sections:
+- [Installation](../../wiki/Installation)
+- [Logger API](../../wiki/Logger-API)
+- [Best Practices](../../wiki/Best Practices)
 
 #Change Log
 ##[Version 2.1.0](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/tree/master/releases/2.0.1)
