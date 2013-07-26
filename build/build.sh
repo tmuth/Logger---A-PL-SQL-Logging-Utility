@@ -128,6 +128,7 @@ chmod 777 $RELEASE_FOLDER/*.*
 
 #Replace any references for the version number
 sed -i.del "s/x\.x\.x/$VERSION_NUMBER/g" $RELEASE_FOLDER/logger_install.sql
+sed -i.del "s/x\.x\.x/$VERSION_NUMBER/g" $RELEASE_FOLDER/logger.pks
 #need to remove the backup file required for sed call
 rm -rf $RELEASE_FOLDER/*.del 
 
