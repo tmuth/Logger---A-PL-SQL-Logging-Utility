@@ -1,5 +1,6 @@
 - [What is Logger?](#what-is-logger)
-- [Documentation](#Documentation)
+- [Documentation](#documentation)
+- [Download](#download)
 - [Change Log](#change-log)
 - [License](#license)
 
@@ -15,7 +16,7 @@ Logger is a PL/SQL logging and debugging framework. The goal of logger is to be 
 ##Feedback/Issues
 Please submit any feedback, suggestions, or issues on the project's [issue page](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues).
 
-#Demo
+##Demo
 ```sql
 exec logger.log('hello world');
 
@@ -30,6 +31,9 @@ In order to keep this page relatively small and for ease of use, the documentati
 - [Installation](../../wiki/Installation)
 - [Logger API](../../wiki/Logger-API)
 - [Best Practices](../../wiki/Best Practices)
+
+#Download
+It is recommended that you download a certified release (from the [releases](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/tree/master/releases) folder). The files in the current repository are for the next release and should be considered unstable.
 
 #Change Log
 ##[Version 2.1.0](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/tree/master/releases/2.0.1)
