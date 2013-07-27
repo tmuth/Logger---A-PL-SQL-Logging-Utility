@@ -41,7 +41,7 @@ as
   type tab_param is table of rec_param index by binary_integer;
   
   -- VARIABLES
-	g_logger_version    constant varchar2(10) := '$VERSION_NUMBER';
+	g_logger_version    constant varchar2(10) := 'x.x.x'; -- Don't change this. Build script will replace with right version number
 	g_context_name 		constant varchar2(35) := substr(sys_context('USERENV','CURRENT_SCHEMA'),1,23)||'_LOGCTX';
 
   g_permanent		    constant number := 1;
@@ -63,16 +63,6 @@ as
   function convert_level_char_to_num(
     p_level in varchar2)
     return number;
-
-  function ok_to_log(p_level  in  number)
-    return boolean
-    $IF $$RAC_LT_11_2 $THEN
-      $IF not dbms_db_version.ver_le_10_2 $THEN
-        $IF $$NO_OP is null or NOT $$NO_OP $THEN
-          result_cache relies_on (logger_prefs, logger_prefs_by_client_id)
-        $END
-      $END
-    $END;
 
   function date_text_format (p_date in date)
     return varchar2;
@@ -224,5 +214,8 @@ as
     p_params in out nocopy logger.tab_param,
     p_name in varchar2,
     p_val in boolean);
+    
+  function ok_to_log(p_level in varchar2)
+    return boolean;
 end logger;
 /

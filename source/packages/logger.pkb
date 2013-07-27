@@ -210,6 +210,18 @@ as
   end null_global_contexts;
 
 
+  /**
+   * Converts string names to text value
+   *
+   * Changes
+   *  - 2.1.0: Start to use global variables and correct numbers
+   *
+   * @author Tyler Muth
+   * @created ???
+   *
+   * @param p_level String representation of level
+   * @return level number. -1 if not found
+   */
   function convert_level_char_to_num(
       p_level in varchar2)
     return number
@@ -218,13 +230,14 @@ as
   begin
     case p_level
       when 'OFF'          then l_level := 0;
-      when 'PERMANENT'    then l_level := 1;
-      when 'ERROR'        then l_level := 2;
-      when 'WARNING'      then l_level := 4;
-      when 'INFORMATION'  then l_level := 8;
-      when 'DEBUG'        then l_level := 16;
-      when 'TIMING'       then l_level := 32;
-      when 'SYS_CONTEXT'  then l_level := 64;
+      when 'PERMANENT'    then l_level := g_permanent;
+      when 'ERROR'        then l_level := g_error;
+      when 'WARNING'      then l_level := g_warning;
+      when 'INFORMATION'  then l_level := g_information;
+      when 'DEBUG'        then l_level := g_debug;
+      when 'TIMING'       then l_level := g_timing;
+      when 'SYS_CONTEXT'  then l_level := g_sys_context;
+      when 'APEX'         then l_level := g_apex;
     else l_level := -1;
     end case;
 
@@ -275,6 +288,15 @@ as
     $END
   end get_level_number;
 
+  /**
+   * Determines if the statement can be stored in LOGGER_LOGS
+   *
+   * @author Tyler Muth
+   * @created ???
+   *
+   * @param p_level Level (number)
+   * @return True of statement can be logged to LOGGER_LOGS
+   */
   function ok_to_log(p_level  in  number)
     return boolean
     $IF $$RAC_LT_11_2 $THEN
@@ -1600,5 +1622,22 @@ as
       logger.append_param(p_params => p_params, p_name => p_name, p_val => case when p_val then 'TRUE' else 'FALSE' end);
     $END  
   end append_param;
+  
+  /**
+   * Determines if log statements will actually be stored.
+   *
+   * @author Martin D'Souza
+   * @created 25-Jul-2013
+   *
+   * @param p_level Level (DEBUG etc..)
+   * @return True of log statements for that level or below will be logged
+   */
+  function ok_to_log(p_level in varchar2)
+    return boolean
+  as
+  begin
+    return ok_to_log(p_level => convert_level_char_to_num(p_level => p_level));
+  end ok_to_log;
+  
 end logger;
 /
