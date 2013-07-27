@@ -90,7 +90,12 @@ create or replace trigger  bi_logger_logs
   before insert on logger_logs 
   for each row 
 begin	
-  :new.id := logger_logs_seq.nextval;
+  -- 2.1.0: Changed to support 10g, since 10g requires a select into for IDs
+  $IF $$LT_11 $THEN
+    select logger_logs_seq.nextval into :new.id from dual;
+  $ELSE
+    :new.id := logger_logs_seq.nextval;
+  $END
 	:new.time_stamp 	:= systimestamp;
 	:new.client_identifier	:= sys_context('userenv','client_identifier');
 	:new.module 		:= sys_context('userenv','module');

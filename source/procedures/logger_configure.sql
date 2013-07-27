@@ -1,21 +1,22 @@
 create or replace procedure logger_configure
 is
-    -- Note: The license is defined in the package specification of the logger package
+  -- Note: The license is defined in the package specification of the logger package
 	--
 	l_rac_lt_11_2       varchar2(50) := 'FALSE';  -- is this a RAC instance less than 11.2, no GAC support
+  l_lt_11 varchar2(50) := 'FALSE'; -- Is this instance lower than 11g?
     
-    l_apex              varchar2(50) := 'FALSE';
-    tbl_not_exist       exception;
-    pls_pkg_not_exist   exception;
-    --no_data_found       exception;
+  l_apex              varchar2(50) := 'FALSE';
+  tbl_not_exist       exception;
+  pls_pkg_not_exist   exception;
+  --no_data_found       exception;
     
-    l_sql		        varchar2(32767);
-	  l_variables	        varchar2(1000) := ' ';
-    l_dummy             number;
-    l_flashback         varchar2(50) := 'FALSE';
-    pragma 				exception_init(tbl_not_exist, -942);
-    --pragma 				exception_init(no_data_found, -1403);
-    pragma 				exception_init(pls_pkg_not_exist, -06550);
+  l_sql		        varchar2(32767);
+  l_variables	        varchar2(1000) := ' ';
+  l_dummy             number;
+  l_flashback         varchar2(50) := 'FALSE';
+  pragma 				exception_init(tbl_not_exist, -942);
+  --pragma 				exception_init(no_data_found, -1403);
+  pragma 				exception_init(pls_pkg_not_exist, -06550);
     
 	l_version           constant number  := dbms_db_version.version + (dbms_db_version.release / 10);
 begin
@@ -23,7 +24,7 @@ begin
     /* ************************************************************************** */
     -- Check to see if we are in a RAC Database, 11.1 or lower.
     --
-	-- Tyler to check if this works
+    -- Tyler to check if this works
     if dbms_utility.is_cluster_database then
         l_rac_lt_11_2 := 'TRUE';
     else
@@ -31,10 +32,19 @@ begin
     end if;
     
     if l_version >= 11.2 then
-		l_rac_lt_11_2 := 'FALSE';
-	end if;
+      l_rac_lt_11_2 := 'FALSE';
+    end if;
     
     l_variables := 'RAC_LT_11_2:'||l_rac_lt_11_2||',';
+    
+    -- Check if Lower than 11g
+    if l_version < 11 then
+      l_lt_11 := 'TRUE';
+    else
+      l_lt_11 := 'FALSE';
+    end if;
+    l_variables := l_variables||'LT_11:'||l_lt_11||',';
+    
     --
     /* ************************************************************************** */
     
