@@ -84,35 +84,20 @@ end;
 /
   
   
--- TRIGGER
-
-create or replace trigger  bi_logger_logs 
-  before insert on logger_logs 
-  for each row 
-begin	
-  -- 2.1.0: Changed to support 10g, since 10g requires a select into for IDs
-  $IF $$LT_11 $THEN
-    select logger_logs_seq.nextval into :new.id from dual;
-  $ELSE
-    :new.id := logger_logs_seq.nextval;
-  $END
-	:new.time_stamp 	:= systimestamp;
-	:new.client_identifier	:= sys_context('userenv','client_identifier');
-	:new.module 		:= sys_context('userenv','module');
-	:new.action 		:= sys_context('userenv','action');
-	
-  $IF $$APEX $THEN
-    :new.user_name 		:= nvl(v('APP_USER'),user);
-  $ELSE
-    :new.user_name 		:= user;
-  $END
-	
-  :new.unit_name 	    :=  upper(:new.unit_name);
+-- TRIGGER (removed as part of 2.1.0 release)
+-- Drop trigger if still exists (from pre-2.1.0 releases) - Issue #31
+declare
+  l_count pls_integer;
+  l_trigger_name user_triggers.trigger_name%type := 'BI_LOGGER_LOGS';
+begin
+  select count(1)
+  into l_count
+  from user_triggers
+  where 1=1
+    and trigger_name = l_trigger_name;
   
-  $IF $$FLASHBACK_ENABLED $THEN
-    :new.scn := dbms_flashback.get_system_change_number;
-  $END
+  if l_count > 0 then
+    execute immediate 'drop trigger ' || l_trigger_name;
+  end if;
 end;
 /
-show errors
-

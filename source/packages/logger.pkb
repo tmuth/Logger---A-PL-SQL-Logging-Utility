@@ -43,7 +43,6 @@ as
   
   -- PRIVATE
   
-  
   /**
    * Returns the display/print friendly parameter information
    * Private
@@ -489,6 +488,7 @@ as
     l_text 				varchar2(32767);
     l_callstack         varchar2(3000);
     l_extra logger_logs.extra%type;
+    l_id logger_logs.id%type;
   begin
     $IF $$NO_OP $THEN
       null;
@@ -508,22 +508,16 @@ as
       
       l_extra := set_extra_with_params(p_extra => p_extra, p_params => p_params);
 
-      -- TODO should we do a check to see if we can find length of logger.text field as 
-      -- If text is too big for the text column, move it to the CLOB (extra) column
-      if length(l_text) > 4000 then
-        if l_extra is not null then
-          -- TODO find out quickest to append to clob
-          l_extra := l_extra || gc_line_feed || gc_line_feed;
-          l_extra := l_extra || '*** Content moved to EXTRA column ***' || gc_line_feed;
-        end if; -- l_extra is not null
-        l_extra := l_extra || l_text;
-
-        l_text := 'Text moved to EXTRA column';
-      end if; -- length(l_text)
-
-      insert into logger_logs (logger_level,text,call_stack,unit_name,line_no,scope,extra)
-      values (p_log_level,l_text,l_callstack,l_proc_name,l_lineno,lower(p_scope), l_extra) returning id into g_log_id ;
-      commit;
+      ins_logger_logs(
+        p_unit_name => upper(l_proc_name) ,
+        p_scope => p_scope ,
+        p_logger_level =>p_log_level,
+        p_extra => l_extra,
+        p_text =>l_text,
+        p_call_stack  =>l_callstack,
+        p_line_no => l_lineno,
+        po_id => l_id);
+--      commit;
     $END
   end log_internal;
 
@@ -572,7 +566,6 @@ as
     l_proc_name     varchar2(100);
     l_lineno        varchar2(100);
     l_text          varchar2(4000);
-    pragma autonomous_transaction;
     l_call_stack    varchar2(4000);
     l_extra         clob;
 	begin
@@ -597,11 +590,16 @@ as
         
         
         l_extra := set_extra_with_params(p_extra => p_extra, p_params => p_params);
-  
-        insert into logger_logs (logger_level,text,unit_name,line_no,call_stack,scope,extra)
-        values	  (logger.g_error,l_text,l_proc_name,l_lineno,l_call_stack,p_scope,l_extra) returning id into g_log_id;
-  
-        commit;
+        
+        ins_logger_logs(
+          p_unit_name => upper(l_proc_name) ,
+          p_scope => p_scope ,
+          p_logger_level =>logger.g_error,
+          p_extra => l_extra,
+          p_text =>l_text,
+          p_call_stack  =>l_call_stack,
+          p_line_no => l_lineno,
+          po_id => g_log_id);  
       end if;
     $END
 	end log_error;
@@ -613,7 +611,6 @@ as
     p_extra   in clob default null,
     p_params  in tab_param default logger.gc_empty_tab_param)
   is
-    pragma autonomous_transaction;
   begin
     $IF $$NO_OP $THEN
       null;
@@ -627,7 +624,6 @@ as
           p_callstack         => dbms_utility.format_call_stack,
           p_params => p_params
           );
-        commit;
       end if;
     $END
   end log_permanent;
@@ -639,7 +635,6 @@ as
     p_extra   in clob default null,
     p_params  in tab_param default logger.gc_empty_tab_param)
   is
-    pragma autonomous_transaction;
   begin
     $IF $$NO_OP $THEN
       null;
@@ -652,7 +647,6 @@ as
           p_extra             => p_extra,
           p_callstack         => dbms_utility.format_call_stack,
           p_params => p_params);
-        commit;
       end if;
     $END
   end log_warning;
@@ -663,7 +657,6 @@ as
     p_extra   in clob default null,
     p_params  in tab_param default logger.gc_empty_tab_param)
 	is
-    pragma autonomous_transaction;
 	begin
     $IF $$NO_OP $THEN
       null;
@@ -676,7 +669,6 @@ as
           p_extra             => p_extra,
           p_callstack         => dbms_utility.format_call_stack,
           p_params  => p_params);
-        commit;
       end if;
     $END
 	end log_information;
@@ -687,7 +679,6 @@ as
     p_extra   in clob default null,
     p_params  in tab_param default logger.gc_empty_tab_param)
 	is
-    pragma autonomous_transaction;
 	begin
     
     $IF $$NO_OP $THEN
@@ -701,7 +692,6 @@ as
           p_extra             => p_extra,
           p_callstack         => dbms_utility.format_call_stack,
           p_params => p_params);
-        commit;
       end if;
     $END
 	end log;
@@ -852,7 +842,6 @@ as
     p_scope         in varchar2 default null)
   is
     l_extra	clob;
-    pragma autonomous_transaction;
   begin
     $IF $$NO_OP $THEN
       null;
@@ -868,7 +857,6 @@ as
             p_log_level			=> logger.g_sys_context,
             p_scope             => p_scope,
             p_extra             => l_extra);
-        commit;
       end if;
     $END
   end log_userenv;
@@ -879,7 +867,6 @@ as
     p_scope         in varchar2 default null)
   is
 		l_extra	clob;
-    pragma autonomous_transaction;
   begin
     $IF $$NO_OP $THEN
       null;
@@ -891,7 +878,6 @@ as
           p_log_level			=> logger.g_sys_context,
           p_scope             => p_scope,
           p_extra             => l_extra);
-        commit;
       end if;
     $END
   end log_cgi_env;
@@ -905,7 +891,6 @@ as
   is
     l_error varchar2(4000);
 		l_dump clob;
-    pragma autonomous_transaction;
   begin
     $IF $$NO_OP $THEN
       null;
@@ -918,7 +903,6 @@ as
           p_log_level			=> logger.g_debug,
           p_scope             => p_scope,
           p_extra             => l_dump);
-        commit;
       end if;
 		$END
 	end log_character_codes;
@@ -965,7 +949,6 @@ as
 		l_proc_name     	varchar2(100);
 		l_text 				varchar2(4000);
     l_pad               varchar2(100);
-		pragma autonomous_transaction;
 	begin
     $IF $$NO_OP $THEN
       null;
@@ -982,10 +965,12 @@ as
         l_text := l_pad||'START: '||p_unit;
         
         if p_log_in_table then
-            insert into logger_logs (logger_level,text,unit_name)
-            values	    (g_timing,l_text,p_unit) returning id into g_log_id ;
+          ins_logger_logs(
+            p_unit_name => p_unit ,
+            p_logger_level => g_timing,
+            p_text =>l_text,
+            po_id => g_log_id);
         end if;
-        commit;
       end if;
     $END
 	end time_start;
@@ -997,8 +982,6 @@ as
 		l_time_string   	varchar2(50);
     l_text 				varchar2(4000);
     l_pad               varchar2(100);
-
-    pragma autonomous_transaction;
 	begin
     $IF $$NO_OP $THEN
         null;
@@ -1020,9 +1003,12 @@ as
           g_proc_start_times.delete(p_unit);
           g_running_timers := g_running_timers - 1;
 
-          insert into logger_logs (logger_level,text,unit_name,scope)
-          values	    (g_timing,l_text,p_unit,p_scope) returning id into g_log_id ;
-          commit;
+          ins_logger_logs(
+            p_unit_name => p_unit,
+            p_scope => p_scope ,
+            p_logger_level =>g_timing,
+            p_text =>l_text,
+            po_id => g_log_id);
         end if;
       end if;
     $END
@@ -1036,8 +1022,6 @@ as
     return varchar2
   is
     l_time_string   	varchar2(50);
-
-    pragma autonomous_transaction;
   begin
     $IF $$NO_OP $THEN
       null;
@@ -1051,11 +1035,14 @@ as
           g_running_timers := g_running_timers - 1;
           
           IF p_log_in_table THEN
-            INSERT INTO logger_logs (logger_level,text,unit_name,SCOPE)
-            VALUES	    (g_timing,l_time_string,p_unit,p_scope) RETURNING ID INTO g_log_id ;
+            ins_logger_logs(
+              p_unit_name => p_unit,
+              p_scope => p_scope ,
+              p_logger_level => g_timing,
+              p_text => l_time_string,
+              po_id => g_log_id);
           END IF;
           
-          commit;
           return l_time_string;
             
         end if;
@@ -1074,7 +1061,6 @@ as
 		l_seconds   NUMBER;
 		l_interval 	INTERVAL day to second;
 		
-    pragma autonomous_transaction;
   begin
     $IF $$NO_OP $THEN
       null;
@@ -1087,12 +1073,15 @@ as
           g_proc_start_times.delete(p_unit);
           g_running_timers := g_running_timers - 1;
                 
-          IF p_log_in_table THEN
-              INSERT INTO logger_logs (logger_level,text,unit_name,SCOPE)
-              VALUES	    (g_timing,l_seconds,p_unit,p_scope) RETURNING ID INTO g_log_id ;
-          END IF;
+          if p_log_in_table then
+            ins_logger_logs( 
+              p_unit_name => p_unit,
+              p_scope => p_scope ,
+              p_logger_level => g_timing,
+              p_text => l_seconds,
+              po_id => g_log_id);
+          end if;
           
-          commit;
           return l_seconds;
                 
         end if;
@@ -1638,6 +1627,94 @@ as
   begin
     return ok_to_log(p_level => convert_level_char_to_num(p_level => p_level));
   end ok_to_log;
+  
+  
+  /**
+   * Handles inserts into LOGGER_LOGS.
+   *
+   * Replaces trigger for both performance issues and to be a single location for all insert statements
+   *
+   * autonomous_transaction so commit will be performed after insert
+   *
+   * @author Martin D'Souza
+   * @created 30-Jul-2013
+   *
+   * Related Issues
+   *  - 31: Initial ticket
+   *
+   * @param p_logger_level
+   * @param p_text
+   * @param p_scope
+   * @param p_call_stack
+   * @param p_unit_name
+   * @param p_line_no
+   * @param p_extra
+   * @param po_id ID entered into logger_logs for this record
+   */
+  procedure ins_logger_logs(
+    p_logger_level in logger_logs.logger_level%type,
+    p_text in varchar2 default null, -- Not using type since want to be able to pass in 32767 characters
+    p_scope in logger_logs.scope%type default null,
+    p_call_stack in logger_logs.call_stack%type default null,
+    p_unit_name in logger_logs.unit_name%type default null,
+    p_line_no in logger_logs.line_no%type default null, 
+    p_extra in logger_logs.extra%type default null,
+    po_id out nocopy logger_logs.id%type
+    )
+  as
+    pragma autonomous_transaction;
+    
+    l_id logger_logs.id%type;
+    l_text varchar2(32767) := p_text;
+    l_extra logger_logs.extra%type := p_extra;
+    
+    l_tmp_clob clob;
+  begin
+    -- Using select into to support version older than 11gR1 (see Issue 26)
+    select logger_logs_seq.nextval 
+    into po_id 
+    from dual;
+    
+    -- 2.1.0: If text is > 4000 characters, it will be moved to the EXTRA column (Issue 17)
+    $IF $$LARGE_TEXT_COLUMN $THEN -- Only check for moving to Clob if small text column
+      -- Don't do anything since column supports large text
+    $ELSE 
+      if length(l_text) > 4000 then
+        if l_extra is null then
+          l_extra := l_text;
+        else
+          -- Using temp clob for performance purposes: http://www.talkapex.com/2009/06/how-to-quickly-append-varchar2-to-clob.html
+          l_tmp_clob := gc_line_feed || gc_line_feed || '*** Content moved to EXTRA column ***' || gc_line_feed;
+          l_extra := l_extra || l_tmp_clob;
+          l_tmp_clob := l_text;
+          l_extra := l_extra || l_text;
+        end if; -- l_extra is not null
+  
+        l_text := 'Text moved to EXTRA column';
+      end if; -- length(l_text)
+    $END
+    
+    insert into logger_logs(
+      id, logger_level, text,
+      time_stamp, scope, module, 
+      action, 
+      user_name, 
+      client_identifier,
+      call_stack, unit_name, line_no , 
+      scn, extra
+      )
+    values(
+      po_id, p_logger_level, l_text,
+      systimestamp, lower(p_scope), sys_context('userenv','module'), 
+      sys_context('userenv','action'), 
+      nvl($IF $$APEX $THEN apex_application.g_user $ELSE user $END,user), 
+      sys_context('userenv','client_identifier'),
+      p_call_stack, upper(p_unit_name), p_line_no, 
+      null, l_extra
+      );
+    
+    commit;
+  end ins_logger_logs;
   
 end logger;
 /

@@ -217,5 +217,16 @@ as
     
   function ok_to_log(p_level in varchar2)
     return boolean;
+    
+  procedure ins_logger_logs(
+    p_logger_level in logger_logs.logger_level%type,
+    p_text in varchar2 default null, -- Not using type since want to be able to pass in 32767 characters
+    p_scope in logger_logs.scope%type default null,
+    p_call_stack in logger_logs.call_stack%type default null,
+    p_unit_name in logger_logs.unit_name%type default null,
+    p_line_no in logger_logs.line_no%type default null, 
+    p_extra in logger_logs.extra%type default null,
+    po_id out nocopy logger_logs.id%type
+  );
 end logger;
 /
