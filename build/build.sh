@@ -42,47 +42,61 @@ cat ../source/install/logger_install_prereqs.sql > $INSTALL
 printf '\n' >> $INSTALL
 
 #TABLES
+printf 'PROMPT tables/logger_logs.sql \n' >> $INSTALL
 cat ../source/tables/logger_logs.sql >> $INSTALL
 printf '\n' >> $INSTALL
+printf 'PROMPT tables/logger_prefs.sql \n' >> $INSTALL
 cat ../source/tables/logger_prefs.sql >> $INSTALL
 printf '\n' >> $INSTALL
+printf 'PROMPT tables/logger_logs_apex_items.sql \n' >> $INSTALL
 cat ../source/tables/logger_logs_apex_items.sql >> $INSTALL
 printf '\n' >> $INSTALL
+printf 'PROMPT tables/logger_prefs_by_client_id.sql \n' >> $INSTALL
 cat ../source/tables/logger_prefs_by_client_id.sql >> $INSTALL
 printf '\n' >> $INSTALL
 
 
 #CONTEXTS
+printf 'PROMPT contexts/logger_context.sql \n' >> $INSTALL
 cat ../source/contexts/logger_context.sql >> $INSTALL
 printf '\n' >> $INSTALL
 
 #JOBS
+printf 'PROMPT jobs/logger_purge_job.sql \n' >> $INSTALL
 cat ../source/jobs/logger_purge_job.sql >> $INSTALL
 printf '\n' >> $INSTALL
+printf 'PROMPT jobs/logger_unset_prefs_by_client.sql \n' >> $INSTALL
 cat ../source/jobs/logger_unset_prefs_by_client.sql >> $INSTALL
 printf '\n' >> $INSTALL
 
 #VIEWS
+printf 'PROMPT views/logger_logs_5_min.sql \n' >> $INSTALL
 cat ../source/views/logger_logs_5_min.sql >> $INSTALL
 printf '\n' >> $INSTALL
+printf 'PROMPT views/logger_logs_60_min.sql \n' >> $INSTALL
 cat ../source/views/logger_logs_60_min.sql >> $INSTALL
 printf '\n' >> $INSTALL
+printf 'PROMPT views/logger_logs_terse.sql\n' >> $INSTALL
 cat ../source/views/logger_logs_terse.sql >> $INSTALL
 printf '\n' >> $INSTALL
 
 #PACKAGES
+printf 'PROMPT packages/logger.pks \n' >> $INSTALL
 cat ../source/packages/logger.pks >> $INSTALL
 printf '\n' >> $INSTALL
+printf 'PROMPT packages/logger.pkb \n' >> $INSTALL
 cat ../source/packages/logger.pkb >> $INSTALL
 printf '\n' >> $INSTALL
 
 
 #PROCEDURES
+printf 'PROMPT procedures/logger_configure.sql \n' >> $INSTALL
 cat ../source/procedures/logger_configure.sql >> $INSTALL
 printf '\n' >> $INSTALL
 
 
 #Post install
+printf 'PROMPT install/post_install_configuration.sql \n' >> $INSTALL
 cat ../source/install/post_install_configuration.sql >> $INSTALL
 printf '\n' >> $INSTALL
 
