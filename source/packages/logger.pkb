@@ -1106,6 +1106,7 @@ as
    *
    * Updates
    *  - 2.0.0: Added user preference support
+   *  - 2.1.2: Fixed issue when calling set_level with the same client_id multiple times
    *
    * @author Tyler Muth
    * @created ???
@@ -1132,13 +1133,19 @@ as
         dbms_output.put_line(l_scope || ' select pref');
       $END
       
-      select logger_level
+      select pref_value
       into l_pref_value
       from (
-        select logger_level, row_number () over (order by rank) rn
+        select pref_value, row_number () over (order by rank) rn
         from (
           -- Client specific logger levels trump system level logger level
-          select logger_level, 1 rank
+          select 
+            case 
+              when p_pref_name = 'LEVEL' then logger_level
+              when p_pref_name = 'INCLUDE_CALL_STACK' then include_call_stack
+            end pref_value
+          
+          , 1 rank
           from logger_prefs_by_client_id
           where 1=1
             and client_id = sys_context('userenv','client_identifier')
