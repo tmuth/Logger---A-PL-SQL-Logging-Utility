@@ -1294,7 +1294,7 @@ as
         -- Since the client_identifier exists, try to see if there exists a record session sepecfic logging level
         -- Note: this query should only return 0..1 rows
         begin
-          select logger_level, include_call_stack, to_char(expiry_date, 'DD-MON-YYYY HH24:MI:SS') expiry_date
+          select logger_level, include_call_stack, expiry_date
           into l_cur_logger_level, l_cur_include_call_stack, l_cur_expiry_date
           from logger_prefs_by_client_id
           where client_id = l_client_identifier;
@@ -1302,7 +1302,7 @@ as
           display_output('Client Identifier', l_client_identifier);
           display_output('Client - Debug Level', l_cur_logger_level);
           display_output('Client - Call Stack', l_cur_include_call_stack);
-          display_output('Client - Expiry Date', l_cur_expiry_date);
+          display_output('Client - Expiry Date', to_char(l_cur_expiry_date, gc_date_format));
         exception
           when no_data_found then
             null; -- No client specific logging set
