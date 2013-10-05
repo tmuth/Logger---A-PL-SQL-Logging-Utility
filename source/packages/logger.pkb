@@ -488,7 +488,6 @@ as
     l_text 				varchar2(32767);
     l_callstack         varchar2(3000);
     l_extra logger_logs.extra%type;
-    l_id logger_logs.id%type;
   begin
     $IF $$NO_OP $THEN
       null;
@@ -516,7 +515,7 @@ as
         p_text =>l_text,
         p_call_stack  =>l_callstack,
         p_line_no => l_lineno,
-        po_id => l_id);
+        po_id => g_log_id);
 --      commit;
     $END
   end log_internal;
