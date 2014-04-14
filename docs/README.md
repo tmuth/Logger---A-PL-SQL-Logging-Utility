@@ -1,6 +1,6 @@
 The documents have been broken up into the following pages for easier navigation:
 
-- [Installation](wiki/Installation)
+- [Installation](Installation)
 	- All the information to install and configure Logger.
 - [Logger API](wiki/Logger-API)
 	- Complete Logger API documentation.
