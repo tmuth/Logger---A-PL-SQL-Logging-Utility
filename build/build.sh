@@ -134,9 +134,10 @@ cp -f ../README.md $RELEASE_FOLDER
 cp -fr ../demos $RELEASE_FOLDER
 
 #Copy wiki documents
-mkdir $RELEASE_FOLDER/wiki
+#No longer necessary as moved to docs folder (Issue #62)
+#mkdir $RELEASE_FOLDER/wiki
 # This is assuming that the wiki directory exists in the same location as the main folder (i.e. same parent)
-cp -f ../../Logger---A-PL-SQL-Logging-Utility.wiki/* $RELEASE_FOLDER/wiki/
+#cp -f ../../Logger---A-PL-SQL-Logging-Utility.wiki/* $RELEASE_FOLDER/wiki/
 
 #sed -i "s/tags\/[0-9]\.[0-9]\.[0-9]\/logger_[0-9]\.[0-9]\.[0-9].zip/tags\/$VERSION_NUMBER\/logger_$VERSION_NUMBER\.zip/g" ../www/index.html
 #cp -f ../www/index.html ../build/readme.html
