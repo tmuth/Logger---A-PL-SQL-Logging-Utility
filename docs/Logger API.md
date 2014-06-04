@@ -133,6 +133,11 @@ All of the main Logger procedures have the same parameters
     	<th>Attribute</th>
 	    <th>Description</th>
   	</tr>
+	<tr>
+		<td>p_text</td>
+		<td>p_text maps to the TEXT column in LOGGER_LOGS. It can handle up to 32767 characters. If p_text exceeds 4000 characters its content will be moved appended to the EXTRA column. If you need to store large blocks of text (i.e. clobs) you can use the p_extra parameter.
+		</td>
+	</tr>
 	
 </table>
 
