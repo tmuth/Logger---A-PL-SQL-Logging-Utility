@@ -138,7 +138,20 @@ All of the main Logger procedures have the same parameters
 		<td>p_text maps to the TEXT column in LOGGER_LOGS. It can handle up to 32767 characters. If p_text exceeds 4000 characters its content will be moved appended to the EXTRA column. If you need to store large blocks of text (i.e. clobs) you can use the p_extra parameter.
 		</td>
 	</tr>
-	
+	<tr>
+		<td>p_scope</td>
+		<td>p_scope is optional but highly recommend. The idea behind scope is to give some context to the log message, such as the application, package.procedure where it was called from. Logger captures the call stack, as well as module and action which are great for APEX logging as they are app number / page number. However, none of these options gives you a clean, consistent way to group messages. The p_scope parameter performs a lower() on the input and stores it in the SCOPE column.</td>
+	</tr>
+	<tr>
+		<td>p_extra</td>
+		<td>When logging large (over 4000 characters) blocks of text, use the third parameter: p_extra. p_extra is a clob field and thus isn't restricted to the 4000 character limit.</td>
+	</tr>
+	<tr>
+		<td>p_params</td>
+		<td>p_params is for storing the parameters object. The goal of this parameter is to allow for a simple and consistent method to log the parameters to a given function. The values are explicitly converted to a string so there is no need to convert them when appending a parameter. 
+		<br/><br/>The data from the parameters array will be appended to the EXTRA column.<br/><br/>
+Since most production instances set the logging level to error, it is highly recommended that you leverage this 4th parameter when calling logger.log_error so that developers know the input that triggered the error. </td>
+	</tr>
 </table>
 
 <a name="main-logger-examples"></a>
