@@ -31,13 +31,13 @@ as
   g_running_timers pls_integer := 0;
   
   -- CONSTANTS
-  gc_line_feed varchar2(1) := chr(10);
-  gc_date_format varchar2(255) := 'DD-MON-YYYY HH24:MI:SS';
-  gc_timestamp_format varchar2(255) := gc_date_format || ':FF';
-  gc_timestamp_tz_format varchar2(255) := gc_timestamp_format || ' TZR';
+  gc_line_feed constant varchar2(1) := chr(10);
+  gc_date_format constant varchar2(255) := 'DD-MON-YYYY HH24:MI:SS';
+  gc_timestamp_format constant varchar2(255) := gc_date_format || ':FF';
+  gc_timestamp_tz_format constant varchar2(255) := gc_timestamp_format || ' TZR';
   
-  gc_ctx_attr_level varchar2(5) := 'level';
-  gc_ctx_attr_include_call_stack varchar2(18) := 'include_call_stack';
+  gc_ctx_attr_level constant varchar2(5) := 'level';
+  gc_ctx_attr_include_call_stack constant varchar2(18) := 'include_call_stack';
 
   
   
