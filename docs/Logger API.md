@@ -6,6 +6,8 @@
 <a name="constants"></a>
 #Constants
 
+<a name="constants-general"></a>
+##General
 <table border="0">
   <tr>
     <th>Name</th>
@@ -23,7 +25,20 @@
 		<td>gc_empty_tab_param</td>
 		<td>Empty param used for default value in logger main procedures.</td>
 	</tr>
+</table>
+
+<a name="constants-logger-levels"></a>
+##Logger Levels
+<table border="0">
+  <tr>
+    <th>Name</th>
+    <th>Description</th>
+  </tr>
 	<tr>
+    <td>g_off</td>
+    <td>Logger level off (0).</td>
+  </tr>
+  <tr>
 		<td>g_permanent</td>
 		<td>Logger level permanent (1).</td>
 	</tr>
@@ -55,6 +70,42 @@
 		<td>g_apex</td>
 		<td>Logger level apex (128).</td>
 	</tr>
+  <tr>
+    <td>g_off_name</td>
+    <td>Logger level name: OFF</td>
+  </tr>
+  <tr>
+    <td>g_permanent_name</td>
+    <td>Logger level name: PERMANENT</td>
+  </tr>
+  <tr>
+    <td>g_error_name</td>
+    <td>Logger level name: ERROR</td>
+  </tr>
+  <tr>
+    <td>g_warning_name</td>
+    <td>Logger level name: WARNING</td>
+  </tr>
+  <tr>
+    <td>g_information_name</td>
+    <td>Logger level name: INFORMATION</td>
+  </tr>
+  <tr>
+    <td>g_debug_name</td>
+    <td>Logger level name: DEBUG</td>
+  </tr>
+  <tr>
+    <td>g_timing_name</td>
+    <td>Logger level name: TIMING</td>
+  </tr>
+  <tr>
+    <td>g_sys_context_name</td>
+    <td>Logger level name: SYS_CONTEXT</td>
+  </tr>
+  <tr>
+    <td>g_apex_name</td>
+    <td>Logger level name: APEX</td>
+  </tr>
 </table>
 
 <a name="types"></a>
@@ -873,7 +924,7 @@ Set both system and client logging levels.
 ####Syntax
 ```sql
 logger.set_level(
-  p_level in varchar2 default 'DEBUG',
+  p_level in varchar2 default logger.g_debug_name,
   p_client_id in varchar2 default null,
   p_include_call_stack in varchar2 default null,
   p_client_id_expire_hours in number default null
@@ -888,7 +939,7 @@ logger.set_level(
   </tr>
   <tr>
     <td>p_level</td>
-    <td>Valid values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING.</td>
+    <td>Use logger.g_&lt;level&gt;_name variables. See [Constants](#constants-logger-levels) </td>
   </tr>
     <tr>
     <td>p_client_id</td>
@@ -907,13 +958,13 @@ logger.set_level(
 ####Example
 Set system level logging level:
 ```sql
-exec logger.set_level('DEBUG');
+exec logger.set_level(logger.g_debug_name);
 ```
 
 Client Specific Configuration:
 ```sql
 -- In Oracle Session-1
-exec logger.set_level('DEBUG');
+exec logger.set_level(logger.g_debug_name);
 
 exec logger.log('Session-1: this should show up');
 
@@ -925,7 +976,7 @@ order by id;
 ---- ------------ ----------------------------------- ----------------- ----------------------------
   31         16 Session-1: this should show up              object      line  object
 
-exec logger.set_level ('ERROR');
+exec logger.set_level (logger.g_error_name);
 
 exec logger.log('Session-1: this should NOT show up');
 
@@ -936,7 +987,7 @@ exec logger.log('Session-1: this should NOT show up');
 exec dbms_session.set_identifier('my_identifier');
 
 -- This sets the logger level for current identifier
-exec logger.set_level('DEBUG', sys_context('userenv','client_identifier'));
+exec logger.set_level(logger.g_debug_name, sys_context('userenv','client_identifier'));
 
 exec logger.log('Session-2: this should show up');
 

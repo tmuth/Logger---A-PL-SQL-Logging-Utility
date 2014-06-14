@@ -44,6 +44,7 @@ as
 	g_logger_version constant varchar2(10) := 'x.x.x'; -- Don't change this. Build script will replace with right version number
 	g_context_name constant varchar2(35) := substr(sys_context('USERENV','CURRENT_SCHEMA'),1,23)||'_LOGCTX';
   
+  g_off constant number := 0;
   g_permanent constant number := 1;
 	g_error constant number := 2;
 	g_warning constant number := 4;
@@ -52,6 +53,17 @@ as
 	g_timing constant number := 32;
   g_sys_context constant number := 64;
   g_apex constant number := 128;
+
+  -- #43
+  g_off_name constant varchar2(30) := 'OFF';
+  g_permanent_name constant varchar2(30) := 'PERMANENT';
+  g_error_name constant varchar2(30) := 'ERROR';
+  g_warning_name constant varchar2(30) := 'WARNING';
+  g_information_name constant varchar2(30) := 'INFORMATION';
+  g_debug_name constant varchar2(30) := 'DEBUG';
+  g_timing_name constant varchar2(30) := 'TIMING';
+  g_sys_context_name constant varchar2(30) := 'SYS_CONTEXT';
+  g_apex_name constant varchar2(30) := 'APEX';
 
   gc_empty_tab_param tab_param;
 
@@ -168,7 +180,7 @@ as
   procedure sqlplus_format;
 
   procedure set_level(
-    p_level in varchar2 default 'DEBUG',
+    p_level in varchar2 default logger.g_debug_name,
     p_client_id in varchar2 default null,
     p_include_call_stack in varchar2 default null,
     p_client_id_expire_hours in number default null

@@ -228,16 +228,16 @@ as
     l_level         number;
   begin
     case p_level
-      when 'OFF'          then l_level := 0;
-      when 'PERMANENT'    then l_level := g_permanent;
-      when 'ERROR'        then l_level := g_error;
-      when 'WARNING'      then l_level := g_warning;
-      when 'INFORMATION'  then l_level := g_information;
-      when 'DEBUG'        then l_level := g_debug;
-      when 'TIMING'       then l_level := g_timing;
-      when 'SYS_CONTEXT'  then l_level := g_sys_context;
-      when 'APEX'         then l_level := g_apex;
-    else l_level := -1;
+      when g_off_name then l_level := g_off;
+      when g_permanent_name then l_level := g_permanent;
+      when g_error_name then l_level := g_error;
+      when g_warning_name then l_level := g_warning;
+      when g_information_name then l_level := g_information;
+      when g_debug_name then l_level := g_debug;
+      when g_timing_name then l_level := g_timing;
+      when g_sys_context_name then l_level := g_sys_context;
+      when g_apex_name then l_level := g_apex;
+      else l_level := -1;
     end case;
 
     return l_level;
@@ -1329,7 +1329,7 @@ as
    * @param p_client_id_expire_hours If p_client_id, expire after number of hours. If not defined, will default to system preference PREF_BY_CLIENT_ID_EXPIRE_HOURS 
    */
   procedure set_level(
-    p_level in varchar2 default 'DEBUG',
+    p_level in varchar2 default logger.g_debug_name,
     p_client_id in varchar2 default null,
     p_include_call_stack in varchar2 default null,
     p_client_id_expire_hours in number default null
@@ -1346,7 +1346,7 @@ as
     l_level := replace(upper(p_level),' ');
     l_include_call_stack := nvl(trim(upper(p_include_call_stack)), get_pref('INCLUDE_CALL_STACK'));
     
-    assert(l_level in ('OFF','PERMANENT','ERROR','WARNING','INFORMATION','DEBUG','TIMING'),
+    assert(l_level in (g_off_name, g_permanent_name, g_error_name, g_warning_name, g_information_name, g_debug_name, g_timing_name),
       '"LEVEL" must be one of the following values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING');
     assert(l_include_call_stack in ('TRUE', 'FALSE'), 'l_include_call_stack must be TRUE or FALSE');
     
