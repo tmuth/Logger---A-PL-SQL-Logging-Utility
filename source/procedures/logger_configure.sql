@@ -2,25 +2,25 @@ create or replace procedure logger_configure
 is
   -- Note: The license is defined in the package specification of the logger package
 	--
-	l_rac_lt_11_2       varchar2(50) := 'FALSE';  -- is this a RAC instance less than 11.2, no GAC support
+	l_rac_lt_11_2 varchar2(50) := 'FALSE';  -- is this a RAC instance less than 11.2, no GAC support
 
-  l_apex              varchar2(50) := 'FALSE';
-  tbl_not_exist       exception;
-  pls_pkg_not_exist   exception;
+  l_apex varchar2(50) := 'FALSE';
+  tbl_not_exist exception;
+  pls_pkg_not_exist exception;
   --no_data_found       exception;
   
-  l_text_data_length  user_tab_columns.data_length%type;
+  l_text_data_length user_tab_columns.data_length%type;
   l_large_text_column varchar2(50);
     
-  l_sql		        varchar2(32767);
-  l_variables	        varchar2(1000) := ' ';
-  l_dummy             number;
-  l_flashback         varchar2(50) := 'FALSE';
-  pragma 				exception_init(tbl_not_exist, -942);
+  l_sql varchar2(32767);
+  l_variables varchar2(1000) := ' ';
+  l_dummy number;
+  l_flashback varchar2(50) := 'FALSE';
+  pragma exception_init(tbl_not_exist, -942);
   --pragma 				exception_init(no_data_found, -1403);
-  pragma 				exception_init(pls_pkg_not_exist, -06550);
+  pragma exception_init(pls_pkg_not_exist, -06550);
     
-	l_version           constant number  := dbms_db_version.version + (dbms_db_version.release / 10);
+	l_version constant number  := dbms_db_version.version + (dbms_db_version.release / 10);
 begin
     
   /* ************************************************************************** */
@@ -28,9 +28,9 @@ begin
   --
   -- Tyler to check if this works
   if dbms_utility.is_cluster_database then
-      l_rac_lt_11_2 := 'TRUE';
+    l_rac_lt_11_2 := 'TRUE';
   else
-      l_rac_lt_11_2 := 'FALSE';
+    l_rac_lt_11_2 := 'FALSE';
   end if;
   
   if l_version >= 11.2 then
@@ -64,13 +64,13 @@ begin
   -- Is APEX installed ?
   --
   begin
-      execute immediate 'select 1 from apex_application_items where rownum = 1' into l_dummy;
+    execute immediate 'select 1 from apex_application_items where rownum = 1' into l_dummy;
       
-      l_apex := 'TRUE';
+    l_apex := 'TRUE';
   exception 
-      when tbl_not_exist then l_apex := 'FALSE'; 
-      when no_data_found then 
-          l_apex := 'TRUE'; 
+    when tbl_not_exist then l_apex := 'FALSE'; 
+    when no_data_found then 
+    l_apex := 'TRUE'; 
   end;
   
   l_variables := l_variables||'APEX:'||l_apex||',';
@@ -84,11 +84,11 @@ begin
   -- Can we call dbms_flashback to get the currect System Commit Number?
   --
   begin
-      execute immediate 'begin :d := dbms_flashback.get_system_change_number; end; ' using out l_dummy;
+    execute immediate 'begin :d := dbms_flashback.get_system_change_number; end; ' using out l_dummy;
       
-      l_flashback := 'TRUE';
+    l_flashback := 'TRUE';
   exception when pls_pkg_not_exist then 
-              l_flashback := 'FALSE'; 
+    l_flashback := 'FALSE'; 
   end;
   
   l_variables := l_variables||'FLASHBACK_ENABLED:'||l_flashback||',';
