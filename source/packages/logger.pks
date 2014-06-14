@@ -41,17 +41,17 @@ as
   type tab_param is table of rec_param index by binary_integer;
   
   -- VARIABLES
-	g_logger_version    constant varchar2(10) := 'x.x.x'; -- Don't change this. Build script will replace with right version number
-	g_context_name 		constant varchar2(35) := substr(sys_context('USERENV','CURRENT_SCHEMA'),1,23)||'_LOGCTX';
-
-  g_permanent		    constant number := 1;
-	g_error 		    constant number := 2;
-	g_warning 		    constant number := 4;
-	g_information	    constant number := 8;
-  g_debug     	    constant number := 16;
-	g_timing     	    constant number := 32;
-  g_sys_context 	    constant number := 64;
-  g_apex 	            constant number := 128;
+	g_logger_version constant varchar2(10) := 'x.x.x'; -- Don't change this. Build script will replace with right version number
+	g_context_name constant varchar2(35) := substr(sys_context('USERENV','CURRENT_SCHEMA'),1,23)||'_LOGCTX';
+  
+  g_permanent constant number := 1;
+	g_error constant number := 2;
+	g_warning constant number := 4;
+	g_information constant number := 8;
+  g_debug constant number := 16;
+	g_timing constant number := 32;
+  g_sys_context constant number := 64;
+  g_apex constant number := 128;
 
   gc_empty_tab_param tab_param;
 
