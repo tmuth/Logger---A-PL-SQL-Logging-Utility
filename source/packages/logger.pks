@@ -253,6 +253,9 @@ as
     p_params in out nocopy logger.tab_param,
     p_name in varchar2,
     p_val in boolean);
+
+  function ok_to_log(p_level in number)
+    return boolean;
     
   function ok_to_log(p_level in varchar2)
     return boolean;

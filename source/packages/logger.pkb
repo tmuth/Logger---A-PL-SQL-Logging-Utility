@@ -290,13 +290,19 @@ as
   /**
    * Determines if the statement can be stored in LOGGER_LOGS
    *
+   * Notes:
+   *  - 
+   *
+   * Related Tickets:
+   *  - #42: Expose publically
+   *
    * @author Tyler Muth
    * @created ???
    *
    * @param p_level Level (number)
    * @return True of statement can be logged to LOGGER_LOGS
    */
-  function ok_to_log(p_level  in  number)
+  function ok_to_log(p_level in number)
     return boolean
     $IF $$RAC_LT_11_2 $THEN
       $IF not dbms_db_version.ver_le_10_2 $THEN
@@ -328,6 +334,27 @@ as
         return false;
       end if;
    $END
+  end ok_to_log;
+
+
+  /**
+   * Determines if log statements will actually be stored.
+   *
+   * @author Martin D'Souza
+   * @created 25-Jul-2013
+   *
+   * @param p_level Level (DEBUG etc..)
+   * @return True of log statements for that level or below will be logged
+   */
+  function ok_to_log(p_level in varchar2)
+    return boolean
+  as
+  begin
+    $IF $$NO_OP $THEN
+      return false;
+    $ELSE  
+      return ok_to_log(p_level => convert_level_char_to_num(p_level => p_level));
+    $END
   end ok_to_log;
 
 
@@ -1687,21 +1714,7 @@ as
 
 
   
-  /**
-   * Determines if log statements will actually be stored.
-   *
-   * @author Martin D'Souza
-   * @created 25-Jul-2013
-   *
-   * @param p_level Level (DEBUG etc..)
-   * @return True of log statements for that level or below will be logged
-   */
-  function ok_to_log(p_level in varchar2)
-    return boolean
-  as
-  begin
-    return ok_to_log(p_level => convert_level_char_to_num(p_level => p_level));
-  end ok_to_log;
+
   
   
   /**
