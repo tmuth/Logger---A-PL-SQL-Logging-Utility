@@ -6,6 +6,15 @@ declare
   type typ_required_columns is table of varchar2(30) index by pls_integer;
   l_required_columns typ_required_columns;
   
+  
+  type typ_tab_col is record (
+    column_name varchar2(30),
+    data_type varchar2(100));
+  type typ_arr_tab_col is table of typ_tab_col index by pls_integer;
+  
+  l_new_col typ_tab_col;
+  l_new_cols typ_arr_tab_col;
+
 begin
   -- Create Table
   select count(1)
@@ -50,6 +59,28 @@ create table logger_logs(
       
     if l_nullable = 'Y' then
       execute immediate 'alter table logger_logs modify ' || l_required_columns(i) || ' not null';
+    end if;
+  end loop;
+
+
+  -- 2.2.0
+  -- Add additional columns
+  -- #50
+  l_new_col.column_name := 'SID';
+  l_new_col.data_type := 'NUMBER';
+
+  l_new_cols(l_new_cols.count+1) := l_new_col;
+
+  for i in 1 .. l_new_cols.count loop
+    select count(1)
+    into l_count
+    from user_tab_columns
+    where 1=1
+      and table_name = 'LOGGER_LOGS'
+      and column_name = l_new_col.column_name;
+
+    if l_count = 0 then
+      execute immediate 'alter table LOGGER_LOGS add (' || l_new_col.column_name || ' ' || l_new_col.data_type || ')';
     end if;
   end loop;
   

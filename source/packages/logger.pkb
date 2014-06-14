@@ -1715,7 +1715,8 @@ as
    * @created 30-Jul-2013
    *
    * Related Issues
-   *  - 31: Initial ticket
+   *  - #31: Initial ticket
+   *  - #50: Added SID column
    *
    * @param p_logger_level
    * @param p_text
@@ -1744,6 +1745,7 @@ as
     l_extra logger_logs.extra%type := p_extra;
     
     l_tmp_clob clob;
+
   begin
     -- Using select into to support version older than 11gR1 (see Issue 26)
     select logger_logs_seq.nextval 
@@ -1776,17 +1778,21 @@ as
       user_name, 
       client_identifier,
       call_stack, unit_name, line_no , 
-      scn, extra
-      )
-    values(
-      po_id, p_logger_level, l_text,
-      systimestamp, lower(p_scope), sys_context('userenv','module'), 
-      sys_context('userenv','action'), 
-      nvl($IF $$APEX $THEN apex_application.g_user $ELSE user $END,user), 
-      sys_context('userenv','client_identifier'),
-      p_call_stack, upper(p_unit_name), p_line_no, 
-      null, l_extra
-      );
+      scn, 
+      extra,
+      sid
+      ) 
+     values(
+       po_id, p_logger_level, l_text,
+       systimestamp, lower(p_scope), sys_context('userenv','module'), 
+       sys_context('userenv','action'), 
+       nvl($IF $$APEX $THEN apex_application.g_user $ELSE user $END,user), 
+       sys_context('userenv','client_identifier'),
+       p_call_stack, upper(p_unit_name), p_line_no, 
+       null, 
+       l_extra,
+       to_number(sys_context('userenv','sid'))
+       );
     
     commit;
   end ins_logger_logs;
