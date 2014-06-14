@@ -179,6 +179,33 @@ as
   procedure unset_client_level;
   
   procedure unset_client_level_all;
+
+
+  function tochar(
+    p_val in number)
+    return varchar2;
+
+  function tochar(
+    p_val in date)
+    return varchar2;
+
+  function tochar(
+    p_val in timestamp)
+    return varchar2;
+
+  function tochar(
+    p_val in timestamp with time zone)
+    return varchar2;
+
+  function tochar(
+    p_val in timestamp with local time zone)
+    return varchar2;
+
+  function tochar(
+    p_val in boolean)
+    return varchar2;
+
+
   
   procedure append_param(
     p_params in out nocopy logger.tab_param,

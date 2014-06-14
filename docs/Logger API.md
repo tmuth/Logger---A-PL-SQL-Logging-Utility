@@ -82,6 +82,7 @@
   - [LOG_CHARACTER_CODES](#procedure-log_character_codes)
   - [LOG_APEX_ITEMS](#procedure-log_apex_items)
 - [Utility Functions](#utility-functions)
+  - [TOCHAR](#procedure-tochar)
   - [GET_CGI_ENV](#procedure-get_cgi_env)
   - [GET_PREF](#procedure-get_pref)
   - [PURGE](#procedure-purge)
@@ -475,6 +476,56 @@ ID      LOG_ID  APP_SESSION    ITEM_NAME                 ITEM_VALUE
 
 <a name="utility-functions"></a>
 ###Utility Functions
+
+
+
+<a name="procedure-tochar"></a>
+####TOCHAR
+
+TOCHAR will convert the value to a string (varchar2). It is useful when wanting to log items, such as booleans, without having to explicitly convert them.
+
+#####Syntax
+```sql
+logger.tochar(
+  p_val in number | date | timestamp | timestamp with time zone | timestamp with local time zone | boolean
+  return varchar2);
+```
+
+#####Parameters
+<table border="0">
+  <tr>
+    <th>Attribute</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>p_val</td>
+    <td>Value (in original data type)</td>
+  </tr>
+    <tr>
+    <td>return</td>
+    <td>Varchar2 value of *p_val*</td>
+  </tr>
+</table>
+
+#####Example
+```sql
+select logger.tochar(sysdate)
+from dual;
+
+
+LOGGER.TOCHAR(SYSDATE)
+-----------------------
+13-JUN-2014 21:20:34
+
+
+-- In PL/SQL highlighting conversion from boolean to varchar2
+SQL> exec dbms_output.put_line(logger.tochar(true));
+TRUE
+
+PL/SQL procedure successfully completed.
+
+```
+
 
 <a name="procedure-get_cgi_env"></a>
 ####GET_CGI_ENV

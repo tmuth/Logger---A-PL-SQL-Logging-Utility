@@ -1503,12 +1503,79 @@ as
   end sqlplus_format;
   
 
+  /**
+   * Converts parameter to varchar2
+   *
+   * Notes:
+   *  - As this function could be useful for non-logging purposes will not apply a NO_OP to it for conditional compilation
+   *
+   * Related Tickets:
+   *  - #67
+   *
+   * @author Martin D'Souza
+   * @created 07-Jun-2014
+   * @param p_value
+   * @return varchar2 value for p_value
+   */
+  function tochar(
+    p_val in number)
+    return varchar2
+  as
+  begin
+    return to_char(p_val); 
+  end tochar;
+
+  function tochar(
+    p_val in date)
+    return varchar2
+  as
+  begin
+    return to_char(p_val, gc_date_format);
+  end tochar;
+
+  function tochar(
+    p_val in timestamp)
+    return varchar2
+  as
+  begin
+    return to_char(p_val, gc_timestamp_format);
+  end tochar;
+
+  function tochar(
+    p_val in timestamp with time zone)
+    return varchar2
+  as
+  begin
+    return to_char(p_val, gc_timestamp_tz_format);
+  end tochar;
+
+  function tochar(
+    p_val in timestamp with local time zone)
+    return varchar2
+  as
+  begin
+    return to_char(p_val, gc_timestamp_tz_format);
+  end tochar;
+
+  function tochar(
+    p_val in boolean)
+    return varchar2
+  as
+  begin
+    return case when p_val then 'TRUE' else 'FALSE' end;
+  end tochar;
+
+
+
   -- Handle Parameters
   
   /**
    * Append parameter to table of parameters
    * Nothing is actually logged in this procedure
    * This procedure is overloaded
+   *
+   * Related Tickets:
+   *  - #67: Updated to reference tochar functions
    *
    * @author Martin D'Souza
    * @created 19-Jan-2013
@@ -1544,7 +1611,7 @@ as
      $IF $$NO_OP $THEN
       null;
     $ELSE
-      logger.append_param(p_params => p_params, p_name => p_name, p_val => to_char(p_val));
+      logger.append_param(p_params => p_params, p_name => p_name, p_val => logger.tochar(p_val => p_val));
     $END  
   end append_param;
   
@@ -1558,7 +1625,7 @@ as
      $IF $$NO_OP $THEN
       null;
     $ELSE
-      logger.append_param(p_params => p_params, p_name => p_name, p_val => to_char(p_val, gc_date_format));
+      logger.append_param(p_params => p_params, p_name => p_name, p_val => logger.tochar(p_val => p_val));
     $END  
   end append_param;
   
@@ -1572,7 +1639,7 @@ as
      $IF $$NO_OP $THEN
       null;
     $ELSE
-      logger.append_param(p_params => p_params, p_name => p_name, p_val => to_char(p_val, gc_timestamp_format));
+      logger.append_param(p_params => p_params, p_name => p_name, p_val => logger.tochar(p_val => p_val));
     $END  
   end append_param;
   
@@ -1586,7 +1653,7 @@ as
      $IF $$NO_OP $THEN
       null;
     $ELSE
-      logger.append_param(p_params => p_params, p_name => p_name, p_val => to_char(p_val, gc_timestamp_tz_format));
+      logger.append_param(p_params => p_params, p_name => p_name, p_val => logger.tochar(p_val => p_val));
     $END  
   end append_param;
   
@@ -1600,7 +1667,7 @@ as
      $IF $$NO_OP $THEN
       null;
     $ELSE
-      logger.append_param(p_params => p_params, p_name => p_name, p_val => to_char(p_val, gc_timestamp_tz_format));
+      logger.append_param(p_params => p_params, p_name => p_name, p_val => logger.tochar(p_val => p_val));
     $END  
   end append_param;
   
@@ -1614,9 +1681,11 @@ as
      $IF $$NO_OP $THEN
       null;
     $ELSE
-      logger.append_param(p_params => p_params, p_name => p_name, p_val => case when p_val then 'TRUE' else 'FALSE' end);
+      logger.append_param(p_params => p_params, p_name => p_name, p_val => p_val);
     $END  
   end append_param;
+
+
   
   /**
    * Determines if log statements will actually be stored.
