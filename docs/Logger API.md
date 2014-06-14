@@ -478,7 +478,6 @@ ID      LOG_ID  APP_SESSION    ITEM_NAME                 ITEM_VALUE
 ###Utility Functions
 
 
-
 <a name="procedure-tochar"></a>
 ####TOCHAR
 
@@ -503,7 +502,7 @@ logger.tochar(
   </tr>
     <tr>
     <td>return</td>
-    <td>Varchar2 value of *p_val*</td>
+    <td>Varchar2 value of p_val</td>
   </tr>
 </table>
 
@@ -511,7 +510,6 @@ logger.tochar(
 ```sql
 select logger.tochar(sysdate)
 from dual;
-
 
 LOGGER.TOCHAR(SYSDATE)
 -----------------------
