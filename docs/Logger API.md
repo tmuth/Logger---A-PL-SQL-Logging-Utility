@@ -1,10 +1,16 @@
-[Constants](#constants)<br/>
-[Types](#types)<br/>
-[Subprograms](#subprograms)
+#Table of Contents
+* [Constants](#constants)<br/>
+* [Types](#types)<br/>
+* [Subprograms](#subprograms)
+
 <a name="constants"></a>
-##Constants
+#Constants
 
 <table border="0">
+  <tr>
+    <th>Name</th>
+    <th>Description</th>
+  </tr>
 	<tr>
 		<td>g_logger_version</td>
 		<td>Version of Logger.</td>
