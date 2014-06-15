@@ -1,5 +1,61 @@
 This page contains all of Logger's Change Logs.
 
+<a name="change-log-2.2.0"></a>
+##Change Log 2.2.0
+[Download](TODO_URL)<br/>
+[Release Page](TODO_URL)<br/>
+Release Articles
+- [TODO_NAME](TOOD_URL)
+
+<table border="0">
+  <tr>
+  	<td>Issue#</td>
+    <td>Feature</td>
+    <td>Articles</td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/67" target="_blank">67</a></td>
+    <td>Added TOCHAR function</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/pull/51" target="_blank">51</a></td>
+    <td>Fix exception in log_apex_items</td>
+    <td></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/50" target="_blank">50</a></td>
+    <td>Added SID column</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/43" target="_blank">43</a></td>
+    <td>Reference new global constants for names</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/42" target="_blank">42</a></td>
+    <td>ok_to_log takes in both name or number of logger level</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/47" target="_blank">47</a></td>
+    <td>Support for both logger level name and number</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/32" target="_blank">32</a></td>
+    <td>printf type support for substitution strings</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td>TODO</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+
+</table>
+
 <a name="change-log-2.1.2"></a>
 ##Change Log 2.1.2
 [Download](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/tree/master/releases/2.1.2)<br/>

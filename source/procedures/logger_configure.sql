@@ -16,6 +16,8 @@ is
   l_variables varchar2(1000) := ' ';
   l_dummy number;
   l_flashback varchar2(50) := 'FALSE';
+  l_utl_lms varchar2(5) := 'FALSE';
+
   pragma exception_init(tbl_not_exist, -942);
   --pragma 				exception_init(no_data_found, -1403);
   pragma exception_init(pls_pkg_not_exist, -06550);
@@ -94,7 +96,19 @@ begin
   l_variables := l_variables||'FLASHBACK_ENABLED:'||l_flashback||',';
   --
   /* ************************************************************************** */
-  
+
+
+  -- #32 Support for substrings
+  begin
+    execute immediate 'begin :d := sys.utl_lms.format_message(''%d'', 1); end; ' using out l_dummy; -- Note could have used q funciton but unsure of backwards support
+
+    l_utl_lms := 'TRUE';
+  exception
+    when others then 
+    l_utl_lms := 'FALSE';
+  end;
+  l_variables := l_variables||'LOGGER_UTL_LMS:'||l_utl_lms||',';
+
     
   l_variables :=  rtrim(l_variables,',');
   $IF $$LOGGER_DEBUG $THEN

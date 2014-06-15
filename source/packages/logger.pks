@@ -281,5 +281,20 @@ as
     p_extra in logger_logs.extra%type default null,
     po_id out nocopy logger_logs.id%type
   );
+  
+  
+  function get_fmt_msg(
+    p_msg in varchar2,
+    p_s01 in varchar2 default null,
+    p_s02 in varchar2 default null,
+    p_s03 in varchar2 default null,
+    p_s04 in varchar2 default null,
+    p_s05 in varchar2 default null,
+    p_s06 in varchar2 default null,
+    p_s07 in varchar2 default null,
+    p_s08 in varchar2 default null,
+    p_s09 in varchar2 default null,
+    p_s10 in varchar2 default null)
+    return varchar2;
 end logger;
 /
