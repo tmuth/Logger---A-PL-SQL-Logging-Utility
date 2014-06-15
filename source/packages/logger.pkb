@@ -243,6 +243,48 @@ as
     return l_level;
   end convert_level_char_to_num;
 
+
+  /**
+   * Converts the logger level num to char format
+   *
+   * Notes:
+   *  - 
+   *
+   * Related Tickets:
+   *  - #47
+   *
+   * @author Martin D'Souza
+   * @created 14-Jun-2014
+   * @param p_level
+   * @return Logger level string format
+   */
+  function convert_level_num_to_char(
+    p_level in number)
+  return varchar2
+  is
+    l_return varchar2(255);
+  begin
+    $if $$no_op $then
+      null;
+    $else
+      l_return :=
+        case p_level
+          when g_off then g_off_name
+          when g_permanent then g_permanent_name
+          when g_error then g_error_name
+          when g_warning then g_warning_name
+          when g_information then g_information_name
+          when g_debug then g_debug_name
+          when g_timing then g_timing_name
+          when g_sys_context then g_sys_context_name
+          when g_apex then g_apex_name
+          else null
+        end;
+    $end
+    
+    return l_return;
+  end convert_level_num_to_char;
+
   function get_level_number
     return number
     $IF $$RAC_LT_11_2 $THEN
@@ -1195,29 +1237,59 @@ as
       raise;
 	end get_pref;
 
-	procedure purge(
-		p_purge_after_days	in varchar2	default null,
-		p_purge_min_level	in varchar2	default null)
+  /**
+   * Purges logger_logs data
+   *
+   * Notes:
+   *  - 
+   *
+   * Related Tickets:
+   *  - #47 Support for overloading
+   *
+   * @author Martin D'Souza
+   * @created 14-Jun-2014
+   * @param p_purge_after_days
+   * @param p_purge_min_level
+   */
+  procedure purge(
+    p_purge_after_days in number default null,
+    p_purge_min_level in number)
 
-	is
-		$IF $$NO_OP is null or NOT $$NO_OP $THEN
-      l_purge_min_level	    number	:= convert_level_char_to_num(nvl(p_purge_min_level,get_pref('PURGE_MIN_LEVEL')));
-      l_purge_after_days	    number	:= nvl(p_purge_after_days,get_pref('PURGE_AFTER_DAYS'));
+  is
+    $IF $$NO_OP is null or NOT $$NO_OP $THEN
+      l_purge_after_days number := nvl(p_purge_after_days,get_pref('PURGE_AFTER_DAYS'));
     $END
     pragma autonomous_transaction;
-	begin
+  begin
     $IF $$NO_OP $THEN
       null;
     $ELSE
+
       if admin_security_check then
         delete
           from logger_logs
-         where logger_level >= l_purge_min_level
+         where logger_level >= p_purge_min_level
            and time_stamp < systimestamp - NUMTODSINTERVAL(l_purge_after_days, 'day')
            and logger_level > g_permanent;
       end if;
     $END
     commit;
+  end purge;
+
+
+	procedure purge(
+		p_purge_after_days in varchar2 default null,
+		p_purge_min_level	in varchar2	default null)
+
+	is
+	begin
+    $IF $$NO_OP $THEN
+      null;
+    $ELSE
+      purge(
+        p_purge_after_days => to_number(p_purge_after_days),
+        p_purge_min_level => convert_level_char_to_num(nvl(p_purge_min_level,get_pref('PURGE_MIN_LEVEL'))));
+    $END
 	end purge;
 
 
@@ -1363,7 +1435,7 @@ as
   )
   is
     l_level varchar2(20);
-    l_ctx   varchar2(2000);
+    l_ctx varchar2(2000);
     l_old_level varchar2(20);
     l_include_call_stack varchar2(255);
     l_client_id_expire_hours number;
@@ -1431,6 +1503,43 @@ as
       end if;
     $END
     commit;
+  end set_level;
+
+
+  /**
+   * overloaded procedure
+   *
+   * Notes:
+   *  - 
+   *
+   * Related Tickets:
+   *  - #47
+   *
+   * @author Martin D'Souza
+   * @created 14-Jun-2014
+   * @param p_level Can not have a default value as it'll be in conflict with parent call
+   * @param p_client_id
+   * @param p_include_call_stack
+   * @param p_client_id_expire_hours
+   */
+  procedure set_level(
+    p_level in number,
+    p_client_id in varchar2 default null,
+    p_include_call_stack in varchar2 default null,
+    p_client_id_expire_hours in number default null
+  )
+  as
+  begin
+    set_level(
+      p_level => 
+        $if $$no_op $then 
+          null 
+        $else 
+          convert_level_num_to_char(p_level => p_level) 
+        $end,
+      p_client_id => p_client_id,
+      p_include_call_stack => p_include_call_stack,
+      p_client_id_expire_hours => p_client_id_expire_hours);
   end set_level;
   
   

@@ -169,8 +169,12 @@ as
     ;
 
 	procedure purge(
-		p_purge_after_days	in varchar2	default null,
+		p_purge_after_days in varchar2 default null,
 		p_purge_min_level	in varchar2	default null);
+
+  procedure purge(
+    p_purge_after_days in number default null,
+    p_purge_min_level in number);
 
 	procedure purge_all;
 
@@ -184,7 +188,14 @@ as
     p_client_id in varchar2 default null,
     p_include_call_stack in varchar2 default null,
     p_client_id_expire_hours in number default null
- );
+  );
+
+  procedure set_level(
+    p_level in number,
+    p_client_id in varchar2 default null,
+    p_include_call_stack in varchar2 default null,
+    p_client_id_expire_hours in number default null
+  );
     
   procedure unset_client_level(p_client_id in varchar2);
   
