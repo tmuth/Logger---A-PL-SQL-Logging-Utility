@@ -1439,6 +1439,13 @@ as
   -- 
   /**
    * Sets the logger level
+   *
+   * Notes:
+   *  - 
+   *
+   * Related Tickets:
+   *  - #59 Allow security check to be bypassed for client specific logging level
+   *
    * 
    * @author Tyler Muth
    * @created ???
@@ -1474,7 +1481,8 @@ as
         '"LEVEL" must be one of the following values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING');
       assert(l_include_call_stack in ('TRUE', 'FALSE'), 'l_include_call_stack must be TRUE or FALSE');
 
-      if admin_security_check then
+      -- #59 Allow security check to be bypassed for client specific logging level
+      if p_client_id is not null or admin_security_check then
         l_ctx := 'Host: '||sys_context('USERENV','HOST');
         l_ctx := l_ctx || ', IP: '||sys_context('USERENV','IP_ADDRESS');
         l_ctx := l_ctx || ', TERMINAL: '||sys_context('USERENV','TERMINAL');
