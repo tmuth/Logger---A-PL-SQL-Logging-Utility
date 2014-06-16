@@ -1839,6 +1839,7 @@ as
    * Related Issues
    *  - #31: Initial ticket
    *  - #50: Added SID column
+   *  - #69: Fixed missing no_op flag
    *
    * @param p_logger_level
    * @param p_text
@@ -1869,52 +1870,57 @@ as
     l_tmp_clob clob;
 
   begin
-    -- Using select into to support version older than 11gR1 (see Issue 26)
-    select logger_logs_seq.nextval 
-    into po_id 
-    from dual;
+    $if $$no_op $then
+      null;
+    $else
+
+      -- Using select into to support version older than 11gR1 (see Issue 26)
+      select logger_logs_seq.nextval 
+      into po_id 
+      from dual;
+      
+      -- 2.1.0: If text is > 4000 characters, it will be moved to the EXTRA column (Issue 17)
+      $IF $$LARGE_TEXT_COLUMN $THEN -- Only check for moving to Clob if small text column
+        -- Don't do anything since column supports large text
+      $ELSE 
+        if length(l_text) > 4000 then
+          if l_extra is null then
+            l_extra := l_text;
+          else
+            -- Using temp clob for performance purposes: http://www.talkapex.com/2009/06/how-to-quickly-append-varchar2-to-clob.html
+            l_tmp_clob := gc_line_feed || gc_line_feed || '*** Content moved to EXTRA column ***' || gc_line_feed;
+            l_extra := l_extra || l_tmp_clob;
+            l_tmp_clob := l_text;
+            l_extra := l_extra || l_text;
+          end if; -- l_extra is not null
     
-    -- 2.1.0: If text is > 4000 characters, it will be moved to the EXTRA column (Issue 17)
-    $IF $$LARGE_TEXT_COLUMN $THEN -- Only check for moving to Clob if small text column
-      -- Don't do anything since column supports large text
-    $ELSE 
-      if length(l_text) > 4000 then
-        if l_extra is null then
-          l_extra := l_text;
-        else
-          -- Using temp clob for performance purposes: http://www.talkapex.com/2009/06/how-to-quickly-append-varchar2-to-clob.html
-          l_tmp_clob := gc_line_feed || gc_line_feed || '*** Content moved to EXTRA column ***' || gc_line_feed;
-          l_extra := l_extra || l_tmp_clob;
-          l_tmp_clob := l_text;
-          l_extra := l_extra || l_text;
-        end if; -- l_extra is not null
-  
-        l_text := 'Text moved to EXTRA column';
-      end if; -- length(l_text)
-    $END
-    
-    insert into logger_logs(
-      id, logger_level, text,
-      time_stamp, scope, module, 
-      action, 
-      user_name, 
-      client_identifier,
-      call_stack, unit_name, line_no , 
-      scn, 
-      extra,
-      sid
-      ) 
-     values(
-       po_id, p_logger_level, l_text,
-       systimestamp, lower(p_scope), sys_context('userenv','module'), 
-       sys_context('userenv','action'), 
-       nvl($IF $$APEX $THEN apex_application.g_user $ELSE user $END,user), 
-       sys_context('userenv','client_identifier'),
-       p_call_stack, upper(p_unit_name), p_line_no, 
-       null, 
-       l_extra,
-       to_number(sys_context('userenv','sid'))
-       );
+          l_text := 'Text moved to EXTRA column';
+        end if; -- length(l_text)
+      $END
+      
+      insert into logger_logs(
+        id, logger_level, text,
+        time_stamp, scope, module, 
+        action, 
+        user_name, 
+        client_identifier,
+        call_stack, unit_name, line_no , 
+        scn, 
+        extra,
+        sid
+        ) 
+       values(
+         po_id, p_logger_level, l_text,
+         systimestamp, lower(p_scope), sys_context('userenv','module'), 
+         sys_context('userenv','action'), 
+         nvl($IF $$APEX $THEN apex_application.g_user $ELSE user $END,user), 
+         sys_context('userenv','client_identifier'),
+         p_call_stack, upper(p_unit_name), p_line_no, 
+         null, 
+         l_extra,
+         to_number(sys_context('userenv','sid'))
+         );
+    $end
     
     commit;
   end ins_logger_logs;
