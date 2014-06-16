@@ -54,8 +54,8 @@ Release Articles
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
-    <td>TODO</td>
+    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/59" target="_blank">59</a></td>
+    <td>Allow security check to be bypassed for client specific logging level</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
