@@ -1531,12 +1531,11 @@ as
   as
   begin
     set_level(
-      p_level => 
-        $if $$no_op $then 
-          null 
-        $else 
-          convert_level_num_to_char(p_level => p_level) 
-        $end,
+      $if $$no_op $then
+        -- Don't pass in p_level since it will default to null (no call then)
+      $else 
+        p_level => convert_level_num_to_char(p_level => p_level),
+      $end
       p_client_id => p_client_id,
       p_include_call_stack => p_include_call_stack,
       p_client_id_expire_hours => p_client_id_expire_hours);
@@ -1977,7 +1976,7 @@ as
 
   begin
     $if $$no_op $then
-      null
+      null;
     $else
       
       $if $$logger_utl_lms $then
