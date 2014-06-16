@@ -1,4 +1,7 @@
+set sqlprompt ''
 set feedback off
+set linesize 200
+set serverout on
 
 alter package logger compile body PLSQL_CCFLAGS='NO_OP:TRUE';
 
@@ -19,3 +22,5 @@ prompt /
 spool off
 
 alter package logger compile body PLSQL_CCFLAGS='NO_OP:FALSE';
+
+exit

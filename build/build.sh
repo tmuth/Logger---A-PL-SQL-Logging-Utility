@@ -7,17 +7,30 @@
 #		OLD: #read -p "New Version Number x.x.x ?" VERSION_NUMBER
 
 VERSION_NUMBER=$1
-
+SQL_CONNECTION=$2
 
 {
 if [ -z "${VERSION_NUMBER}" ]; then 
-	echo "VERSION_NUMBER (parameter 1) is not defined"
+  echo "VERSION_NUMBER (parameter 1) is not defined"
+  exit 0
+fi
+if [ -z "${SQL_CONNECTION}" ]; then 
+	echo "SQL_CONNECTION (parameter 2) is not defined"
 	exit 0
 fi
 }
 
 echo "Building release $VERSION_NUMBER"
 
+
+#TODO testing no_ops
+START_DIR="$PWD"
+cd ../source/packages
+sqlplus $SQL_CONNECTION @../gen_no_op.sql
+cd $START_DIR
+
+#TODO delete
+#sqlplus giffy/giffy@//localhost:1529/XE @../gen_no_op.sql
 
 
 #*** VARIABLES ***
@@ -103,7 +116,7 @@ printf '\n' >> $INSTALL
 
 
 #NO OP Code
-printf "\x2d\x2d This file installs a NO-OP version of the logger package that has all of the same procedures and functions,\n " > $NO_OP
+printf "\x2d\x2d This file installs a NO-OP version of the logger package that has all of the same procedures and functions,\n" > $NO_OP
 printf "\x2d\x2d but does not actually write to any tables. Additionally, it has no other object dependencies.\n" >> $NO_OP
 printf "\x2d\x2d You can review the documentation at https://logger.samplecode.oracle.com/ for more information.\n" >> $NO_OP
 printf '\n' >> $NO_OP
