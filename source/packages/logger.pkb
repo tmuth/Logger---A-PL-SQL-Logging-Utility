@@ -59,20 +59,24 @@ as
     l_return clob;
     l_no_vars constant varchar2(255) := 'No params defined';
   begin
-    -- Generate line feed delimited list
-    if p_params.count > 0 then
-      for x in p_params.first..p_params.last loop
-        l_return := l_return || p_params(x).name || ': ' || p_params(x).val;
-        
-        if x != p_params.last then
-          l_return := l_return || gc_line_feed;
-        end if;
-      end loop;
-    end if; -- p_params.count > 0
-    
-    if l_return is null then
-      l_return := l_no_vars;
-    end if;
+    $if $$no_op $then
+      null;
+    $else
+      -- Generate line feed delimited list
+      if p_params.count > 0 then
+        for x in p_params.first..p_params.last loop
+          l_return := l_return || p_params(x).name || ': ' || p_params(x).val;
+          
+          if x != p_params.last then
+            l_return := l_return || gc_line_feed;
+          end if;
+        end loop;
+      end if; -- p_params.count > 0
+      
+      if l_return is null then
+        l_return := l_no_vars;
+      end if;
+    $end
     
     return l_return;
   end get_param_clob;
@@ -93,9 +97,13 @@ as
     p_message in varchar2)
   as
   begin
-    if not p_condition or p_condition is null then
-      raise_application_error(-20000, p_message);
-    end if;
+    $if $$no_op $then
+      null;
+    $else
+      if not p_condition or p_condition is null then
+        raise_application_error(-20000, p_message);
+      end if;
+    $end
   end assert;
   
   /**
@@ -166,19 +174,24 @@ as
  function admin_security_check
     return boolean
   is
-    l_protect_admin_procs	varchar2(50)	:= get_pref('PROTECT_ADMIN_PROCS');
-    l_return                boolean default false;
+    l_protect_admin_procs	logger_prefs.pref_value%type;
+    l_return boolean default false;
   begin
-    if get_pref('PROTECT_ADMIN_PROCS') = 'TRUE' then
-      if get_pref('INSTALL_SCHEMA') = sys_context('USERENV','SESSION_USER') then
-        l_return := true;
+    $if $$no_op $then
+      l_return := true;
+    $else
+      l_protect_admin_procs := get_pref('PROTECT_ADMIN_PROCS');
+      if l_protect_admin_procs = 'TRUE' then
+        if get_pref('INSTALL_SCHEMA') = sys_context('USERENV','SESSION_USER') then
+          l_return := true;
+        else
+          l_return := false;
+          raise_application_error (-20000, 'You are not authorized to call this procedure.');
+        end if;
       else
-        l_return := false;
-        raise_application_error (-20000, 'You are not authorized to call this procedure.');
+          l_return := true;
       end if;
-    else
-        l_return := true;
-    end if;
+    $end
 
     return l_return;
 
@@ -519,11 +532,15 @@ as
     --
     l_callstack varchar2(3000) := p_callstack;
   begin
-    l_callstack := substr( l_callstack, instr( l_callstack, chr(10), 1, 5 )+1 );
-    l_callstack := substr( l_callstack, 1, instr( l_callstack, chr(10), 1, 1 )-1 );
-    l_callstack := trim( substr( l_callstack, instr( l_callstack, ' ' ) ) );
-    o_lineno := substr( l_callstack, 1, instr( l_callstack, ' ' )-1 );
-    o_unit := trim(substr( l_callstack, instr( l_callstack, ' ', -1, 1 ) ));
+    $if $$no_op $then
+      null;
+    $else
+      l_callstack := substr( l_callstack, instr( l_callstack, chr(10), 1, 5 )+1 );
+      l_callstack := substr( l_callstack, 1, instr( l_callstack, chr(10), 1, 1 )-1 );
+      l_callstack := trim( substr( l_callstack, instr( l_callstack, ' ' ) ) );
+      o_lineno := substr( l_callstack, 1, instr( l_callstack, ' ' )-1 );
+      o_unit := trim(substr( l_callstack, instr( l_callstack, ' ', -1, 1 ) ));
+    $end
   end get_debug_info;
 
 
@@ -792,77 +809,81 @@ as
         --log_warning('Invalid SYS_CONTEXT Parameter: '||p_name);
         null;
     end append_ctx;
+
   
   begin
+    $if $$no_op $then
+      return null;
+    $else
+      if l_detail_level in ('ALL','NLS','INSTANCE') then
+        append_ctx('NLS_CALENDAR');
+        append_ctx('NLS_CURRENCY');
+        append_ctx('NLS_DATE_FORMAT');
+        append_ctx('NLS_DATE_LANGUAGE');
+        append_ctx('NLS_SORT');
+        append_ctx('NLS_TERRITORY');
+        append_ctx('LANG');
+        append_ctx('LANGUAGE');
+      end if;
 
-    if l_detail_level in ('ALL','NLS','INSTANCE') then
-      append_ctx('NLS_CALENDAR');
-      append_ctx('NLS_CURRENCY');
-      append_ctx('NLS_DATE_FORMAT');
-      append_ctx('NLS_DATE_LANGUAGE');
-      append_ctx('NLS_SORT');
-      append_ctx('NLS_TERRITORY');
-      append_ctx('LANG');
-      append_ctx('LANGUAGE');
-    end if;
+      if l_detail_level in ('ALL','USER') then
+        append_ctx('CURRENT_SCHEMA');
+        append_ctx('SESSION_USER');
+        append_ctx('OS_USER');
+        append_ctx('CLIENT_IDENTIFIER');
+        append_ctx('CLIENT_INFO');
+        append_ctx('IP_ADDRESS');
+        append_ctx('HOST');
+        append_ctx('TERMINAL');
+      end if;
 
-    if l_detail_level in ('ALL','USER') then
-      append_ctx('CURRENT_SCHEMA');
-      append_ctx('SESSION_USER');
-      append_ctx('OS_USER');
-      append_ctx('CLIENT_IDENTIFIER');
-      append_ctx('CLIENT_INFO');
-      append_ctx('IP_ADDRESS');
-      append_ctx('HOST');
-      append_ctx('TERMINAL');
-    end if;
+      if l_detail_level in ('ALL','USER') then
+        append_ctx('AUTHENTICATED_IDENTITY');
+        append_ctx('AUTHENTICATION_DATA');
+        append_ctx('AUTHENTICATION_METHOD');
+        append_ctx('ENTERPRISE_IDENTITY');
+        append_ctx('POLICY_INVOKER');
+        append_ctx('PROXY_ENTERPRISE_IDENTITY');
+        append_ctx('PROXY_GLOBAL_UID');
+        append_ctx('PROXY_USER');
+        append_ctx('PROXY_USERID');
+        append_ctx('IDENTIFICATION_TYPE');
+        append_ctx('ISDBA');
+      end if;
 
-    if l_detail_level in ('ALL','USER') then
-      append_ctx('AUTHENTICATED_IDENTITY');
-      append_ctx('AUTHENTICATION_DATA');
-      append_ctx('AUTHENTICATION_METHOD');
-      append_ctx('ENTERPRISE_IDENTITY');
-      append_ctx('POLICY_INVOKER');
-      append_ctx('PROXY_ENTERPRISE_IDENTITY');
-      append_ctx('PROXY_GLOBAL_UID');
-      append_ctx('PROXY_USER');
-      append_ctx('PROXY_USERID');
-      append_ctx('IDENTIFICATION_TYPE');
-      append_ctx('ISDBA');
-    end if;
+      if l_detail_level in ('ALL','INSTANCE') then
+        append_ctx('DB_DOMAIN');
+        append_ctx('DB_NAME');
+        append_ctx('DB_UNIQUE_NAME');
+        append_ctx('INSTANCE');
+        append_ctx('INSTANCE_NAME');
+        append_ctx('SERVER_HOST');
+        append_ctx('SERVICE_NAME');
+      end if;
 
-    if l_detail_level in ('ALL','INSTANCE') then
-      append_ctx('DB_DOMAIN');
-      append_ctx('DB_NAME');
-      append_ctx('DB_UNIQUE_NAME');
-      append_ctx('INSTANCE');
-      append_ctx('INSTANCE_NAME');
-      append_ctx('SERVER_HOST');
-      append_ctx('SERVICE_NAME');
-    end if;
+      if l_detail_level in ('ALL') then
+        append_ctx('ACTION');
+        append_ctx('AUDITED_CURSORID');
+        append_ctx('BG_JOB_ID');
+        append_ctx('CURRENT_BIND');
+        append_ctx('CURRENT_SCHEMAID');
+        append_ctx('CURRENT_SQL');
+        append_ctx('CURRENT_SQLn');
+        append_ctx('CURRENT_SQL_LENGTH');
+        append_ctx('ENTRYID');
+        append_ctx('FG_JOB_ID');
+        append_ctx('GLOBAL_CONTEXT_MEMORY');
+        append_ctx('GLOBAL_UID');
+        append_ctx('MODULE');
+        append_ctx('NETWORK_PROTOCOL');
+        append_ctx('SESSION_USERID');
+        append_ctx('SESSIONID');
+        append_ctx('SID');
+        append_ctx('STATEMENTID');
+      end if;
 
-    if l_detail_level in ('ALL') then
-      append_ctx('ACTION');
-      append_ctx('AUDITED_CURSORID');
-      append_ctx('BG_JOB_ID');
-      append_ctx('CURRENT_BIND');
-      append_ctx('CURRENT_SCHEMAID');
-      append_ctx('CURRENT_SQL');
-      append_ctx('CURRENT_SQLn');
-      append_ctx('CURRENT_SQL_LENGTH');
-      append_ctx('ENTRYID');
-      append_ctx('FG_JOB_ID');
-      append_ctx('GLOBAL_CONTEXT_MEMORY');
-      append_ctx('GLOBAL_UID');
-      append_ctx('MODULE');
-      append_ctx('NETWORK_PROTOCOL');
-      append_ctx('SESSION_USERID');
-      append_ctx('SESSIONID');
-      append_ctx('SID');
-      append_ctx('STATEMENTID');
-    end if;
-
-    return rtrim(l_ctx,', ');
+      return rtrim(l_ctx,', ');
+    $end
   end get_sys_context;
 
 
@@ -1442,17 +1463,17 @@ as
     l_expiry_date logger_prefs_by_client_id.expiry_date%type;
     pragma autonomous_transaction;
   begin
-    l_level := replace(upper(p_level),' ');
-    l_include_call_stack := nvl(trim(upper(p_include_call_stack)), get_pref('INCLUDE_CALL_STACK'));
-    
-    assert(l_level in (g_off_name, g_permanent_name, g_error_name, g_warning_name, g_information_name, g_debug_name, g_timing_name),
-      '"LEVEL" must be one of the following values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING');
-    assert(l_include_call_stack in ('TRUE', 'FALSE'), 'l_include_call_stack must be TRUE or FALSE');
-    
     $IF $$NO_OP $THEN
       raise_application_error (-20000,
           'Either the NO-OP version of Logger is installed or it is compiled for NO-OP,  so you cannot set the level.');
     $ELSE
+      l_level := replace(upper(p_level),' ');
+      l_include_call_stack := nvl(trim(upper(p_include_call_stack)), get_pref('INCLUDE_CALL_STACK'));
+      
+      assert(l_level in (g_off_name, g_permanent_name, g_error_name, g_warning_name, g_information_name, g_debug_name, g_timing_name),
+        '"LEVEL" must be one of the following values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING');
+      assert(l_include_call_stack in ('TRUE', 'FALSE'), 'l_include_call_stack must be TRUE or FALSE');
+
       if admin_security_check then
         l_ctx := 'Host: '||sys_context('USERENV','HOST');
         l_ctx := l_ctx || ', IP: '||sys_context('USERENV','IP_ADDRESS');
