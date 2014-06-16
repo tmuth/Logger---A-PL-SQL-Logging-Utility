@@ -49,6 +49,16 @@ Release Articles
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
+    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/57" target="_blank">57</a></td>
+    <td>Modify build script so that no_op code is auto generated as part of build</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td>TODO</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
     <td>TODO</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
