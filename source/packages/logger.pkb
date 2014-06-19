@@ -1845,7 +1845,7 @@ as
      $IF $$NO_OP $THEN
       null;
     $ELSE
-      logger.append_param(p_params => p_params, p_name => p_name, p_val => p_val);
+      logger.append_param(p_params => p_params, p_name => p_name, p_val => logger.tochar(p_val => p_val));
     $END  
   end append_param;
 
