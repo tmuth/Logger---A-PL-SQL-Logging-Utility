@@ -63,7 +63,6 @@ as
     l_num number;
   begin
     l_num := to_number(p_str);
-
     return true;
   exception
     when others then
@@ -1511,8 +1510,8 @@ as
 
       l_include_call_stack := nvl(trim(upper(p_include_call_stack)), get_pref('INCLUDE_CALL_STACK'));
       
-      assert(l_level in (g_off_name, g_permanent_name, g_error_name, g_warning_name, g_information_name, g_debug_name, g_timing_name),
-        '"LEVEL" must be one of the following values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING');
+      assert(l_level in (g_off_name, g_permanent_name, g_error_name, g_warning_name, g_information_name, g_debug_name, g_timing_name, g_sys_context_name, g_apex_name),
+        '"LEVEL" must be one of the following values: OFF,PERMANENT,ERROR,WARNING,INFORMATION,DEBUG,TIMING,SYS_CONTEXT,APEX');
       assert(l_include_call_stack in ('TRUE', 'FALSE'), 'l_include_call_stack must be TRUE or FALSE');
 
       -- #59 Allow security check to be bypassed for client specific logging level
