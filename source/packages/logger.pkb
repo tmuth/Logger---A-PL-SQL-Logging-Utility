@@ -42,6 +42,34 @@ as
   
   
   -- PRIVATE
+
+  /**
+   * 
+   *
+   * Notes:
+   *  - 
+   *
+   * Related Tickets:
+   *  - 
+   *
+   * @author Martin D'Souza
+   * @created -- TODO mdsouza: 
+   * @param p_str
+   * @return True if p_str is a number
+   */
+  function is_number(p_str in varchar2)
+    return boolean
+  as
+    l_num number;
+  begin
+    l_num := to_number(p_str);
+
+    return true;
+  exception
+    when others then
+      return false;
+  end is_number;
+
   
   /**
    * Returns the display/print friendly parameter information
@@ -1445,6 +1473,7 @@ as
    *
    * Related Tickets:
    *  - #59 Allow security check to be bypassed for client specific logging level
+   *  - #47 Allow of numbers to be passed in p_level. Did not overload (see ticket comments as to why)
    *
    * 
    * @author Tyler Muth
@@ -1475,6 +1504,11 @@ as
           'Either the NO-OP version of Logger is installed or it is compiled for NO-OP,  so you cannot set the level.');
     $ELSE
       l_level := replace(upper(p_level),' ');
+
+      if is_number(p_str => l_level) then
+        l_level := convert_level_num_to_char(p_level => p_level);
+      end if;
+
       l_include_call_stack := nvl(trim(upper(p_include_call_stack)), get_pref('INCLUDE_CALL_STACK'));
       
       assert(l_level in (g_off_name, g_permanent_name, g_error_name, g_warning_name, g_information_name, g_debug_name, g_timing_name),
@@ -1532,42 +1566,6 @@ as
       end if;
     $END
     commit;
-  end set_level;
-
-
-  /**
-   * overloaded procedure
-   *
-   * Notes:
-   *  - 
-   *
-   * Related Tickets:
-   *  - #47
-   *
-   * @author Martin D'Souza
-   * @created 14-Jun-2014
-   * @param p_level Can not have a default value as it'll be in conflict with parent call
-   * @param p_client_id
-   * @param p_include_call_stack
-   * @param p_client_id_expire_hours
-   */
-  procedure set_level(
-    p_level in number,
-    p_client_id in varchar2 default null,
-    p_include_call_stack in varchar2 default null,
-    p_client_id_expire_hours in number default null
-  )
-  as
-  begin
-    set_level(
-      $if $$no_op $then
-        -- Don't pass in p_level since it will default to null (no call then)
-      $else 
-        p_level => convert_level_num_to_char(p_level => p_level),
-      $end
-      p_client_id => p_client_id,
-      p_include_call_stack => p_include_call_stack,
-      p_client_id_expire_hours => p_client_id_expire_hours);
   end set_level;
   
   

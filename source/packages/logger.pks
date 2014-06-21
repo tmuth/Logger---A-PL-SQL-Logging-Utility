@@ -189,13 +189,6 @@ as
     p_include_call_stack in varchar2 default null,
     p_client_id_expire_hours in number default null
   );
-
-  procedure set_level(
-    p_level in number,
-    p_client_id in varchar2 default null,
-    p_include_call_stack in varchar2 default null,
-    p_client_id_expire_hours in number default null
-  );
     
   procedure unset_client_level(p_client_id in varchar2);
   
