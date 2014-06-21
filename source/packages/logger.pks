@@ -76,6 +76,10 @@ as
     p_level in varchar2)
     return number;
 
+  function convert_level_num_to_char(
+    p_level in number)
+    return varchar2;
+
   function date_text_format (p_date in date)
     return varchar2;
 
