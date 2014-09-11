@@ -663,6 +663,96 @@ display_output('Debug Level','NO-OP, Logger completely disabled.');
   begin
     null;
   end append_param;
+
+  procedure log_error(
+    p_xmltype       in XMLTYPE default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    null;
+  end log_error;
   
+  procedure log_error(
+    p_date          in date default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    null;
+  end log_error;
+  
+  procedure log_permanent(
+    p_xmltype       in XMLTYPE default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    null;
+  end log_permanent;
+  
+  procedure log_permanent(
+    p_date          in date default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    null;
+  end log_permanent;
+  
+  procedure log_warning(
+    p_xmltype       in XMLTYPE default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    null;
+  end log_warning;
+  
+  procedure log_warning(
+    p_date          in date default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    null;
+  end log_warning;
+  
+  procedure log_information(
+    p_xmltype       in XMLTYPE default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    null;
+  end log_information;
+  
+  procedure log_information(
+    p_date          in date default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    null;
+  end log_information;
+  
+  procedure log(
+    p_xmltype       in XMLTYPE default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    null;
+  end log;
+  
+  procedure log(
+    p_date          in date default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    null;
+  end log;
+
 end logger;
 /

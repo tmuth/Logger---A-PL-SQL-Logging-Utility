@@ -700,7 +700,6 @@ as
   
         l_text := l_text || dbms_utility.format_error_stack();
         
-        
         l_extra := set_extra_with_params(p_extra => p_extra, p_params => p_params);
         
         ins_logger_logs(
@@ -716,7 +715,30 @@ as
     $END
 	end log_error;
 
+  procedure log_error(
+    p_xmltype       in XMLTYPE default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    log_error (
+      p_scope   =>      p_scope,
+      p_extra   =>      p_xmltype.getclobval(),
+      p_params  =>      p_params);
+  end log_error;
 
+  procedure log_error(
+    p_date          in date default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    log_error (
+      p_text    =>      logger.tochar (p_date),
+      p_scope   =>      p_scope,
+      p_params  =>      p_params);
+  end log_error;
+  
   procedure log_permanent(
     p_text    in varchar2,
     p_scope   in varchar2 default null,
@@ -740,7 +762,31 @@ as
     $END
   end log_permanent;
 
+  procedure log_permanent(
+    p_xmltype       in XMLTYPE default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    log_permanent (
+      p_text    =>  NULL,
+      p_scope   =>  p_scope,
+      p_extra   =>  p_xmltype.getclobval(),
+      p_params  =>  p_params);
+  end log_permanent;
 
+  procedure log_permanent(
+    p_date          in date default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    log_permanent (
+      p_text    =>      logger.tochar (p_date),
+      p_scope   =>      p_scope,
+      p_params  =>      p_params);
+  end log_permanent;
+  
   procedure log_warning(
     p_text    in varchar2,
     p_scope   in varchar2 default null,
@@ -761,6 +807,31 @@ as
           p_params => p_params);
       end if;
     $END
+  end log_warning;
+
+  procedure log_warning(
+    p_xmltype       in XMLTYPE default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    log_warning (
+      p_text    =>  NULL,
+      p_scope   =>  p_scope,
+      p_extra   =>  p_xmltype.getclobval(),
+      p_params  =>  p_params);
+  end log_warning;
+
+  procedure log_warning(
+    p_date          in date default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    log_warning (
+      p_text    =>      logger.tochar (p_date),
+      p_scope   =>      p_scope,
+      p_params  =>      p_params);
   end log_warning;
 
   procedure log_information(
@@ -785,6 +856,31 @@ as
     $END
 	end log_information;
 
+  procedure log_information(
+    p_xmltype       in XMLTYPE default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    log_information (
+      p_text    =>  NULL,
+      p_scope   =>  p_scope,
+      p_extra   =>  p_xmltype.getclobval(),
+      p_params  =>  p_params);
+  end log_information;
+
+  procedure log_information(
+    p_date          in date default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    log_information (
+      p_text    =>      logger.tochar (p_date),
+      p_scope   =>      p_scope,
+      p_params  =>      p_params);
+  end log_information;
+
 	procedure log(
     p_text    in varchar2,
     p_scope   in varchar2 default null,
@@ -792,7 +888,6 @@ as
     p_params  in tab_param default logger.gc_empty_tab_param)
 	is
 	begin
-    
     $IF $$NO_OP $THEN
       null;
     $ELSE
@@ -807,6 +902,31 @@ as
       end if;
     $END
 	end log;
+
+  procedure log(
+    p_xmltype       in XMLTYPE default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    log (
+      p_text    =>  NULL,
+      p_scope   =>  p_scope,
+      p_extra   =>  p_xmltype.getclobval(),
+      p_params  =>  p_params);
+  end log;
+
+  procedure log(
+    p_date          in date default null,
+    p_scope         in varchar2 default null,
+    p_params        in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    log (
+      p_text    =>      logger.tochar (p_date),
+      p_scope   =>      p_scope,
+      p_params  =>      p_params);
+  end log;
 
   function get_sys_context(
     p_detail_level in varchar2 default 'USER', -- ALL, NLS, USER, INSTANCE
@@ -833,7 +953,6 @@ as
       end if;
     exception 
       when invalid_userenv_parm then
-        --log_warning('Invalid SYS_CONTEXT Parameter: '||p_name);
         null;
     end append_ctx;
 
@@ -933,7 +1052,7 @@ as
         l_cgienv := l_cgienv || rpad(p_name,r_pad,' ')||': '||p_val||l_crlf;
 			end if;
       --exception when invalid_userenv_parm then
-      --log_warning('Invalid SYS_CONTEXT Parameter: '||p_name);
+
       null;
     end append_cgi_env;
 
