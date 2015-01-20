@@ -747,7 +747,7 @@ as
     p_params  in tab_param default logger.gc_empty_tab_param)  
   is
   begin
-    log_warn(
+    log_warning(
       p_text    => p_text,
       p_scope   => p_scope,
       p_extra   => p_extra,
@@ -2064,6 +2064,20 @@ as
     return l_return;
 
   end get_fmt_msg;  
+  
+  procedure print(
+    aSessionId in integer := null,
+    aNumberRows in integer := null)
+  is
+  begin
+    $if not $$RAC_LT_11_2 $then
+      dbms_output.put_line('RAC_LT_11_2');
+    $else
+      dbms_output.put_line('ELSE');
+    $end
+  end;  
+    
+  
   
 end logger;
 /
