@@ -100,29 +100,29 @@ as
     p_extra   in clob default null,
     p_params  in tab_param default logger.gc_empty_tab_param);
 
-  procedure log_warning(
-    p_text    in varchar2,
-    p_scope   in varchar2 default null,
-    p_extra   in clob default null,
-    p_params  in tab_param default logger.gc_empty_tab_param);
-
   procedure log_warn(
     p_text    in varchar2,
     p_scope   in varchar2 default null,
     p_extra   in clob default null,
     p_params  in tab_param default logger.gc_empty_tab_param);
 
-  procedure log_information(
+  procedure log_warning(
     p_text    in varchar2,
     p_scope   in varchar2 default null,
     p_extra   in clob default null,
     p_params  in tab_param default logger.gc_empty_tab_param);
-  
+ 
   procedure log_info(
     p_text    in varchar2,
     p_scope   in varchar2 default null,
     p_extra   in clob default null,
     p_params  in tab_param default logger.gc_empty_tab_param);    
+
+  procedure log_information(
+    p_text    in varchar2,
+    p_scope   in varchar2 default null,
+    p_extra   in clob default null,
+    p_params  in tab_param default logger.gc_empty_tab_param);
 
   procedure log(
     p_text    in varchar2,

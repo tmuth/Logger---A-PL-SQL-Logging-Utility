@@ -740,6 +740,19 @@ as
     $END
   end log_permanent;
 
+  procedure log_warn(
+    p_text    in varchar2,
+    p_scope   in varchar2 default null,
+    p_extra   in clob default null,
+    p_params  in tab_param default logger.gc_empty_tab_param)  
+  is
+  begin
+    log_warn(
+      p_text    => p_text,
+      p_scope   => p_scope,
+      p_extra   => p_extra,
+      p_params  => p_params); 
+  end;  
 
   procedure log_warning(
     p_text    in varchar2,
@@ -762,19 +775,19 @@ as
       end if;
     $END
   end log_warning;
-
-  procedure log_warn(
+ 
+  procedure log_info(
     p_text    in varchar2,
     p_scope   in varchar2 default null,
     p_extra   in clob default null,
-    p_params  in tab_param default logger.gc_empty_tab_param)  
+    p_params  in tab_param default logger.gc_empty_tab_param)
   is
   begin
-    log_warn(
+    log_information(
       p_text    => p_text,
       p_scope   => p_scope,
       p_extra   => p_extra,
-      p_params  => p_params); 
+      p_params  => p_params);
   end;  
 
   procedure log_information(
@@ -798,20 +811,6 @@ as
       end if;
     $END
 	end log_information;
-  
-  procedure log_info(
-    p_text    in varchar2,
-    p_scope   in varchar2 default null,
-    p_extra   in clob default null,
-    p_params  in tab_param default logger.gc_empty_tab_param)
-  is
-  begin
-    log_information(
-      p_text    => p_text,
-      p_scope   => p_scope,
-      p_extra   => p_extra,
-      p_params  => p_params);
-  end;  
 
 	procedure log(
     p_text    in varchar2,
