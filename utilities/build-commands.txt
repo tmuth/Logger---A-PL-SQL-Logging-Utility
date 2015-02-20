@@ -1,1 +1,0 @@
-perl Markdown.pl --html4tags ../README.md > README.html

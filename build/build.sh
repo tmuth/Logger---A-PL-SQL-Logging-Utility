@@ -10,11 +10,11 @@ VERSION_NUMBER=$1
 SQL_CONNECTION=$2
 
 {
-if [ -z "${VERSION_NUMBER}" ]; then 
+if [ -z "${VERSION_NUMBER}" ]; then
   echo "VERSION_NUMBER (parameter 1) is not defined"
   exit 0
 fi
-if [ -z "${SQL_CONNECTION}" ]; then 
+if [ -z "${SQL_CONNECTION}" ]; then
 	echo "SQL_CONNECTION (parameter 2) is not defined"
 	exit 0
 fi
@@ -28,9 +28,6 @@ START_DIR="$PWD"
 cd ../source/packages
 sqlplus $SQL_CONNECTION @../gen_no_op.sql
 cd $START_DIR
-
-#TODO delete
-#sqlplus giffy/giffy@//localhost:1529/XE @../gen_no_op.sql
 
 
 #*** VARIABLES ***
@@ -117,6 +114,10 @@ printf '\n' >> $INSTALL
 
 #NO OP Code
 printf "\x2d\x2d This file installs a NO-OP version of the logger package that has all of the same procedures and functions,\n" > $NO_OP
+
+#TODO mdsouza: use gen_no_op.sql to build this
+printf "\x2d\x2d This file installs a NO-OP version of the logger package that has all of the same procedures and functions,\n " > $NO_OP
+
 printf "\x2d\x2d but does not actually write to any tables. Additionally, it has no other object dependencies.\n" >> $NO_OP
 printf "\x2d\x2d You can review the documentation at https://logger.samplecode.oracle.com/ for more information.\n" >> $NO_OP
 printf '\n' >> $NO_OP
@@ -146,31 +147,18 @@ cp -f ../README.md $RELEASE_FOLDER
 #Copy demo scripts
 cp -fr ../demos $RELEASE_FOLDER
 
-#Copy wiki documents
-#No longer necessary as moved to docs folder (Issue #62)
-#mkdir $RELEASE_FOLDER/wiki
-# This is assuming that the wiki directory exists in the same location as the main folder (i.e. same parent)
-#cp -f ../../Logger---A-PL-SQL-Logging-Utility.wiki/* $RELEASE_FOLDER/wiki/
-
-#sed -i "s/tags\/[0-9]\.[0-9]\.[0-9]\/logger_[0-9]\.[0-9]\.[0-9].zip/tags\/$VERSION_NUMBER\/logger_$VERSION_NUMBER\.zip/g" ../www/index.html
-#cp -f ../www/index.html ../build/readme.html
-#Generate readme.html
-#Using https://github.com/evilstreak/markdown-js to convert Markdown (.md) file to html
-#To install: npm install -g markdown
-#MD: I've taken this out since it wasn't converting very well
-#md2html ../README.md > $RELEASE_FOLDER/readme.html
 
 chmod 777 $RELEASE_FOLDER/*.*
+
 
 #Replace any references for the version number
 sed -i.del "s/x\.x\.x/$VERSION_NUMBER/g" $RELEASE_FOLDER/logger_install.sql
 sed -i.del "s/x\.x\.x/$VERSION_NUMBER/g" $RELEASE_FOLDER/logger.pks
 #need to remove the backup file required for sed call
-rm -rf $RELEASE_FOLDER/*.del 
+rm -rf $RELEASE_FOLDER/*.del
 
 
 
-#Old windows zip7za a -tzip $/logger_$VERSION_NUMBER.zip ../build/*.sql ../build/*.html
 #By CDing into the release_folder we don't get the full path in the zip file
 cd $RELEASE_FOLDER
 zip -r logger_$VERSION_NUMBER.zip .
