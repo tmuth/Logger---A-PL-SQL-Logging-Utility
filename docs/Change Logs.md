@@ -14,47 +14,47 @@ Release Articles
     <td>Articles</td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/67" target="_blank">67</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/67" target="_blank">67</a></td>
     <td>Added TOCHAR function</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/pull/51" target="_blank">51</a></td>
+    <td><a href="https://github.com/oraopensource/logger/pull/51" target="_blank">51</a></td>
     <td>Fix exception in log_apex_items</td>
     <td></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/50" target="_blank">50</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/50" target="_blank">50</a></td>
     <td>Added SID column</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/43" target="_blank">43</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/43" target="_blank">43</a></td>
     <td>Reference new global constants for names</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/42" target="_blank">42</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/42" target="_blank">42</a></td>
     <td>ok_to_log takes in both name or number of logger level</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/47" target="_blank">47</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/47" target="_blank">47</a></td>
     <td>Support for both logger level name and number</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/32" target="_blank">32</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/32" target="_blank">32</a></td>
     <td>printf type support for substitution strings</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/57" target="_blank">57</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/57" target="_blank">57</a></td>
     <td>Modify build script so that no_op code is auto generated as part of build</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/59" target="_blank">59</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/59" target="_blank">59</a></td>
     <td>Allow security check to be bypassed for client specific logging level</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
@@ -68,8 +68,8 @@ Release Articles
 
 <a name="change-log-2.1.2"></a>
 ##Change Log 2.1.2
-[Download](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/tree/master/releases/2.1.2)<br/>
-[Release Page](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues?milestone=6&state=closed)<br/>
+[Download](https://github.com/oraopensource/logger/tree/master/releases/2.1.2)<br/>
+[Release Page](https://github.com/oraopensource/logger/issues?milestone=6&state=closed)<br/>
 
 <table border="0">
   <tr>
@@ -78,12 +78,12 @@ Release Articles
     <td>Articles</td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/39" target="_blank">39</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/39" target="_blank">39</a></td>
     <td>Bug setting client level multiple times.</td>
     <td></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/41" target="_blank">41</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/41" target="_blank">41</a></td>
     <td>Bug viewing logger.status when client_id is defined.</td>
     <td></td>
   </tr>
@@ -92,8 +92,8 @@ Release Articles
 
 <a name="change-log-2.1.1"></a>
 ##Change Log 2.1.1
-[Download](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/tree/master/releases/2.1.1)<br/>
-[Release Page](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues?milestone=5&state=closed)<br/>
+[Download](https://github.com/oraopensource/logger/tree/master/releases/2.1.1)<br/>
+[Release Page](https://github.com/oraopensource/logger/issues?milestone=5&state=closed)<br/>
 
 <table border="0">
   <tr>
@@ -102,7 +102,7 @@ Release Articles
     <td>Articles</td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/37" target="_blank">37</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/37" target="_blank">37</a></td>
     <td>Bug compiling logger_configure fixed.</td>
     <td></td>
   </tr>
@@ -111,12 +111,12 @@ Release Articles
 
 <a name="change-log-2.1.0"></a>
 ##Change Log 2.1.0
-[Download](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/tree/master/releases/2.1.0)<br/>
-[Release Page](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues?milestone=3&state=closed)<br/>
+[Download](https://github.com/oraopensource/logger/tree/master/releases/2.1.0)<br/>
+[Release Page](https://github.com/oraopensource/logger/issues?milestone=3&state=closed)<br/>
 Release Articles
 - [Logger 2.1.0 - Released!](http://www.talkapex.com/2013/08/logger-210-released.html)
 
-**Note: Review Issue [#31](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/31) as it may impact your application if you manually inserted into the *LOGGER\_LOGS* table.**
+**Note: Review Issue [#31](https://github.com/oraopensource/logger/issues/31) as it may impact your application if you manually inserted into the *LOGGER\_LOGS* table.**
 
 <table border="0">
   <tr>
@@ -125,12 +125,12 @@ Release Articles
     <td>Articles</td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/17" target="_blank">17</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/17" target="_blank">17</a></td>
     <td>Allow for large text (> 4000 chars) to be passed into p_text parameter. If > 4000 then will be appended to the EXTRA column. In future may not be necessary with 12c large varchar2 column support (see issue #30)</td>
     <td><a href="http://www.talkapex.com/2013/08/logger-210-text-length-4000-characters.html" target="_blank">Text Length &gt; 4000 Characters</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/20" target="_blank">20</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/20" target="_blank">20</a></td>
     <td>Restructured documentation:
 <ul>
 	<li>Moving or removing most content from README.md to various wiki pages. This now frees up the main project page with a brief overview of what Logger is.</li>
@@ -140,27 +140,27 @@ Release Articles
     <td><a href="http://www.talkapex.com/2013/08/logger-210-documentation-overhaul.html" target="_blank">Documentation Overhaul</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/24" target="_blank">24</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/24" target="_blank">24</a></td>
     <td>Open ok_to_log as public.</td>
     <td><a href="http://www.talkapex.com/2013/08/logger-210-oktolog.html" target="_blank">ok_to_log</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/26" target="_blank">26</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/26" target="_blank">26</a></td>
     <td>Fixed error compiling in 10g (or any 11gR1 and below).</td>
     <td><a href="http://www.talkapex.com/2013/08/logger-210-10g-sequence-fixed.html" target="_blank">10g Sequence Fixed</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/27" target="_blank">27</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/27" target="_blank">27</a></td>
     <td>Generate demo scripts and add them to build. More demo scripts to come during future releases. Avoids the need to regenerate for presentations and learning.</td>
     <td><a href="http://www.talkapex.com/2013/08/logger-210-demo-scripts.html" target="_blank">Demo Scripts</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/28" target="_blank">28</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/28" target="_blank">28</a></td>
     <td>Include wiki documents as part of build. Wiki is technically part of a different git repository. By adding documentation with release developers will maintain history on API documentation etc.</td>
     <td></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/31" target="_blank">31</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/31" target="_blank">31</a></td>
     <td>Remove trigger on LOGGER_LOGS. For performance issues and to resolve the large text issue the trigger on LOGGER_LOGS has been dropped. In its place, all insert commands should now use ins_logger_logs.<br/><br//>Performance improvement as part of disabling the trigger. Initial tests show ~15% performance improvement for instances that are using APEX. Part of the speed improvement is how the USER is logged.</td>
     <td><a href="http://www.talkapex.com/2013/08/logger-210-insloggerlogs.html" target="_blank">ins_logger_logs</a></td>
   </tr>
@@ -168,8 +168,8 @@ Release Articles
 
 <a name="change-log-2.0.0"></a>
 ##Change Log 2.0.0
-[Download](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/tree/master/releases/2.0.0)<br/>
-[Release Page](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues?milestone=1&state=closed)<br/>
+[Download](https://github.com/oraopensource/logger/tree/master/releases/2.0.0)<br/>
+[Release Page](https://github.com/oraopensource/logger/issues?milestone=1&state=closed)<br/>
 Release Articles
 - [Logger 2.0.0 Alpha](http://www.talkapex.com/2013/06/logger-200-released.html)
 - [Logger 2.0.0 Beta](http://www.talkapex.com/2013/05/logger-200-beta.html)
@@ -192,12 +192,12 @@ Release Articles
     <td><a href="http://www.talkapex.com/2013/05/logger-200-logging-parameters.html" target="_blank">Logging Parameters</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/4" target="_blank">4</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/4" target="_blank">4</a></td>
     <td>Client specific level setting (to enable logging based on client_id)</td>
     <td><a href="http://www.talkapex.com/2013/05/logger-200-enable-session-specific.html" target="_blank">Enable Session Specific Logging</a><br/><a href="http://www.talkapex.com/2013/05/logger-200-session-specific-logging.html" target="_blank">Session Specific Logging - Advanced Features</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/issues/8" target="_blank">8</a></td>
+    <td><a href="https://github.com/oraopensource/logger/issues/8" target="_blank">8</a></td>
     <td>New build script which will allow for future versions of logger to be updated. This was built off a 1.4.0 release.</td>
     <td></td>
   </tr>
@@ -205,7 +205,7 @@ Release Articles
 
 <a name="change-log-1.4.0"></a>
 ##Change Log 1.4.0
-[Download](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/tree/master/releases/1.4.0)
+[Download](https://github.com/oraopensource/logger/tree/master/releases/1.4.0)
 
 <table border="0">
   <tr>
@@ -228,7 +228,7 @@ Release Articles
 
 <a name="change-log-1.3.0"></a>
 ##Change Log 1.3.0
-[Download](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/tree/master/releases/1.3.0)
+[Download](https://github.com/oraopensource/logger/tree/master/releases/1.3.0)
 
 <table border="0">
   <tr>
@@ -271,7 +271,7 @@ Release Articles
 
 <a name="change-log-1.2.0"></a>
 ##Change Log 1.2.0
-[Download](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/tree/master/releases/1.2.0)
+[Download](https://github.com/oraopensource/logger/tree/master/releases/1.2.0)
 
 <table border="0">
   <tr>

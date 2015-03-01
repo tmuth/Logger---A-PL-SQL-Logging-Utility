@@ -2,16 +2,16 @@
 declare
   l_count pls_integer;
   l_nullable user_tab_columns.nullable%type;
-  
+
   type typ_required_columns is table of varchar2(30) index by pls_integer;
   l_required_columns typ_required_columns;
-  
-  
+
+
   type typ_tab_col is record (
     column_name varchar2(30),
     data_type varchar2(100));
   type typ_arr_tab_col is table of typ_tab_col index by pls_integer;
-  
+
   l_new_col typ_tab_col;
   l_new_cols typ_arr_tab_col;
 
@@ -21,7 +21,7 @@ begin
   into l_count
   from user_tables
   where table_name = 'LOGGER_LOGS';
-  
+
   if l_count = 0 then
     execute immediate '
 create table logger_logs(
@@ -44,19 +44,19 @@ create table logger_logs(
 )
     ';
   end if;
-  
+
   -- 2.0.0
   l_required_columns(l_required_columns.count+1) := 'LOGGER_LEVEL';
   l_required_columns(l_required_columns.count+1) := 'TIME_STAMP';
-  
+
   for i in l_required_columns.first .. l_required_columns.last loop
-    
+
     select nullable
     into l_nullable
     from user_tab_columns
     where table_name = 'LOGGER_LOGS'
       and column_name = upper(l_required_columns(i));
-      
+
     if l_nullable = 'Y' then
       execute immediate 'alter table logger_logs modify ' || l_required_columns(i) || ' not null';
     end if;
@@ -65,7 +65,7 @@ create table logger_logs(
 
   -- 2.2.0
   -- Add additional columns
-  -- #50
+  -- #51
   l_new_col.column_name := 'SID';
   l_new_col.data_type := 'NUMBER';
 
@@ -83,14 +83,14 @@ create table logger_logs(
       execute immediate 'alter table LOGGER_LOGS add (' || l_new_col.column_name || ' ' || l_new_col.data_type || ')';
     end if;
   end loop;
-  
+
 
   -- SEQUENCE
   select count(1)
   into l_count
   from user_sequences
   where sequence_name = 'LOGGER_LOGS_SEQ';
-  
+
   if l_count = 0 then
     execute immediate '
       create sequence logger_logs_seq
@@ -101,20 +101,20 @@ create table logger_logs(
           cache 20
     ';
   end if;
-  
+
   -- INDEXES
   select count(1)
   into l_count
   from user_indexes
   where index_name = 'LOGGER_LOGS_IDX1';
-  
+
   if l_count = 0 then
     execute immediate 'create index logger_logs_idx1 on logger_logs(time_stamp,logger_level)';
   end if;
 end;
 /
-  
-  
+
+
 -- TRIGGER (removed as part of 2.1.0 release)
 -- Drop trigger if still exists (from pre-2.1.0 releases) - Issue #31
 declare
@@ -126,7 +126,7 @@ begin
   from user_triggers
   where 1=1
     and trigger_name = l_trigger_name;
-  
+
   if l_count > 0 then
     execute immediate 'drop trigger ' || l_trigger_name;
   end if;

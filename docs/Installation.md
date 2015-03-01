@@ -17,10 +17,10 @@ from logger_prefs
 where pref_name = 'LOGGER_VERSION';
 ```
 
-To uninstall an older version of logger, see the [Uninstall](#uninstall) instructions. If necessary, you can download the correct version from the [releases](https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/tree/master/releases) folder.
+To uninstall an older version of logger, see the [Uninstall](#uninstall) instructions. If necessary, you can download the correct version from the [releases](https://github.com/oraopensource/logger/tree/master/releases) folder.
 
 ###Install Through APEX
-Logger is no longer supported from a web-only installation if the schema was provisioned by APEX. Essentially the APEX team removed the "create any context" privilege when provisioning a new workspace, likely for security reasons. I agree with their choice, it unfortunately impacts logger. 
+Logger is no longer supported from a web-only installation if the schema was provisioned by APEX. Essentially the APEX team removed the "create any context" privilege when provisioning a new workspace, likely for security reasons. I agree with their choice, it unfortunately impacts logger.
 
 ##Install into a new schema
 
@@ -81,7 +81,7 @@ LOGGER_GLOBAL_CTX   CONTEXT -- Global Application Contexts are owned by SYS
 ##Uninstall
 To uninstall Logger simple run the following script in the schema that Logger was installed in:
 
-```sql 
+```sql
 @drop_logger.sql
 ```
 
@@ -95,19 +95,19 @@ They're various logger levels. To see the complete list, go to the [Constants](L
 ###Enable
 To enable logging for the entire schema:
 ```sql
-exec logger.set_level('DEBUG');
+exec logger.set_level(logger.g_debug);
 ```
 
 ###Disable
 To disable logging:
 ```sql
-exec logger.set_level('OFF');
+exec logger.set_level(logger.g_off);
 ```
 
 Instead of disabling all logging, setting the level to "ERROR" might be a better approach:
 
 ```sql
-exec logger.set_level('ERROR');
+exec logger.set_level(logger.g_error);
 ```
 If you never want logger to run in an environment you can install the [NO-OP](#install-no-op) version.
 
@@ -123,7 +123,7 @@ To view the status/configuration of the Logger:
 set serveroutput on
 exec logger.status
 
-Project Home Page	 	 : https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/
+Project Home Page	 	 : https://github.com/oraopensource/logger/
 Logger Version		 	 : 2.0.0.a01
 Debug Level		  	 	 : DEBUG
 Capture Call Stack	 	 : TRUE
@@ -194,7 +194,7 @@ exec logger.status;
 ```
 
 ####Flashback
-To enable this option, grant execute on *dbms_flashback* to the user that owns the logger packages. Every insert into *logger_logs* will include the SCN (System Commit Number). This allows you to flashback a session to the time when the error occurred to help debug it or even undo any data corruption. As SYS from sql*plus: 
+To enable this option, grant execute on *dbms_flashback* to the user that owns the logger packages. Every insert into *logger_logs* will include the SCN (System Commit Number). This allows you to flashback a session to the time when the error occurred to help debug it or even undo any data corruption. As SYS from sql*plus:
 
 ```sql
 grant execute on dbms_flashback to logger;
@@ -209,4 +209,4 @@ This option allows you to call logger.log_apex_items which grabs the names and v
 
 By default, the DBMS\_SCHEDULER job "LOGGER\_PURGE\_JOB" runs every night at 1:00am and deletes any logs older than 7 days that are of error level *g_debug* or higher which includes *g_debug* and *g_timing*. This means logs with any lower level such as *g_error* or *g_permanent* will never be purged. You can also manually purge all logs using *logger.purge_all*, but this will not delete logs of error level *g_permanent*.
 
-Starting in 2.0.0 a new job was *LOGGER\_UNSET\_PREFS\_BY\_CLIENT* introduced to remove [client specific logging](Logger-API#set-logging-level). By default this job is run every hour on the hour. 
+Starting in 2.0.0 a new job was *LOGGER\_UNSET\_PREFS\_BY\_CLIENT* introduced to remove [client specific logging](Logger-API#set-logging-level). By default this job is run every hour on the hour.

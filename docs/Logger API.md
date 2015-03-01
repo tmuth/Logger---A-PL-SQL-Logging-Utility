@@ -147,7 +147,7 @@
   - [GET_CGI_ENV](#procedure-get_cgi_env)
   - [GET_PREF](#procedure-get_pref)
   - [PURGE](#procedure-purge)
-  - [PURGE_ALL](#procedure-purge_all) 
+  - [PURGE_ALL](#procedure-purge_all)
   - [STATUS](#procedure-status)
   - [SQLPLUS_FORMAT](#procedure-sqlplus_format)
   - [NULL_GLOBAL_CONTEXTS](#procedure-null_global_contexts)
@@ -210,7 +210,7 @@ All of the main Logger procedures have the same parameters
 	</tr>
 	<tr>
 		<td>p_params</td>
-		<td>p_params is for storing the parameters object. The goal of this parameter is to allow for a simple and consistent method to log the parameters to a given function. The values are explicitly converted to a string so there is no need to convert them when appending a parameter. 
+		<td>p_params is for storing the parameters object. The goal of this parameter is to allow for a simple and consistent method to log the parameters to a given function. The values are explicitly converted to a string so there is no need to convert them when appending a parameter.
 		<br/><br/>The data from the parameters array will be appended to the EXTRA column.<br/><br/>
 Since most production instances set the logging level to error, it is highly recommended that you leverage this 4th parameter when calling logger.log_error so that developers know the input that triggered the error. </td>
 	</tr>
@@ -254,7 +254,7 @@ as
 begin
   logger.append_param(l_params, 'p_empno', p_empno); -- Parameter name and value just stored in PL/SQL array and not logged yet
   logger.append_param(l_params, 'p_ename', p_ename); -- Parameter name and value just stored in PL/SQL array and not logged yet
-  logger.log('START', l_scope, null, l_params); -- All parameters are logged at this point	
+  logger.log('START', l_scope, null, l_params); -- All parameters are logged at this point
   -- ...
 exception
   when others then
@@ -330,7 +330,7 @@ logger.log_userenv(
 ####Example
 ```sql
 exec logger.log_userenv('NLS');
- 
+
 select text,extra from logger_logs_5_min;
 
 TEXT                                           EXTRA
@@ -392,7 +392,7 @@ logger.log_cgi_env(
 ####Example
 ```sql
 exec logger.log_cgi_env;
- 
+
 select extra from logger_logs where text like '%CGI%';
 TEXT                                               EXTRA
 -------------------------------------------------- -------------------------------------------------------
@@ -404,7 +404,7 @@ SERVER_NAME                   : 11g
 REQUEST_METHOD                : POST
 PATH_INFO                     : /wwv_flow.show
 SCRIPT_NAME                   : /pls/apex
-REMOTE_ADDR                   : 192.168.1.7    
+REMOTE_ADDR                   : 192.168.1.7
 ...
 ```
 
@@ -444,9 +444,9 @@ logger.log_character_codes(
 ####Example
 ```sql
 exec logger.log_character_codes('Hello World'||chr(9)||'Foo'||chr(13)||chr(10)||'Bar');
- 
+
 select extra from logger_logs_5_min;
- 
+
 EXTRA
 ----------------------------------------------------------------------------------
 Common Codes: 13=Line Feed, 10=Carriage Return, 32=Space, 9=Tab
@@ -492,18 +492,18 @@ end;
 ```
 
 ```sql
-select id,logger_level,text,module,action,client_identifier 
-from logger_logs 
+select id,logger_level,text,module,action,client_identifier
+from logger_logs
 where logger_level = 128;
- 
+
  ID     LOGGER_LEVEL TEXT                 MODULE                 ACTION    CLIENT_IDENTIFIER
 ------- ------------ -------------------- ---------------------- --------- --------------------
      47          128 Debug Edit Customer  APEX:APPLICATION 100   PAGE 7    ADMIN:45588554040361
-      
-select * 
-from logger_logs_apex_items 
+
+select *
+from logger_logs_apex_items
 where log_id = 47; --log_id relates to logger_logs.id
- 
+
 ID      LOG_ID  APP_SESSION    ITEM_NAME                 ITEM_VALUE
 ------- ------- ---------------- ------------------------- ---------------------------------------------
     136      47   45588554040361 P1_QUOTA
@@ -729,7 +729,7 @@ logger.status(
 set serveroutput on
 exec logger.status
 
-Project Home Page    : https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility/
+Project Home Page    : https://github.com/oraopensource/logger/
 Logger Version       : 2.0.0.a01
 Debug Level          : DEBUG
 Capture Call Stack     : TRUE
@@ -999,13 +999,13 @@ order by id;
 ---- ------------ ----------------------------------- ----------------- ----------------------------
   31         16 Session-1: this should show up                  object      line  object
   32         16 Session-2: this should show up    my_identifier   object      line  object
-  
+
 -- Notice how the CLIENT_IDENTIFIER field also contains the current client_identifer
 ```
 
-In APEX the *client\_identifier* is 
+In APEX the *client\_identifier* is
 ```sql
-:APP_USER || ':' || :APP_SESSION 
+:APP_USER || ':' || :APP_SESSION
 ```
 
 
@@ -1063,7 +1063,7 @@ logger.unset_client_level_all;
 
 ####Parameters
 No Parameters.
-  
+
 ####Example
 ```sql
 exec logger.unset_client_level_all;
@@ -1097,9 +1097,9 @@ begin
     logger.time_stop('foo');
 end;
 /
- 
+
 select text from logger_logs_5_min;
- 
+
 TEXT
 ---------------------------------
 START: foo
@@ -1319,13 +1319,13 @@ end p_demo_function;
 
 <a name="procedure-ok_to_log"></a>
 ###OK_TO_LOG
-Though Logger internally handles when a statement is stored in the LOGGER_LOGS table there may be situations where you need to know if logger will log a statement before calling logger. This is useful when doing an expensive operation just to log the data. 
+Though Logger internally handles when a statement is stored in the LOGGER_LOGS table there may be situations where you need to know if logger will log a statement before calling logger. This is useful when doing an expensive operation just to log the data.
 
 A classic example is looping over an array for the sole purpose of logging the data. In this case, there's no reason why the code should perform the additional computations when logging is disabled for a certain level.
 
 *ok\_to\_log* will also factor in client specific logging settings.
 
-*Note*: *ok\_to\_log* is not something that should be used frequently. All calls to logger run this command internally. 
+*Note*: *ok\_to\_log* is not something that should be used frequently. All calls to logger run this command internally.
 
 ####Syntax
 ```sql
@@ -1361,13 +1361,13 @@ begin
   end loop;
 
   -- Only log if logging is enabled
-  if logger.ok_to_log('DEBUG') then
+  if logger.ok_to_log(logger.g_debug) then
     for x in 1..l_array.count loop
       logger.log(l_array(x));
     end loop;
   end if;
 end;
-/ 
+/
 ```
 
 Note: ok\_to\_log should not be used for one-off log commands. This defeats the whole purpose of having the various log commands. For example ok\_to\_log should *not* be used in the following way:
@@ -1400,7 +1400,7 @@ logger.ins_logger_logs(
   p_scope in logger_logs.scope%type default null,
   p_call_stack in logger_logs.call_stack%type default null,
   p_unit_name in logger_logs.unit_name%type default null,
-  p_line_no in logger_logs.line_no%type default null, 
+  p_line_no in logger_logs.line_no%type default null,
   p_extra in logger_logs.extra%type default null,
   po_id out nocopy logger_logs.id%type);
 ```
@@ -1463,7 +1463,7 @@ begin
 --    p_extra => ,
     po_id => l_id
   );
-  
+
   dbms_output.put_line('ID: ' || l_id);
 end;
 /

@@ -1,17 +1,17 @@
 declare
   l_count pls_integer;
   l_nullable user_tab_columns.nullable%type;
-  
+
   type typ_required_columns is table of varchar2(30) index by pls_integer;
   l_required_columns typ_required_columns;
-  
+
 begin
   -- Create Table
   select count(1)
   into l_count
   from user_tables
-  where table_name = 'LOGGER_PREFS_BY_CLIENT_ID'; 
-  
+  where table_name = 'LOGGER_PREFS_BY_CLIENT_ID';
+
   if l_count = 0 then
     execute immediate q'!
 create table logger_prefs_by_client_id(
@@ -27,7 +27,7 @@ create table logger_prefs_by_client_id(
 )
     !';
   end if;
-  
+
   -- COMMENTS
   execute immediate q'!comment on table logger_prefs_by_client_id is 'Client specific logger levels. Only active client_ids/logger_levels will be maintained in this table'!';
   execute immediate q'!comment on column logger_prefs_by_client_id.client_id is 'Client identifier'!';

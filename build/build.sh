@@ -159,6 +159,7 @@ rm -rf $RELEASE_FOLDER/*.del
 
 
 
+#Old windows zip7za a -tzip $/logger_$VERSION_NUMBER.zip ../build/*.sql ../build/*.html
 #By CDing into the release_folder we don't get the full path in the zip file
 cd $RELEASE_FOLDER
 zip -r logger_$VERSION_NUMBER.zip .

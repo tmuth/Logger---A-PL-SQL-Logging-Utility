@@ -1,16 +1,17 @@
 create or replace package logger
   authid definer
 as
+  -- TODO mdsouza: Change this properly
   -- This project using the following Revised BSD License:
   --
-  -- Copyright (c) 2013, Tyler D. Muth, tylermuth.wordpress.com 
-  -- and contributors to the project at 
-  -- https://github.com/tmuth/Logger---A-PL-SQL-Logging-Utility
+  -- Copyright (c) 2013, Tyler D. Muth, tylermuth.wordpress.com
+  -- and contributors to the project at
+  -- https://github.com/oraopensource/logger
   -- All rights reserved.
   --
   -- Project Contributors
   --  - Martin Giffy D'Souza: http://www.talkapex.com
-  -- 
+  --
   -- Redistribution and use in source and binary forms, with or without
   -- modification, are permitted provided that the following conditions are met:
   --     * Redistributions of source code must retain the above copyright
@@ -21,7 +22,7 @@ as
   --     * Neither the name of Tyler D Muth, nor Oracle Corporation, nor the
   --       names of its contributors may be used to endorse or promote products
   --       derived from this software without specific prior written permission.
-  -- 
+  --
   -- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
   -- ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   -- WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -37,13 +38,19 @@ as
   type rec_param is record(
     name varchar2(255),
     val varchar2(4000));
-  
+
   type tab_param is table of rec_param index by binary_integer;
-  
+
+  type rec_logger_logs is record(
+    id logger_logs.id%type,
+    logger_level logger_logs.logger_level%type
+  );
+
+
   -- VARIABLES
 	g_logger_version constant varchar2(10) := 'x.x.x'; -- Don't change this. Build script will replace with right version number
 	g_context_name constant varchar2(35) := substr(sys_context('USERENV','CURRENT_SCHEMA'),1,23)||'_LOGCTX';
-  
+
   g_off constant number := 0;
   g_permanent constant number := 1;
 	g_error constant number := 2;
@@ -54,7 +61,7 @@ as
   g_sys_context constant number := 64;
   g_apex constant number := 128;
 
-  -- #43
+  -- #44
   g_off_name constant varchar2(30) := 'OFF';
   g_permanent_name constant varchar2(30) := 'PERMANENT';
   g_error_name constant varchar2(30) := 'ERROR';
@@ -67,9 +74,49 @@ as
 
   gc_empty_tab_param tab_param;
 
+  -- TODO mdsouza: issue number?
+  -- TODO mdsouza: gc or g?
+  g_rec_logger_logs rec_logger_logs; -- TODO mdsouza: put this internal and create a get function so no outside access
+  g_in_plugin boolean := false; -- TODO mdsouza:  should be moved to internall only.
+
+
+  -- Expose private functions only for testing during development
+  $if $$logger_debug $then
+    function is_number(p_str in varchar2)
+      return boolean;
+
+    procedure assert(
+      p_condition in boolean,
+      p_message in varchar2);
+
+    function get_param_clob(p_params in logger.tab_param)
+      return clob;
+
+    procedure save_global_context(
+      p_attribute in varchar2,
+      p_value in varchar2,
+      p_client_id in varchar2 default null);
+
+    function set_extra_with_params(
+      p_extra in logger_logs.extra%type,
+      p_params in tab_param)
+      return logger_logs.extra%type;
+
+    function get_sys_context(
+      p_detail_level in varchar2 default 'USER', -- ALL, NLS, USER, INSTANCE
+      p_vertical in boolean default false,
+      p_show_null in boolean default false)
+      return clob;
+
+    function admin_security_check
+      return boolean;
+
+    function get_level_number
+      return number;
+  $end
 
   -- PROCEDURES and FUNCTIONS
-  
+
   procedure null_global_contexts;
 
   function convert_level_char_to_num(
@@ -147,14 +194,14 @@ as
 	procedure time_stop(
 		p_unit				IN VARCHAR2,
     p_scope             in varchar2 default null);
-        
+
   function time_stop(
     p_unit				IN VARCHAR2,
     p_scope             in varchar2 default null,
     p_log_in_table 	    IN boolean default true
     )
     return varchar2;
-        
+
   function time_stop_seconds(
     p_unit				in varchar2,
     p_scope             in varchar2 default null,
@@ -193,13 +240,54 @@ as
     p_include_call_stack in varchar2 default null,
     p_client_id_expire_hours in number default null
   );
-    
+
   procedure unset_client_level(p_client_id in varchar2);
-  
+
   procedure unset_client_level;
-  
+
   procedure unset_client_level_all;
 
+
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in varchar2);
+
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in number);
+
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in date);
+
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in timestamp);
+
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in timestamp with time zone);
+
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in timestamp with local time zone);
+
+  procedure append_param(
+    p_params in out nocopy logger.tab_param,
+    p_name in varchar2,
+    p_val in boolean);
+
+  function ok_to_log(p_level in number)
+    return boolean;
+
+  function ok_to_log(p_level in varchar2)
+    return boolean;
 
   function tochar(
     p_val in number)
@@ -225,61 +313,18 @@ as
     p_val in boolean)
     return varchar2;
 
-
-  
-  procedure append_param(
-    p_params in out nocopy logger.tab_param,
-    p_name in varchar2,
-    p_val in varchar2);
-    
-  procedure append_param(
-    p_params in out nocopy logger.tab_param,
-    p_name in varchar2,
-    p_val in number);
-    
-  procedure append_param(
-    p_params in out nocopy logger.tab_param,
-    p_name in varchar2,
-    p_val in date);
-    
-  procedure append_param(
-    p_params in out nocopy logger.tab_param,
-    p_name in varchar2,
-    p_val in timestamp);
-    
-  procedure append_param(
-    p_params in out nocopy logger.tab_param,
-    p_name in varchar2,
-    p_val in timestamp with time zone);
-    
-  procedure append_param(
-    p_params in out nocopy logger.tab_param,
-    p_name in varchar2,
-    p_val in timestamp with local time zone);
-    
-  procedure append_param(
-    p_params in out nocopy logger.tab_param,
-    p_name in varchar2,
-    p_val in boolean);
-
-  function ok_to_log(p_level in number)
-    return boolean;
-    
-  function ok_to_log(p_level in varchar2)
-    return boolean;
-    
   procedure ins_logger_logs(
     p_logger_level in logger_logs.logger_level%type,
     p_text in varchar2 default null, -- Not using type since want to be able to pass in 32767 characters
     p_scope in logger_logs.scope%type default null,
     p_call_stack in logger_logs.call_stack%type default null,
     p_unit_name in logger_logs.unit_name%type default null,
-    p_line_no in logger_logs.line_no%type default null, 
+    p_line_no in logger_logs.line_no%type default null,
     p_extra in logger_logs.extra%type default null,
     po_id out nocopy logger_logs.id%type
   );
-  
-  
+
+
   function get_fmt_msg(
     p_msg in varchar2,
     p_s01 in varchar2 default null,
