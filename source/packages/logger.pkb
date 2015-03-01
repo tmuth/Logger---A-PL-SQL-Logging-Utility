@@ -124,7 +124,7 @@ as
       end if;
     $end
   end assert;
-  
+
 
   /**
    * Returns the display/print friendly parameter information
@@ -287,7 +287,7 @@ as
 
     begin
       l_value := sys_context('USERENV',p_name);
-      
+
       if p_show_null or l_value is not null then
         if p_vertical then
           l_ctx := l_ctx || rpad(p_name,r_pad,' ')||': '|| l_value || gc_cflf;
@@ -325,7 +325,7 @@ as
         append_ctx('HOST');
         append_ctx('TERMINAL');
       end if;
-    
+
       if l_detail_level in ('ALL','USER') then
         append_ctx('AUTHENTICATED_IDENTITY');
         append_ctx('AUTHENTICATION_DATA');
@@ -481,6 +481,54 @@ as
   end get_level_number;
 
 
+  /**
+   * Determines if callstack should be while logging
+   *
+   * Notes:
+   *  - Private
+   *
+   * Related Tickets:
+   *  -
+   *
+   * @author Tyler Muth
+   * @created ???
+   * @return
+   */
+  function include_call_stack
+    return boolean
+    $if 1=1
+      and $$rac_lt_11_2
+      and not dbms_db_version.ver_le_10_2
+      and ($$no_op is null or not $$no_op) $then
+        result_cache relies_on (logger_prefs, logger_prefs_by_client_id)
+    $end
+  is
+    l_call_stack_pref logger_prefs.pref_value%type;
+  begin
+    $if $$no_op $then
+      return false;
+    $else
+      $if $$rac_lt_11_2 $then
+        l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
+      $else
+        l_call_stack_pref := sys_context(g_context_name,gc_ctx_attr_include_call_stack);
+
+        if l_call_stack_pref is null then
+          l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
+          save_global_context(
+            p_attribute => gc_ctx_attr_include_call_stack,
+            p_value => l_call_stack_pref,
+            p_client_id => sys_context('userenv','client_identifier'));
+        end if;
+      $end
+
+      if l_call_stack_pref = 'TRUE' then
+        return true;
+      else
+        return false;
+      end if;
+    $end
+  end include_call_stack;
   -- **** PUBLIC ****
 
 
@@ -726,54 +774,7 @@ as
   end ok_to_log;
 
 
-  /**
-     * Determines if callstack should be while logging
-     *
-     * Notes:
-     *  -
-     *
-     * Related Tickets:
-     *  -
-     *
-     * @author Tyler Muth
-     * @created ???
-     * @return
-     */
-  function include_call_stack
-    return boolean
-    $if 1=1
-      and $$rac_lt_11_2
-      and not dbms_db_version.ver_le_10_2
-      and ($$no_op is null or not $$no_op) $then
-        result_cache relies_on (logger_prefs, logger_prefs_by_client_id)
-    $end
-  is
-    l_call_stack_pref logger_prefs.pref_value%type;
-  begin
-    $if $$no_op $then
-      return false;
-    $else
-      $if $$rac_lt_11_2 $then
-        l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
-      $else
-        l_call_stack_pref := sys_context(g_context_name,gc_ctx_attr_include_call_stack);
 
-        if l_call_stack_pref is null then
-          l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
-          save_global_context(
-            p_attribute => gc_ctx_attr_include_call_stack,
-            p_value => l_call_stack_pref,
-            p_client_id => sys_context('userenv','client_identifier'));
-        end if;
-      $end
-
-      if l_call_stack_pref = 'TRUE' then
-        return true;
-      else
-        return false;
-      end if;
-    $end
-  end include_call_stack;
 
 
   /**

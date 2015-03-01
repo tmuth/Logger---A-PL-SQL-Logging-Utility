@@ -113,6 +113,9 @@ as
 
     function get_level_number
       return number;
+      
+    function include_call_stack
+      return boolean;
   $end
 
   -- PROCEDURES and FUNCTIONS
