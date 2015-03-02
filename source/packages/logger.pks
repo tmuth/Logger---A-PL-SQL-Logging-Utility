@@ -113,9 +113,14 @@ as
 
     function get_level_number
       return number;
-      
+
     function include_call_stack
       return boolean;
+
+    function date_text_format_base (
+      p_date_start in date,
+      p_date_stop  in date)
+    return varchar2;
   $end
 
   -- PROCEDURES and FUNCTIONS

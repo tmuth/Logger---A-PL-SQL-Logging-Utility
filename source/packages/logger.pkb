@@ -529,6 +529,92 @@ as
       end if;
     $end
   end include_call_stack;
+
+
+  /**
+   * Returns date diff in "... sectons/minutes/days/etc ago" format
+   *
+   * Notes:
+   *  - Private
+   *
+   * Related Tickets:
+   *  -
+   *
+   * @author Tyler Muth
+   * @created ???
+   * @param p_date_start
+   * @param p_date_stop
+   * @return Text version of date diff
+   */
+  function date_text_format_base (
+    p_date_start in date,
+    p_date_stop  in date)
+  return varchar2
+  as
+    x varchar2(20);
+  begin
+    $if $$no_op $then
+      return null;
+    $else
+      x :=
+        case
+          when p_date_stop-p_date_start < 1/1440
+            then round(24*60*60*(p_date_stop-p_date_start)) || ' seconds'
+          when p_date_stop-p_date_start < 1/24
+            then round(24*60*(p_date_stop-p_date_start)) || ' minutes'
+          when p_date_stop-p_date_start < 1
+            then round(24*(p_date_stop-p_date_start)) || ' hours'
+          when p_date_stop-p_date_start < 14
+            then trunc(p_date_stop-p_date_start) || ' days'
+          when p_date_stop-p_date_start < 60
+            then trunc((p_date_stop-p_date_start)/7) || ' weeks'
+          when p_date_stop-p_date_start < 365
+            then round(months_between(p_date_stop,p_date_start)) || ' months'
+          else round(months_between(p_date_stop,p_date_start)/12,1) || ' years'
+        end;
+      x:= regexp_replace(x,'(^1 [[:alnum:]]{4,10})s','\1');
+      x:= x || ' ago';
+      return substr(x,1,20);
+    $end
+  end date_text_format_base;
+
+
+  /**
+   * Parses the callstack to get unit and line number
+   *
+   * Notes:
+   *  - Private
+   *
+   * Related Tickets:
+   *  -
+   *
+   * @author Tyler Muth
+   * @created ???
+   * @param p_callstack
+   * @param o_unit
+   * @param o_lineno
+   */
+  procedure get_debug_info(
+    p_callstack in clob,
+    o_unit out varchar2,
+    o_lineno out varchar2 )
+  as
+    --
+    l_callstack varchar2(10000) := p_callstack;
+  begin
+    $if $$no_op $then
+      null;
+    $else
+      l_callstack := substr( l_callstack, instr( l_callstack, chr(10), 1, 5 )+1 );
+      l_callstack := substr( l_callstack, 1, instr( l_callstack, chr(10), 1, 1 )-1 );
+      l_callstack := trim( substr( l_callstack, instr( l_callstack, ' ' ) ) );
+      o_lineno := substr( l_callstack, 1, instr( l_callstack, ' ' )-1 );
+      o_unit := trim(substr( l_callstack, instr( l_callstack, ' ', -1, 1 ) ));
+    $end
+  end get_debug_info;
+
+
+
   -- **** PUBLIC ****
 
 
@@ -776,56 +862,6 @@ as
 
 
 
-
-  /**
-   * Returns date diff in "... sectons/minutes/days/etc ago" format
-   *
-   * Notes:
-   *  -
-   *
-   * Related Tickets:
-   *  -
-   *
-   * @author Tyler Muth
-   * @created ???
-   * @param p_date_start
-   * @param p_date_stop
-   * @return Text version of date diff
-   */
-  -- TODO mdsouza: move this to private area?
-  function date_text_format_base (
-    p_date_start in date,
-    p_date_stop  in date)
-  return varchar2
-  as
-    x varchar2(20);
-  begin
-    $if $$no_op $then
-      return null;
-    $else
-      x :=
-        case
-          when p_date_stop-p_date_start < 1/1440
-            then round(24*60*60*(p_date_stop-p_date_start)) || ' seconds'
-          when p_date_stop-p_date_start < 1/24
-            then round(24*60*(p_date_stop-p_date_start)) || ' minutes'
-          when p_date_stop-p_date_start < 1
-            then round(24*(p_date_stop-p_date_start)) || ' hours'
-          when p_date_stop-p_date_start < 14
-            then trunc(p_date_stop-p_date_start) || ' days'
-          when p_date_stop-p_date_start < 60
-            then trunc((p_date_stop-p_date_start)/7) || ' weeks'
-          when p_date_stop-p_date_start < 365
-            then round(months_between(p_date_stop,p_date_start)) || ' months'
-          else round(months_between(p_date_stop,p_date_start)/12,1) || ' years'
-        end;
-      x:= regexp_replace(x,'(^1 [[:alnum:]]{4,10})s','\1');
-      x:= x || ' ago';
-      return substr(x,1,20);
-    $end
-  end date_text_format_base;
-
-
   /**
    * ???
    *
@@ -840,7 +876,6 @@ as
    * @param p_date
    * @return
    */
-  -- TODO mdsouza: move to private area?
   function date_text_format (p_date in date)
     return varchar2
   as
@@ -854,7 +889,7 @@ as
     $end
   end date_text_format;
 
-  -- TODO mdsouza: what does this do/used for? Private?
+
   function get_character_codes(
     p_string        in varchar2,
     p_show_common_codes   in boolean default true)
@@ -893,40 +928,6 @@ as
   end get_character_codes;
 
 
-  /**
-   * Parses the callstack to get unit and line number
-   *
-   * Notes:
-   *  -
-   *
-   * Related Tickets:
-   *  -
-   *
-   * @author Tyler Muth
-   * @created ???
-   * @param p_callstack
-   * @param o_unit
-   * @param o_lineno
-   */
-  -- TODO mdsouza: move to private?
-  procedure get_debug_info(
-    p_callstack in clob,
-    o_unit out varchar2,
-    o_lineno out varchar2 )
-  as
-    --
-    l_callstack varchar2(10000) := p_callstack;
-  begin
-    $if $$no_op $then
-      null;
-    $else
-      l_callstack := substr( l_callstack, instr( l_callstack, chr(10), 1, 5 )+1 );
-      l_callstack := substr( l_callstack, 1, instr( l_callstack, chr(10), 1, 1 )-1 );
-      l_callstack := trim( substr( l_callstack, instr( l_callstack, ' ' ) ) );
-      o_lineno := substr( l_callstack, 1, instr( l_callstack, ' ' )-1 );
-      o_unit := trim(substr( l_callstack, instr( l_callstack, ' ', -1, 1 ) ));
-    $end
-  end get_debug_info;
 
 
   /**
