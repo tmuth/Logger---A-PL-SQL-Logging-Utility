@@ -1471,7 +1471,6 @@ as
    * @created ???
    * @param p_unit
    * @param p_log_in_table
-   * @return TODO
    */
   procedure time_start(
     p_unit in varchar2,
@@ -1627,7 +1626,7 @@ as
    * @param p_unit
    * @param p_scope
    * @param p_log_in_table
-   * @return TODO
+   * @return Timer in seconds
    */
   function time_stop_seconds(
     p_unit in varchar2,
@@ -1670,7 +1669,7 @@ as
 
 
   /**
-   *
+   * Resets all timers
    *
    * Notes:
    *  -
