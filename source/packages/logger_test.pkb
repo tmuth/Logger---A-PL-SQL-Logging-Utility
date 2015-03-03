@@ -55,6 +55,9 @@ as
 
     -- Reset all contexts
     logger.null_global_contexts;
+
+    -- Reset timers
+    logger.time_reset;
   end util_test_setup;
 
 
@@ -92,6 +95,8 @@ as
 
     dbms_session.set_identifier(null);
 
+    -- Reset timers
+    logger.time_reset;
   end util_test_teardown;
 
 
@@ -131,6 +136,26 @@ as
     end if;
   end util_display_errors;
 
+
+  /**
+   * Returns unique scope
+   *
+   * Notes:
+   *  - This is useful when trying to back reference which log was just inserted
+   *  - Should look in logger_logs_5_mins since recent
+   *
+   * Related Tickets:
+   *  -
+   *
+   * @author Martin D'Souza
+   * @created 2-Mar-2015
+   */
+  function util_get_unique_scope
+    return varchar2
+  as
+  begin
+    return lower('logger_test_' || dbms_random.string('x',20));
+  end util_get_unique_scope;
 
   -- *** TESTS ***
 
@@ -509,7 +534,7 @@ p_test2: test2' then
     -- Should still register since log_internal doesn't check ok_to_log (which is as expected)
     logger.set_level(p_level => logger.g_error);
 
-    l_scope := lower('logger_test_' || dbms_random.string('x',20));
+    l_scope := util_get_unique_scope;
     logger.log_internal(
       p_text => 'test',
       p_log_level => logger.g_debug,
@@ -678,6 +703,272 @@ new line',
 
   -- snapshot_apex_items not going to be tested for now
 
+  procedure log_error
+  as
+    l_scope logger_logs.scope%type := util_get_unique_scope;
+    l_count pls_integer;
+    l_row logger_logs_5_min%rowtype;
+  begin
+    g_proc_name := 'log_error';
+
+    -- Should not log
+    logger.set_level(p_level => logger.g_permanent);
+    logger.log_error('test', l_scope);
+
+    select count(1)
+    into l_count
+    from logger_logs_5_min
+    where 1=1
+      and scope = l_scope;
+
+    if l_count > 0 then
+      util_add_error('logging error when shouldnt');
+    end if;
+
+
+    logger.set_level(p_level => logger.g_debug);
+    logger.log_error('test', l_scope);
+
+    -- Reset callstack context and set pref to false to ensure that callstack is still set even though this setting is false
+    update logger_prefs
+    set pref_value = 'FALSE'
+    where pref_name = 'INCLUDE_CALL_STACK';
+
+    -- Wipe the sys context so that it reloads
+    logger.save_global_context(
+      p_attribute => 'include_call_stack',
+      p_value => null);
+
+    begin
+      select *
+      into l_row
+      from logger_logs_5_min
+      where 1=1
+        and scope = l_scope;
+
+      if l_row.call_stack is null then
+        util_add_error('Callstack is empty when it should always have a value');
+      end if;
+    exception
+      when no_data_found then
+        util_add_error('not logging');
+    end;
+  end log_error;
+
+  -- Test all log functions (except for log_error)
+  procedure log_all_logs
+  as
+    type rec_log_fn is record(
+      fn_name varchar2(30),
+      level_off number,
+      level_self number,
+      level_on number
+    );
+
+    type tab_log_fn is table of rec_log_fn index by pls_integer;
+
+
+    l_log_fns tab_log_fn;
+
+    l_scope logger_logs.scope%type;
+    l_count pls_integer;
+    l_sql varchar2(255);
+
+    function get_log_fn(
+      p_fn_name varchar2,
+      p_level_off number,
+      p_level_self number,
+      p_level_on number)
+      return rec_log_fn
+    as
+      l_log_fn rec_log_fn;
+      l_count pls_integer;
+    begin
+      l_log_fn.fn_name := p_fn_name;
+      l_log_fn.level_off := p_level_off;
+      l_log_fn.level_self := p_level_self;
+      l_log_fn.level_on := p_level_on;
+
+      return l_log_fn;
+    end get_log_fn;
+
+  begin
+
+
+    l_log_fns(l_log_fns.count + 1) := get_log_fn('log_permanent', logger.g_off, logger.g_permanent, logger.g_debug);
+    l_log_fns(l_log_fns.count + 1) := get_log_fn('log_warning', logger.g_error, logger.g_warning, logger.g_debug);
+    l_log_fns(l_log_fns.count + 1) := get_log_fn('log_information', logger.g_warning, logger.g_information, logger.g_debug);
+    l_log_fns(l_log_fns.count + 1) := get_log_fn('log', logger.g_warning, logger.g_debug, logger.g_debug);
+
+    for i in l_log_fns.first .. l_log_fns.last loop
+      g_proc_name := l_log_fns(i).fn_name;
+
+      for x in (
+        select regexp_substr('off:self:on','[^:]+', 1, level) action
+        from dual
+        connect by regexp_substr('off:self:on', '[^:]+', 1, level) is not null
+      ) loop
+
+        if x.action = 'off' then
+          -- Test off
+          logger.set_level(l_log_fns(i).level_off);
+        elsif x.action = 'self' then
+          -- Test self
+          logger.set_level(l_log_fns(i).level_self);
+        elsif x.action = 'on' then
+          -- Test on
+          logger.set_level(l_log_fns(i).level_on);
+        end if;
+
+        l_scope := util_get_unique_scope;
+        l_sql := 'begin logger.' || l_log_fns(i).fn_name || q'!('test', :scope); end;!';
+        execute immediate l_sql using l_scope;
+
+        select count(1)
+        into l_count
+        from logger_logs_5_min
+        where 1=1
+          and scope = l_scope;
+
+        if 1=2
+          or (x.action = 'off' and l_count != 0)
+          or (x.action in ('self', 'on') and l_count != 1) then
+          util_add_error(l_log_fns(i).fn_name || ' failed test: ' || x.action);
+        end if;
+      end loop; -- x
+
+    end loop;
+
+  end log_all_logs;
+
+
+  -- get_cgi_env requires http connection so no tests for now (can simulate in future)
+
+  -- log_userenv: Dependant on get_sys_context which varies for each system
+
+  -- log_cgi_env: Same as above
+
+  -- log_character_codes: covered in get_character_codes
+
+  -- log_apex_items: Future / dependant on APEX instance
+
+  procedure time_start
+  as
+    l_unit_name logger_logs.unit_name%type := util_get_unique_scope;
+    l_text logger_logs.text%type;
+  begin
+    g_proc_name := 'time_start';
+
+    logger.set_level(logger.g_timing);
+
+    logger.time_start(
+      p_unit => l_unit_name,
+      p_log_in_table => true
+    );
+
+    select max(text)
+    into l_text
+    from logger_logs_5_min
+    where 1=1
+      and unit_name = upper(l_unit_name);
+
+    if l_text is null or l_text != 'START: ' || l_unit_name then
+      util_add_error('Logged text invalid: ' || l_text);
+    end if;
+
+  end time_start;
+
+
+  procedure time_stop
+  as
+    l_unit_name logger_logs.unit_name%type := util_get_unique_scope;
+    l_scope logger_logs.scope%type := util_get_unique_scope;
+    l_text logger_logs.text%type;
+    l_sleep_time pls_integer := 1;
+  begin
+    g_proc_name := 'time_stop';
+
+    logger.set_level(logger.g_debug); -- Time stop only requires g_debug
+
+    logger.time_start(
+      p_unit => l_unit_name,
+      p_log_in_table => false
+    );
+
+    apex_util.pause(l_sleep_time);
+
+    logger.time_stop(
+      p_unit => l_unit_name,
+      p_scope => l_scope
+    );
+
+    select max(text)
+    into l_text
+    from logger_logs_5_min
+    where 1=1
+      and scope = l_scope;
+
+    dbms_output.put_line(l_text);
+    if l_text is null or l_text not like 'STOP : ' || l_unit_name || ' - 00:00:0' || l_sleep_time || '%' then
+      util_add_error('Issue with text: ' || l_text);
+    end if;
+
+  end time_stop;
+
+
+  procedure time_stop_fn
+  as
+    l_unit_name logger_logs.unit_name%type := util_get_unique_scope;
+    l_sleep_time pls_integer := 2;
+    l_text varchar2(50);
+  begin
+    g_proc_name := 'time_stop (function)';
+
+    logger.set_level(logger.g_debug);
+
+    logger.time_start(
+      p_unit => l_unit_name,
+      p_log_in_table => false
+    );
+
+    apex_util.pause(l_sleep_time);
+
+    l_text := logger.time_stop(p_unit => l_unit_name);
+
+    if l_text is null or l_text not like '00:00:0' || l_sleep_time || '%' then
+      util_add_error('Issue with return: ' || l_text);
+    end if;
+
+  end time_stop_fn;
+
+
+  procedure time_stop_seconds
+  as
+    l_unit_name logger_logs.unit_name%type := util_get_unique_scope;
+    l_sleep_time pls_integer := 2;
+    l_text varchar2(50);
+  begin
+    g_proc_name := 'time_stop_seconds';
+
+    logger.set_level(logger.g_debug);
+
+    logger.time_start(
+      p_unit => l_unit_name,
+      p_log_in_table => false
+    );
+
+    apex_util.pause(l_sleep_time);
+
+    l_text := logger.time_stop_seconds(p_unit => l_unit_name);
+
+    if l_text is null or l_text not like l_sleep_time || '.0%' then
+      util_add_error('Issue with return: ' || l_text);
+    end if;
+
+  end time_stop_seconds;
+
+
+  -- time_reset: won't test for now
 
 
 
@@ -723,6 +1014,12 @@ new line',
     util_test_setup; convert_level_num_to_char; util_test_teardown;
     util_test_setup; get_character_codes; util_test_teardown;
     util_test_setup; ok_to_log; util_test_teardown;
+    util_test_setup; log_error; util_test_teardown;
+    util_test_setup; log_all_logs; util_test_teardown;
+    util_test_setup; time_start; util_test_teardown;
+    util_test_setup; time_stop; util_test_teardown;
+    util_test_setup; time_stop_fn; util_test_teardown;
+    util_test_setup; time_stop_seconds; util_test_teardown;
 
 
     -- Display errors
