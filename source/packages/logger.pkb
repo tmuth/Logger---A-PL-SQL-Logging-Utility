@@ -1284,7 +1284,7 @@ as
     $if $$no_op $then
       return null;
     $else
-      for i in 1..owa.num_cgi_vars loop
+      for i in 1..nvl(owa.num_cgi_vars,0) loop
         append_cgi_env(
           p_name      => owa.cgi_var_name(i),
           p_val       => owa.cgi_var_val(i));
