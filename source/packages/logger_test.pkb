@@ -2,8 +2,10 @@ create or replace package body logger_test
 as
 
   -- CONTANTS
-  c_line_feed constant varchar2(1) := chr(10);
-  c_unknown_err constant varchar2(50) := 'Unknown error';
+  gc_line_feed constant varchar2(1) := chr(10);
+  gc_unknown_err constant varchar2(50) := 'Unknown error';
+  gc_client_id constant varchar2(30) := 'test_client_id'; -- Consistent client id to use
+
 
   -- GLOBAL VARIABLES
   g_proc_name varchar2(30); -- current proc name being tested
@@ -50,6 +52,9 @@ as
 
     -- Reset client_id
     dbms_session.set_identifier(null);
+
+    -- Reset all contexts
+    logger.null_global_contexts;
   end util_test_setup;
 
 
@@ -186,7 +191,7 @@ as
 
     l_clob := logger.get_param_clob(p_params => l_params);
 
-    if l_clob != 'p_test1: test1' || c_line_feed || 'p_test2: test2' then
+    if l_clob != 'p_test1: test1' || gc_line_feed || 'p_test2: test2' then
       util_add_error('Not displaying correctly');
     end if;
   end get_param_clob;
@@ -209,11 +214,11 @@ as
     end if;
 
     -- Test for client_id
-    dbms_session.set_identifier('test_identifier');
+    dbms_session.set_identifier(gc_client_id);
     logger.save_global_context(
       p_attribute => 'TEST',
       p_value => 'test_client_id',
-      p_client_id => 'test_identifier');
+      p_client_id => gc_client_id);
 
     if sys_context(logger.g_context_name, 'TEST') != 'test_client_id' then
       util_add_error('Context not setting (client_id);');
@@ -286,7 +291,7 @@ p_test2: test2' then
 
   exception
     when others then
-      util_add_error(c_unknown_err);
+      util_add_error(gc_unknown_err);
   end get_sys_context;
 
 
@@ -360,7 +365,7 @@ p_test2: test2' then
     end if;
 
     -- Client level Test
-    dbms_session.set_identifier('test_identifier');
+    dbms_session.set_identifier(gc_client_id);
     logger.set_level(
       p_level => logger.g_error,
       p_client_id => sys_context('userenv','client_identifier')
@@ -371,6 +376,179 @@ p_test2: test2' then
       util_add_error('Invalid clientid level');
     end if;
   end get_level_number;
+
+
+  procedure include_call_stack
+  as
+  begin
+    g_proc_name := 'include_call_stack';
+
+    update logger_prefs
+    set pref_value = 'TRUE'
+    where pref_name = 'INCLUDE_CALL_STACK';
+
+    if not logger.include_call_stack then
+      util_add_error('Faling on true');
+    end if;
+
+    update logger_prefs
+    set pref_value = 'FALSE'
+    where pref_name = 'INCLUDE_CALL_STACK';
+
+    -- reset contexts so that it looks at new one (could have called Logger.configure but more than what I need here)
+    logger.null_global_contexts;
+
+    if logger.include_call_stack then
+      util_add_error('Faling on false');
+    end if;
+
+    -- Test with client
+    dbms_session.set_identifier(gc_client_id);
+    logger.set_level(
+      p_level => logger.g_debug,
+      p_client_id => gc_client_id,
+      p_include_call_stack => 'TRUE'
+    );
+
+    if not logger.include_call_stack then
+      util_add_error('Faling on true (client_id)');
+    end if;
+
+  end include_call_stack;
+
+
+  procedure date_text_format_base
+  as
+    l_start date;
+    l_stop date;
+  begin
+    g_proc_name := 'date_text_format_base';
+
+    -- Test Seconds
+    l_start := to_date('10-Jan-2015 20:40:10', 'DD-MON-YYYY HH24:MI:SS');
+    l_stop := to_date('10-Jan-2015 20:40:20', 'DD-MON-YYYY HH24:MI:SS');
+    if logger.date_text_format_base (
+        p_date_start => l_start,
+        p_date_stop => l_stop) != '10 seconds ago' then
+      util_add_error('Error with seconds');
+    end if;
+
+    -- Test Minutes
+    l_start := to_date('10-Jan-2015 20:30', 'DD-MON-YYYY HH24:MI');
+    l_stop := to_date('10-Jan-2015 20:40', 'DD-MON-YYYY HH24:MI');
+    if logger.date_text_format_base (
+        p_date_start => l_start,
+        p_date_stop => l_stop) != '10 minutes ago' then
+      util_add_error('Error with minutes');
+    end if;
+
+    -- Test Hours (and that it's 1 hour not 1 hours)
+    l_start := to_date('10-Jan-2015 20:30', 'DD-MON-YYYY HH24:MI');
+    l_stop := to_date('10-Jan-2015 21:40', 'DD-MON-YYYY HH24:MI');
+    if logger.date_text_format_base (
+        p_date_start => l_start,
+        p_date_stop => l_stop) != '1 hour ago' then
+      util_add_error('Error with hours');
+    end if;
+
+    -- Test Days
+    l_start := to_date('10-Jan-2015 20:30', 'DD-MON-YYYY HH24:MI');
+    l_stop := to_date('12-Jan-2015 20:40', 'DD-MON-YYYY HH24:MI');
+    if logger.date_text_format_base (
+        p_date_start => l_start,
+        p_date_stop => l_stop) != '2 days ago' then
+      util_add_error('Error with days');
+    end if;
+
+    -- Test Weeks
+    l_start := to_date('10-Jan-2015 20:30', 'DD-MON-YYYY HH24:MI');
+    l_stop := to_date('30-Jan-2015 20:40', 'DD-MON-YYYY HH24:MI');
+    if logger.date_text_format_base (
+        p_date_start => l_start,
+        p_date_stop => l_stop) != '2 weeks ago' then
+      util_add_error('Error with weeks');
+    end if;
+
+    -- Test Months
+    l_start := to_date('10-Jan-2015 20:30', 'DD-MON-YYYY HH24:MI');
+    l_stop := to_date('11-Mar-2015 20:40', 'DD-MON-YYYY HH24:MI');
+    if logger.date_text_format_base (
+        p_date_start => l_start,
+        p_date_stop => l_stop) != '2 months ago' then
+      util_add_error('Error with months');
+    end if;
+
+    -- Test Years
+    l_start := to_date('10-Jan-2015 20:30', 'DD-MON-YYYY HH24:MI');
+    l_stop := to_date('11-Mar-2016 20:40', 'DD-MON-YYYY HH24:MI');
+    if logger.date_text_format_base (
+        p_date_start => l_start,
+        p_date_stop => l_stop) != '1.2 years ago' then
+      util_add_error('Error with years');
+    end if;
+
+  end date_text_format_base;
+
+
+  -- Will not test date_text_format since it's dependant on current date and uses date_text_format_base
+
+  -- Will not test get_debug_info since it's too specific to where it's being called
+
+  procedure log_internal
+  as
+    l_params logger.tab_param;
+    l_scope logger_logs.scope%type;
+    l_row logger_logs_5_min%rowtype;
+
+  begin
+    g_proc_name := 'log_internal';
+
+    logger.append_param(l_params, 'p_test1', 'test1');
+
+    -- Set the level to error then log at debug.
+    -- Should still register since log_internal doesn't check ok_to_log (which is as expected)
+    logger.set_level(p_level => logger.g_error);
+
+    l_scope := lower('logger_test_' || dbms_random.string('x',20));
+    logger.log_internal(
+      p_text => 'test',
+      p_log_level => logger.g_debug,
+      p_scope => l_scope,
+      p_extra => 'extra',
+      p_callstack => null,
+      p_params => l_params);
+
+    select *
+    into l_row
+    from logger_logs_5_min
+    where 1=1
+      and scope = l_scope;
+
+    if l_row.text != 'test' then
+      util_add_error('text failed');
+    end if;
+
+    if l_row.logger_level != logger.g_debug then
+      util_add_error('Level failed');
+    end if;
+
+    if l_row.extra !=
+'extra
+
+*** Parameters ***
+
+p_test1: test1' then
+      util_add_error('Extra Failed');
+    end if;
+
+    -- Add test to make sure other columns aren't null?
+
+
+  end log_internal;
+
+
+
+  -- *** PUBLIC *** --
 
 
   procedure null_global_contexts
@@ -391,6 +569,116 @@ p_test2: test2' then
 
 
   end null_global_contexts;
+
+
+  procedure convert_level_char_to_num
+  as
+  begin
+    g_proc_name := 'convert_level_char_to_num';
+
+    if logger.convert_level_char_to_num(p_level => logger.g_error_name) != logger.g_error then
+      util_add_error('Not converting properly');
+    end if;
+  end convert_level_char_to_num;
+
+
+  procedure convert_level_num_to_char
+  as
+  begin
+    g_proc_name := 'convert_level_num_to_char';
+
+    if logger.convert_level_num_to_char(p_level => logger.g_information) != logger.g_information_name then
+      util_add_error('Not converting properly');
+    end if;
+  end convert_level_num_to_char;
+
+
+  procedure get_character_codes
+  as
+    l_temp varchar2(1000);
+  begin
+    g_proc_name := 'get_character_codes';
+
+    l_temp := logger.get_character_codes(
+  		p_string =>
+'Test
+new line',
+  		p_show_common_codes => false);
+
+    if l_temp !=
+'  84,101,115,116, 10,110,101,119, 32,108,105,110,101
+   T,  e,  s,  t,  ~,  n,  e,  w,   ,  l,  i,  n,  e' then
+      util_add_error('Failed on show common codes false');
+    end if;
+
+    l_temp := logger.get_character_codes(
+  		p_string =>
+'Test
+new line',
+  		p_show_common_codes => true);
+
+    if l_temp !=
+'Common Codes: 13=Line Feed, 10=Carriage Return, 32=Space, 9=Tab
+  84,101,115,116, 10,110,101,119, 32,108,105,110,101
+   T,  e,  s,  t,  ~,  n,  e,  w,   ,  l,  i,  n,  e' then
+      util_add_error('Failed on show common codes true');
+    end if;
+  end get_character_codes;
+
+  -- FUTURE mdsouza: Add test for get_debug_info
+
+  procedure ok_to_log
+  as
+    l_bool boolean;
+    test_type dbms_sql.varchar2_table;
+  begin
+    g_proc_name := 'ok_to_log';
+
+    test_type(1) := 'global';
+    test_type(2) := 'client';
+
+    for i in test_type.first .. test_type.last loop
+      -- for client reset global to debug then set client to error
+      if test_type(i) = 'global' then
+        logger.set_level(p_level => logger.g_error);
+      else
+        -- Client
+        -- Reset global level
+        logger.set_level(p_level => logger.g_debug);
+
+        dbms_session.set_identifier(gc_client_id);
+        logger.set_level(
+          p_level => logger.g_error,
+          p_client_id => gc_client_id);
+      end if;
+
+      -- Tests
+      -- Should be false since lower
+      if logger.ok_to_log(p_level => logger.g_debug) then
+        util_add_error('not registering lower levels. Test Type: ' || test_type(i));
+      end if;
+
+      -- Should be true
+      if not logger.ok_to_log(p_level => logger.g_error) then
+        util_add_error('failing when same level. Test Type: ' || test_type(i));
+      end if;
+
+      -- Should be true
+      if not logger.ok_to_log(p_level => logger.g_permanent) then
+        util_add_error('failing when higher level. Test Type: ' || test_type(i));
+      end if;
+
+
+    end loop;
+
+  end ok_to_log;
+
+  -- ok_to_log (varchar2): Not running since it's a wrapper
+
+
+  -- snapshot_apex_items not going to be tested for now
+
+
 
 
 
@@ -414,6 +702,8 @@ p_test2: test2' then
     g_errors := l_error_null;
 
     -- Run tests
+
+    -- Private
     util_test_setup; is_number; util_test_teardown;
     util_test_setup; assert; util_test_teardown;
     util_test_setup; get_param_clob; util_test_teardown;
@@ -422,7 +712,18 @@ p_test2: test2' then
     util_test_setup; get_sys_context; util_test_teardown;
     util_test_setup; admin_security_check; util_test_teardown;
     util_test_setup; get_level_number; util_test_teardown;
-    null_global_contexts;
+    util_test_setup; include_call_stack; util_test_teardown;
+    util_test_setup; date_text_format_base; util_test_teardown;
+    util_test_setup; log_internal; util_test_teardown;
+
+
+    -- Public
+    util_test_setup; null_global_contexts; util_test_teardown;
+    util_test_setup; convert_level_char_to_num; util_test_teardown;
+    util_test_setup; convert_level_num_to_char; util_test_teardown;
+    util_test_setup; get_character_codes; util_test_teardown;
+    util_test_setup; ok_to_log; util_test_teardown;
+
 
     -- Display errors
     util_display_errors;
