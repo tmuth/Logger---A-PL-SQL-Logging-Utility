@@ -120,7 +120,15 @@ as
     function date_text_format_base (
       p_date_start in date,
       p_date_stop  in date)
-    return varchar2;
+      return varchar2;
+
+    procedure log_internal(
+      p_text in varchar2,
+      p_log_level in number,
+      p_scope in varchar2,
+      p_extra in clob default null,
+      p_callstack in varchar2 default null,
+      p_params in tab_param default logger.gc_empty_tab_param);
   $end
 
   -- PROCEDURES and FUNCTIONS

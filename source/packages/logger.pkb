@@ -614,6 +614,68 @@ as
   end get_debug_info;
 
 
+  /**
+   * Main procedure that will store log data into logger_logs table
+   *
+   *
+   * Modifications
+   *  - 2.1.0: If text is > 4000 characters, it will be moved to the EXTRA column
+   *
+   * @author Tyler Muth
+   * @created ???
+   * @param p_text
+   * @param p_log_level
+   * @param p_scope
+   * @param p_extra
+   * @param p_callstack
+   * @param p_params
+   *
+   */
+  procedure log_internal(
+    p_text in varchar2,
+    p_log_level in number,
+    p_scope in varchar2,
+    p_extra in clob default null,
+    p_callstack in varchar2 default null,
+    p_params in tab_param default logger.gc_empty_tab_param)
+  is
+    l_proc_name varchar2(100);
+    l_lineno varchar2(100);
+    l_text varchar2(32767);
+    l_callstack varchar2(3000);
+    l_extra logger_logs.extra%type;
+  begin
+    $if $$no_op $then
+      null;
+    $else
+      l_text := p_text;
+
+      -- Generate callstack text
+      if p_callstack is not null and include_call_stack then
+        get_debug_info(
+          p_callstack     => p_callstack,
+          o_unit          => l_proc_name,
+          o_lineno        => l_lineno);
+
+        l_callstack  := regexp_replace(p_callstack,'^.*$','',1,4,'m');
+        l_callstack  := regexp_replace(l_callstack,'^.*$','',1,1,'m');
+        l_callstack  := ltrim(replace(l_callstack,chr(10)||chr(10),chr(10)),chr(10));
+
+      end if;
+
+      l_extra := set_extra_with_params(p_extra => p_extra, p_params => p_params);
+
+      ins_logger_logs(
+        p_unit_name => upper(l_proc_name) ,
+        p_scope => p_scope ,
+        p_logger_level =>p_log_level,
+        p_extra => l_extra,
+        p_text =>l_text,
+        p_call_stack  =>l_callstack,
+        p_line_no => l_lineno,
+        po_id => g_log_id);
+    $end
+  end log_internal;
 
   -- **** PUBLIC ****
 
@@ -928,70 +990,6 @@ as
   end get_character_codes;
 
 
-
-
-  /**
-   * Main procedure that will store log data into logger_logs table
-   *
-   *
-   * Modifications
-   *  - 2.1.0: If text is > 4000 characters, it will be moved to the EXTRA column
-   *
-   * @author Tyler Muth
-   * @created ???
-   * @param p_text
-   * @param p_log_level
-   * @param p_scope
-   * @param p_extra
-   * @param p_callstack
-   * @param p_params
-   *
-   */
-  procedure log_internal(
-    p_text in varchar2,
-    p_log_level in number,
-    p_scope in varchar2,
-    p_extra in clob default null,
-    p_callstack in varchar2 default null,
-    p_params in tab_param default logger.gc_empty_tab_param)
-  is
-    l_proc_name varchar2(100);
-    l_lineno varchar2(100);
-    l_text varchar2(32767);
-    l_callstack varchar2(3000);
-    l_extra logger_logs.extra%type;
-  begin
-    $if $$no_op $then
-      null;
-    $else
-      l_text := p_text;
-
-      -- Generate callstack text
-      if p_callstack is not null and include_call_stack then
-        get_debug_info(
-          p_callstack     => p_callstack,
-          o_unit          => l_proc_name,
-          o_lineno        => l_lineno);
-
-        l_callstack  := regexp_replace(p_callstack,'^.*$','',1,4,'m');
-        l_callstack  := regexp_replace(l_callstack,'^.*$','',1,1,'m');
-        l_callstack  := ltrim(replace(l_callstack,chr(10)||chr(10),chr(10)),chr(10));
-
-      end if;
-
-      l_extra := set_extra_with_params(p_extra => p_extra, p_params => p_params);
-
-      ins_logger_logs(
-        p_unit_name => upper(l_proc_name) ,
-        p_scope => p_scope ,
-        p_logger_level =>p_log_level,
-        p_extra => l_extra,
-        p_text =>l_text,
-        p_call_stack  =>l_callstack,
-        p_line_no => l_lineno,
-        po_id => g_log_id);
-    $end
-  end log_internal;
 
   -- TODO mdsouza: need to support as part of APEX items
   procedure snapshot_apex_items(
