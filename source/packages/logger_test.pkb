@@ -1162,9 +1162,34 @@ new line',
       util_add_error('boolean: ' || l_val);
     end if;
 
-
-
   end tochar;
+
+
+  procedure append_param
+  as
+    l_params logger.tab_param;
+  begin
+    g_proc_name := 'append_param';
+
+    logger.append_param(
+      p_params => l_params,
+      p_name => 'test',
+      p_val => 'val');
+
+    if l_params.count != 1 then
+      util_add_error('Did not add');
+    end if;
+
+    if l_params(1).name != 'test' then
+      util_add_error('Name invalid');
+    end if;
+
+    if l_params(1).val != 'val' then
+      util_add_error('Val Invalid');
+    end if;
+  end append_param;
+
+  -- ins_logger_logs
 
   /**
    * Runs all the tests and displays errors
@@ -1217,6 +1242,7 @@ new line',
     util_test_setup; purge_all; util_test_teardown;
     util_test_setup; set_level; util_test_teardown;
     util_test_setup; tochar; util_test_teardown;
+    util_test_setup; append_param; util_test_teardown;
 
 
     -- Display errors
