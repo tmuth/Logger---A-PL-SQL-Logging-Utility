@@ -544,6 +544,8 @@ ID      LOG_ID  APP_SESSION    ITEM_NAME                 ITEM_VALUE
 
 TOCHAR will convert the value to a string (varchar2). It is useful when wanting to log items, such as booleans, without having to explicitly convert them.
 
+**Note: ```tochar ``` does not use the *no_op* conditional compilation so it will always execute.** This means that you can use outside of Logger (i.e. within your own application business logic).
+
 ####Syntax
 ```sql
 logger.tochar(
