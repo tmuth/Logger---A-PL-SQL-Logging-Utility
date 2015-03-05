@@ -884,7 +884,7 @@ new line',
     l_unit_name logger_logs.unit_name%type := util_get_unique_scope;
     l_scope logger_logs.scope%type := util_get_unique_scope;
     l_text logger_logs.text%type;
-    l_sleep_time pls_integer := 1;
+    l_sleep_time number := 1;
   begin
     g_proc_name := 'time_stop';
 
@@ -895,7 +895,7 @@ new line',
       p_log_in_table => false
     );
 
-    apex_util.pause(l_sleep_time);
+    apex_util.pause(l_sleep_time + 0.1);
 
     logger.time_stop(
       p_unit => l_unit_name,
@@ -919,7 +919,7 @@ new line',
   procedure time_stop_fn
   as
     l_unit_name logger_logs.unit_name%type := util_get_unique_scope;
-    l_sleep_time pls_integer := 2;
+    l_sleep_time number := 2;
     l_text varchar2(50);
   begin
     g_proc_name := 'time_stop (function)';
@@ -931,7 +931,7 @@ new line',
       p_log_in_table => false
     );
 
-    apex_util.pause(l_sleep_time);
+    apex_util.pause(l_sleep_time + 0.1);
 
     l_text := logger.time_stop(p_unit => l_unit_name);
 
@@ -945,7 +945,7 @@ new line',
   procedure time_stop_seconds
   as
     l_unit_name logger_logs.unit_name%type := util_get_unique_scope;
-    l_sleep_time pls_integer := 2;
+    l_sleep_time number := 2;
     l_text varchar2(50);
   begin
     g_proc_name := 'time_stop_seconds';
@@ -957,7 +957,7 @@ new line',
       p_log_in_table => false
     );
 
-    apex_util.pause(l_sleep_time);
+    apex_util.pause(l_sleep_time + 0.05);
 
     l_text := logger.time_stop_seconds(p_unit => l_unit_name);
 
@@ -994,6 +994,177 @@ new line',
 
   end get_pref;
 
+  -- purge
+
+  procedure purge_all
+  as
+    l_count pls_integer;
+  begin
+    g_proc_name := 'purge_all';
+
+    logger.set_level(p_level => logger.g_debug);
+    logger.log('test');
+
+    logger.purge_all;
+
+    select count(1)
+    into l_count
+    from logger_logs
+    where 1=1
+      and logger_level > logger.g_permanent;
+
+    if l_count > 0 then
+      util_add_error('Non permanent records being kept.');
+    end if;
+  end purge_all;
+
+  -- status: Won't test since no real easy way to test output
+
+
+  procedure set_level
+  as
+    l_scope logger_logs.scope%type;
+    l_count pls_integer;
+    l_call_stack logger_logs.call_stack%type;
+
+    procedure log_and_count
+    as
+    begin
+      l_scope := util_get_unique_scope;
+      logger.log('test', l_scope);
+
+      select count(1)
+      into l_count
+      from logger_logs_5_min
+      where scope = l_scope;
+    end log_and_count;
+
+  begin
+    g_proc_name := 'set_level';
+
+    logger.set_level(p_level => logger.g_debug);
+
+
+    log_and_count;
+    if l_count != 1 then
+      util_add_error('Not logging debug');
+    end if;
+
+    logger.set_level(p_level => logger.g_error);
+    log_and_count;
+    if l_count != 0 then
+      util_add_error('Logging when shouldnt be');
+    end if;
+
+    -- Test client specific
+    dbms_session.set_identifier(gc_client_id);
+
+
+    -- Disable logging globally then set on for client
+    logger.set_level(p_level => logger.g_error);
+    logger.set_level(
+      p_level => logger.g_debug,
+      p_client_id => gc_client_id,
+      p_include_call_stack => 'TRUE');
+
+    log_and_count;
+    if l_count != 1 then
+      util_add_error('Not logging for client');
+    else
+      -- Test callstack
+      select call_stack
+      into l_call_stack
+      from logger_logs_5_min
+      where scope = l_scope;
+
+      if l_call_stack is null then
+        util_add_error('Callstack not being logged when it should be');
+      end if;
+    end if;
+
+
+    -- Test callstack off
+    logger.set_level(
+      p_level => logger.g_debug,
+      p_client_id => gc_client_id,
+      p_include_call_stack => 'FALSE');
+
+    log_and_count;
+    if l_count = 1 then
+      -- Test callstack
+      select call_stack
+      into l_call_stack
+      from logger_logs_5_min
+      where scope = l_scope;
+
+      if l_call_stack is not null then
+        util_add_error('Callstack being logged when it should not be');
+      end if;
+    end if;
+
+
+    -- Testing unset_client_level here since structure is in place
+    g_proc_name := 'unset_client_level';
+
+    logger.set_level(p_level => logger.g_error);
+    logger.set_level(
+      p_level => logger.g_debug,
+      p_client_id => gc_client_id,
+      p_include_call_stack => 'TRUE');
+
+    logger.unset_client_level(p_client_id => gc_client_id);
+    log_and_count;
+    if l_count != 0 then
+      util_add_error('unset not succesful');
+    end if;
+
+  end set_level;
+
+
+  -- unset_client_level (tested above)
+
+  -- unset_client_level
+
+  -- unset_client_level_all
+
+  -- sqlplus_format
+
+  -- Test all tochar commands
+  procedure tochar
+  as
+    l_val varchar2(255);
+  begin
+    g_proc_name := 'tochar';
+
+    if logger.tochar(1) != '1' then
+      util_add_error('number');
+    end if;
+
+    l_val := logger.tochar(to_date('1-Jan-2013'));
+    if l_val != '01-JAN-2013 00:00:00' then
+      util_add_error('date: ' || l_val);
+    end if;
+
+    l_val := logger.tochar(to_timestamp ('10-sep-02 14:10:10.123000', 'dd-mon-rr hh24:mi:ss.ff'));
+    if l_val != '10-SEP-2002 14:10:10:123000000' then
+      util_add_error('timestamp: ' || l_val);
+    end if;
+
+    l_val := logger.tochar(to_timestamp_tz('1999-12-01 11:00:00 -8:00', 'yyyy-mm-dd hh:mi:ss tzh:tzm'));
+    if l_val != '01-DEC-1999 11:00:00:000000000 -08:00' then
+      util_add_error('timezone: ' || l_val);
+    end if;
+
+    -- Local timezone based on above and is dependant on each system
+
+    l_val := logger.tochar(true) || ':' || logger.tochar(false);
+    if l_val != 'TRUE:FALSE' then
+      util_add_error('boolean: ' || l_val);
+    end if;
+
+
+
+  end tochar;
 
   /**
    * Runs all the tests and displays errors
@@ -1043,6 +1214,9 @@ new line',
     util_test_setup; time_stop_fn; util_test_teardown;
     util_test_setup; time_stop_seconds; util_test_teardown;
     util_test_setup; get_pref; util_test_teardown;
+    util_test_setup; purge_all; util_test_teardown;
+    util_test_setup; set_level; util_test_teardown;
+    util_test_setup; tochar; util_test_teardown;
 
 
     -- Display errors
