@@ -1719,6 +1719,8 @@ as
   is
     l_scope varchar2(30) := 'get_pref';
     l_pref_value logger_prefs.pref_value%type;
+    l_client_id logger_prefs_by_client_id.client_id%type;
+
   begin
     $if $$no_op $then
       return null;
@@ -1726,6 +1728,8 @@ as
       $if $$logger_debug $then
         dbms_output.put_line(l_scope || ' select pref');
       $end
+
+      l_client_id := sys_context('userenv','client_identifier');
 
       select pref_value
       into l_pref_value
@@ -1741,7 +1745,7 @@ as
             1 rank
           from logger_prefs_by_client_id
           where 1=1
-            and client_id = sys_context('userenv','client_identifier')
+            and client_id = l_client_id
             -- Only try to get prefs at a client level if pref is in LEVEL or INCLUDE_CALL_STACK
             and p_pref_name in ('LEVEL', 'INCLUDE_CALL_STACK')
           union
@@ -1761,6 +1765,7 @@ as
     when others then
       raise;
   end get_pref;
+
 
   /**
    * Purges logger_logs data
