@@ -970,7 +970,29 @@ new line',
 
   -- time_reset: won't test for now
 
+  procedure get_pref
+  as
+    l_pref logger_prefs.pref_value%type;
+  begin
+    g_proc_name := 'get_pref';
 
+    logger.set_level(p_level => logger.g_debug);
+
+    l_pref := nvl(logger.get_pref('LEVEL'), 'a');
+    if l_pref != logger.g_debug_name then
+      util_add_error('Global level not fetching correctly');
+    end if;
+
+    dbms_session.set_identifier(gc_client_id);
+    logger.set_level(
+      p_level => logger.g_warning,
+      p_client_id => gc_client_id);
+    l_pref := nvl(logger.get_pref('LEVEL'), 'a');
+    if l_pref != logger.g_warning_name then
+      util_add_error('Client pref not correct');
+    end if;
+
+  end get_pref;
 
 
   /**
@@ -1020,6 +1042,7 @@ new line',
     util_test_setup; time_stop; util_test_teardown;
     util_test_setup; time_stop_fn; util_test_teardown;
     util_test_setup; time_stop_seconds; util_test_teardown;
+    util_test_setup; get_pref; util_test_teardown;
 
 
     -- Display errors
