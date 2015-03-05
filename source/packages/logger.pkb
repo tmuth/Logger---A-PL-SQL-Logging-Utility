@@ -1982,7 +1982,7 @@ as
           display_output('Client Identifier', l_client_identifier);
           display_output('Client - Debug Level', l_cur_logger_level);
           display_output('Client - Call Stack', l_cur_include_call_stack);
-          display_output('Client - Expiry Date', to_char(l_cur_expiry_date, gc_date_format));
+          display_output('Client - Expiry Date', logger.tochar(l_cur_expiry_date));
         exception
           when no_data_found then
             null; -- No client specific logging set
@@ -2219,12 +2219,12 @@ as
 
   end sqlplus_format;
 
-
   /**
    * Converts parameter to varchar2
    *
    * Notes:
    *  - As this function could be useful for non-logging purposes will not apply a NO_OP to it for conditional compilation
+   *  - Need to call this tochar instead of to_char since there will be a conflict when calling it
    *
    * Related Tickets:
    *  - #68
@@ -2293,7 +2293,7 @@ as
    * This procedure is overloaded
    *
    * Related Tickets:
-   *  - #67: Updated to reference tochar functions
+   *  - #67: Updated to reference to_char functions
    *
    * @author Martin D'Souza
    * @created 19-Jan-2013
@@ -2402,10 +2402,6 @@ as
       logger.append_param(p_params => p_params, p_name => p_name, p_val => logger.tochar(p_val => p_val));
     $end
   end append_param;
-
-
-  -- -- TODO mdsouza: to_char or tochar?
-
 
 
   /**
