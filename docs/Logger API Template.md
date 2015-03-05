@@ -16,8 +16,8 @@ TODO
 #####Parameters
 <table border="0">
   <tr>
-    <td>Attribute</td>
-    <td>Description</td>
+    <th>Attribute</th>
+    <th>Description</th>
   </tr>
   <tr>
     <td>TODO</td>
