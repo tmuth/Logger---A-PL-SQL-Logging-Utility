@@ -33,7 +33,7 @@ In order to keep this page relatively small and for ease of use, the documentati
 - [Best Practices](docs/Best Practices.md)
 
 #Download
-It is recommended that you download a certified release (from the [releases](https://github.com/oraopensource/logger/tree/master/releases) folder). The files in the current repository are for the next release and should be considered unstable.
+It is recommended that you download a certified release (from the [releases](https://github.com/oraopensource/logger/releases) folder). The files in the current repository are for the next release and should be considered unstable.
 
 #Change Log
 [Change Logs](docs/Change Logs.md). TODO mdsouza: Just move this file to use milestones instead.
