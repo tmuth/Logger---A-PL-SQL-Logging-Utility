@@ -2514,7 +2514,8 @@ as
         call_stack, unit_name, line_no ,
         scn,
         extra,
-        sid
+        sid,
+        client_info
         )
        values(
          po_id, p_logger_level, l_text,
@@ -2525,7 +2526,8 @@ as
          p_call_stack, upper(p_unit_name), p_line_no,
          null,
          l_extra,
-         to_number(sys_context('userenv','sid'))
+         to_number(sys_context('userenv','sid')),
+         sys_context('userenv','client_info')
          );
 
       -- #46 Plugin support
