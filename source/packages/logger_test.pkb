@@ -1189,7 +1189,9 @@ new line',
     end if;
   end append_param;
 
-  -- ins_logger_logs
+  -- TODO: ins_logger_logs (to test post functions)
+
+  -- TODO: get_fmt_msg are we adding it in here?
 
   /**
    * Runs all the tests and displays errors
