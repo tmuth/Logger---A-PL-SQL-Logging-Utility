@@ -90,7 +90,7 @@ To uninstall Logger simple run the following script in the schema that Logger wa
 
 <a name="config-logger-levels"></a>
 ###Logger Levels
-They're various logger levels. To see the complete list, go to the [Constants](Logger-API.md#wiki-constants) section in the Logger API.
+They're various logger levels. To see the complete list, go to the [Constants](Logger API.md#wiki-constants) section in the Logger API.
 
 ###Enable
 To enable logging for the entire schema:
