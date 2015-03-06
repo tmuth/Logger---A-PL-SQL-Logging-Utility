@@ -27,16 +27,16 @@ select * from logger_logs;
 See the [Logger API](docs/Logger API.md) documentation for complete set of procedures.
 
 #Documentation
-In order to keep this page relatively small and for ease of use, the documentation has been moved to the [Logger Wiki](../../wiki). In there you you will find the following sections:
-- [Installation](../../wiki/Installation)
-- [Logger API](../../wiki/Logger-API)
-- [Best Practices](../../wiki/Best Practices)
+In order to keep this page relatively small and for ease of use, the documentation has been moved to the [Logger Docs](docs). In there you you will find the following sections:
+- [Installation](docs/Installation.md)
+- [Logger API](docs/Logger API.md)
+- [Best Practices](docs/Best Practices.md)
 
 #Download
 It is recommended that you download a certified release (from the [releases](https://github.com/oraopensource/logger/tree/master/releases) folder). The files in the current repository are for the next release and should be considered unstable.
 
 #Change Log
-The [Change Log](../../wiki/Change Logs) page has moved to the [wiki page](../../wiki/Change Logs).
+[Change Logs](docs/Change Logs.md). TODO mdsouza: Just move this file to use milestones instead.
 
 
 #License
