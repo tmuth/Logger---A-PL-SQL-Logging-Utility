@@ -90,7 +90,7 @@ To uninstall Logger simple run the following script in the schema that Logger wa
 
 <a name="config-logger-levels"></a>
 ###Logger Levels
-They're various logger levels. To see the complete list, go to the [Constants](Logger API.md#wiki-constants) section in the Logger API.
+They're various logger levels. To see the complete list, go to the [Constants](Logger API.md#constants) section in the Logger API.
 
 ###Enable
 To enable logging for the entire schema:
@@ -114,7 +114,7 @@ If you never want logger to run in an environment you can install the [NO-OP](#i
 
 
 ###Client Specific Configuration
-Logger now supports client specific configuration. For more information and examples view the [Set Logging Level](Logger-API#wiki-set-logging-level) section in the Logger API documentation.
+Logger now supports client specific configuration. For more information and examples view the [Set Logging Level](Logger API.md#set-logging-level) section in the Logger API documentation.
 
 ###Status
 To view the status/configuration of the Logger:
@@ -152,7 +152,7 @@ Logger stores its configuration settings in LOGGER_PREFS. These are the followin
   </tr>
     <tr>
     <td>INCLUDE_CALL_STACK</td>
-    <td>Store the call stack. Note [client specific settings](Logger-API#wiki-set-logging-level) can override this.</td>
+    <td>Store the call stack. Note <a href="Logger API.md#set-logging-level">client specific settings</a> can override this.</td>
   </tr>
   <tr>
     <td>INSTALL_SCHEMA</td>
