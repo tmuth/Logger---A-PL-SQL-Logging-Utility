@@ -1267,7 +1267,7 @@ as
   is
     l_cgienv clob;
 
-    $if not $$no_op $then
+    $if $$no_op is null or not $$no_op $then
       procedure append_cgi_env(
         p_name    in varchar2,
         p_val   in varchar2)
