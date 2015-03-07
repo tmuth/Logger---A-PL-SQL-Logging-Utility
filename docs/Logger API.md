@@ -3,6 +3,9 @@
 * [Types](#types)<br/>
 * [Subprograms](#subprograms)
 
+*This site is best viewed using: http://logger.github.oraopensource.com/docs/api*
+[TOC]
+
 <a name="constants"></a>
 #Constants
 
