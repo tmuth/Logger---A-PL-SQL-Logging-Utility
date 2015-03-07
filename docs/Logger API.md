@@ -29,6 +29,9 @@
 
 <a name="constants-logger-levels"></a>
 ##Logger Levels
+For historical purposes, logger levels supports both integers and names which are intergchangble when calling a function that requires a logger level.
+###Numeric
+This is the preferred method
 <table border="0">
   <tr>
     <th>Name</th>
@@ -70,6 +73,11 @@
 		<td>g_apex</td>
 		<td>Logger level apex (128).</td>
 	</tr>
+</table>
+
+###Name
+This will still work, however it is recommended that you use the numeric values.
+<table border="0">
   <tr>
     <td>g_off_name</td>
     <td>Logger level name: OFF</td>
