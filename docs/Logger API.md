@@ -1,4 +1,4 @@
-***This site is best viewed at: http://logger.github.oraopensource.com/docs/api***
+***This doc is best viewed at: http://logger.github.oraopensource.com/docs/api***
 
 <a name="constants"></a>
 #Constants
