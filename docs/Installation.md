@@ -1,4 +1,4 @@
-***This document is best viewed in [flatdoc format](http://oraopensource.github.io/flatdoc?repo=logger&path=docs%2Installation.md)***
+***This document is best viewed in [flatdoc format](http://oraopensource.github.io/flatdoc?repo=logger&path=docs%2FInstallation.md)***
 <a name="installation"></a>
 #Installation
 
