@@ -1,5 +1,4 @@
 ***This document is best viewed in [flatdoc format](http://oraopensource.github.io/flatdoc?repo=logger&path=docs%2FLogger+API.md)***
-
 <a name="constants"></a>
 #Constants
 
@@ -232,26 +231,28 @@ end p_demo_procedure;
 
 
 <a name="procedure-log"></a>
-###LOG Procedure
+###LOG
 This procedure will log an entry into the LOGGER\_LOGS table when the logger_level is set to *debug*. See [Main Logger Procedures](#main-logger-procedures) for syntax, parameters, and examples.
 
 <a name="procedure-log_information"></a>
-###LOG_INFORMATION Procedure
+###LOG_INFORMATION / LOG_INFO
 This procedure will log an entry into the LOGGER\_LOGS table when the logger_level is set to *information*. See [Main Logger Procedures](#main-logger-procedures) for syntax, parameters, and examples.
 
+```log_info``` is a shortcut wrapper for ```log_information```.
+
 <a name="procedure-log_warning"></a>
-###LOG_WARNING Procedure
+###LOG_WARNING / LOG_WARN
 This procedure will log an entry into the LOGGER\_LOGS table when the logger_level is set to *warning*. See [Main Logger Procedures](#main-logger-procedures) for syntax, parameters, and examples.
 
+```log_warn``` is a shortcut wrapper for ```log_warning```.
+
 <a name="procedure-log_error"></a>
-###LOG_ERROR Procedure
+###LOG_ERROR
 This procedure will log an entry into the LOGGER\_LOGS table when the logger_level is set to *error*. See [Main Logger Procedures](#main-logger-procedures) for syntax, parameters, and examples.
 
 <a name="procedure-log_permanent"></a>
-###LOG_PERMANENT Procedure
+###LOG_PERMANENT
 This procedure will log an entry into the LOGGER\_LOGS table when the logger_level is set to *permanent*. See [Main Logger Procedures](#main-logger-procedures) for syntax, parameters, and examples.
-
-
 
 <a name="other-logger-procedures"></a>
 ##Other Logger Procedures
