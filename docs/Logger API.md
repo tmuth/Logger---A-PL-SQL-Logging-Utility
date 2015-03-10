@@ -1,5 +1,3 @@
-***This document is best viewed in [flatdoc format](http://oraopensource.github.io/flatdoc?repo=logger&path=docs%2FLogger+API.md)***
-
 <a name="constants"></a>
 #Constants
 
