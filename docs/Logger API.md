@@ -1,4 +1,3 @@
-<a name="constants"></a>
 #Constants
 
 <a name="constants-general"></a>
