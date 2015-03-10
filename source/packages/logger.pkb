@@ -1169,6 +1169,37 @@ as
 
 
   /**
+   * Wrapper for log_warning
+   *
+   * Notes:
+   *  - #80
+   *
+   * Related Tickets:
+   *  -
+   *
+   * @author Martin D'Souza
+   * @created 9-9-Mar-2015
+   * @param p_text
+   * @param p_scope
+   * @param p_extra
+   * @param p_params
+   */
+  procedure log_warn(
+    p_text in varchar2,
+    p_scope in varchar2 default null,
+    p_extra in clob default null,
+    p_params in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    logger.log_warning(
+      p_text => p_text,
+      p_scope => p_scope,
+      p_extra => p_extra,
+      p_params => p_params
+    );
+  end log_warn;
+
+  /**
    *
    *
    * Notes:
@@ -1205,6 +1236,38 @@ as
       end if;
     $end
   end log_information;
+
+
+  /**
+   * Wrapper for short call to log_information
+   *
+   * Notes:
+   *  -
+   *
+   * Related Tickets:
+   *  - #80
+   *
+   * @author Martin D'Souza
+   * @created 9-Mar-2015
+   * @param p_text
+   * @param p_scope
+   * @param p_extra
+   * @param p_params
+   */
+  procedure log_info(
+    p_text in varchar2,
+    p_scope in varchar2 default null,
+    p_extra in clob default null,
+    p_params in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    logger.log_information(
+      p_text => p_text,
+      p_scope => p_scope,
+      p_extra => p_extra,
+      p_params => p_params
+    );
+  end log_info;
 
 
   /**
@@ -2655,23 +2718,28 @@ as
   as
     l_return varchar2(4000);
     l_count pls_integer;
-    g_substring_regexp constant varchar2(10) := '(%s|%d)';
+    c_substring_regexp constant varchar2(10) := '(%s|%d)';
 
   begin
     $if $$no_op $then
       null;
     $else
+      -- TODO mdsouza: support for %s1 subs
 
       $if $$logger_utl_lms $then
+
+        -- TODO mdsouza: escape %%
+
         -- True printf functionality (if supported): http://vbegun.blogspot.ca/2005/10/simple-plsql-printf.html
         -- Note: Did performance tests and using sys.utl_lms is faster then custom code below.
         l_return := sys.utl_lms.format_message(p_msg,p_s01, p_s02, p_s03, p_s04, p_s05, p_s06, p_s07, p_s08, p_s09, p_s10);
       $else
+        -- TODO mdsouza: support for %% escaping
         l_return := p_msg;
-        l_count := regexp_count(l_return, g_substring_regexp, 1, 'c');
+        l_count := regexp_count(l_return, c_substring_regexp, 1, 'c');
 
         for i in 1..l_count loop
-          l_return := regexp_replace(l_return, g_substring_regexp,
+          l_return := regexp_replace(l_return, c_substring_regexp,
             case
               when i = 1 then p_s01
               when i = 2 then p_s02
