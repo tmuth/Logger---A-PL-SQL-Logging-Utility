@@ -255,8 +255,6 @@ This procedure will log an entry into the LOGGER\_LOGS table when the logger_lev
 ###LOG_PERMANENT
 This procedure will log an entry into the LOGGER\_LOGS table when the logger_level is set to *permanent*. See [Main Logger Procedures](#main-logger-procedures) for syntax, parameters, and examples.
 
-
-
 <a name="other-logger-procedures"></a>
 ##Other Logger Procedures
 
