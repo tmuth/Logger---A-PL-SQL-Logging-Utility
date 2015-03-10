@@ -2,7 +2,6 @@
 
 <a name="constants"></a>
 #Constants
-TODO
 
 <a name="constants-general"></a>
 ##General
