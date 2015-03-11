@@ -100,8 +100,8 @@ printf '\n' >> $INSTALL
 
 
 #PROCEDURES
-printf 'PROMPT procedures/logger_configure.sql \n' >> $INSTALL
-cat ../source/procedures/logger_configure.sql >> $INSTALL
+printf 'PROMPT procedures/logger_configure.plb \n' >> $INSTALL
+cat ../source/procedures/logger_configure.plb >> $INSTALL
 printf '\n' >> $INSTALL
 
 
