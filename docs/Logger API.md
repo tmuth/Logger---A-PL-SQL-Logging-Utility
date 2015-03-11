@@ -1354,13 +1354,16 @@ end if;
 
 <a name="procedure-ins_logger_logs"></a>
 ###INS_LOGGER_LOGS
-As part of the 2.1.0 release, the trigger on LOGGER\_LOGS was removed for both performance and other issues. Though inserting directly to the LOGGER\_LOGS table is not a supported feature of Logger, you may have some code that does a direct insert. The primary reason that a manual insert into LOGGER\_LOGS was done was to obtain the ID column for the log entry.
+Similar to ```ok_to_log```, this procedure should be used very infrequently as the main Logger procedures should handle everything that is required for quickly logging information.
 
-To help prevent any issues with backwards compatibility, *ins\_logger\_logs* has been made publicly accessible to handle any inserts into LOGGER\_LOGS. This is a supported procedure and any manual insert statements will need to be modified to use this procedure instead.
+As part of the 2.1.0 release, the trigger on ```LOGGER_LOGS``` was removed for both performance and other issues. Though inserting directly to the ```LOGGER_LOGS``` table is not a supported feature of Logger, you may have some code that does a direct insert. The primary reason that a manual insert into ```LOGGER_LOGS``` was done was to obtain the ```ID``` column for the log entry.
 
-It's important to note that *ins\_logger\_logs* does not check the Logger level. This means it will always insert into the LOGGER\_LOGS table. It is also an Autonomous Transaction procedure so a commit is always performed, however it will not affect the current session.
+To help prevent any issues with backwards compatibility, ```ins_logger_logs```  has been made publicly accessible to handle any inserts into ```LOGGER_LOGS```. This is a supported procedure and any manual insert statements will need to be modified to use this procedure instead.
 
-Similar to *ok\_to\_log*, this procedure should be used very infrequently as the main Logger procedures should handle everything that is required for quickly logging information.
+Important things to now about ```ins_logger_logs```:
+
+ - It does not check the Logger level. This means it will always insert into the ```LOGGER_LOGS``` table. It is also an Autonomous Transaction procedure so a commit is always performed, however it will not affect the current session.
+ - Plugins (TODO link) will not be executed when calling this procedure. If you have critical processes which leverage plugin support you should use the proper log function instead.
 
 ####Syntax
 ```sql
