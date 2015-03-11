@@ -1364,7 +1364,6 @@ Important things to now about ```ins_logger_logs```:
 
  - It does not check the Logger level. This means it will always insert into the ```LOGGER_LOGS``` table. It is also an Autonomous Transaction procedure so a commit is always performed, however it will not affect the current session.
  - Plugins (TODO link) will not be executed when calling this procedure. If you have critical processes which leverage plugin support you should use the proper log function instead.
-
 ####Syntax
 ```sql
 logger.ins_logger_logs(
