@@ -24,19 +24,14 @@ as
   --  Primarily used for dbms_output.put_line calls
   --  Part of #64
   --
-  -- $$LOGGER_PLUGINS_ENABLED
-  --  Set in logger_configure.
-  --  Only set to true if you want Plugin features enabled
-  --  Put this in conditional compilation so performance on existing systems won't be affected
-  --
-  -- TODO mdsouza:  better documentation
-  -- $$LOGGER_PLUGIN_FN_<FN> : For each type of plugin
+  -- $$LOGGER_PLUGIN_<TYPE> : For each type of plugin
+  --  Introduced with #46
+  --  $$LOGGER_PLUGIN_ERROR
   --
 
 
 
 -- TODO mdsouza: Create package varis for string veriosns of error type
--- TODO mdsouza: Make procedures simple by choosing one or other (but make backwards compatible)
 
   -- TYPES
   type ts_array is table of timestamp index by varchar2(100);
@@ -46,6 +41,14 @@ as
   g_log_id number;
   g_proc_start_times ts_array;
   g_running_timers pls_integer := 0;
+
+  -- #46
+  g_plug_logger_log_error rec_logger_log;
+
+  g_in_plugin_error boolean := false;
+
+
+
 
 
   -- CONSTANTS
@@ -416,7 +419,7 @@ as
   end admin_security_check;
 
 
-    -- TODO mdsouza: test this on XE to see if it runs?
+  -- TODO mdsouza: test this on XE to see if it runs?
   -- TODO mdsouza: I don't think this runs at all
   /**
    *
@@ -676,6 +679,138 @@ as
         po_id => g_log_id);
     $end
   end log_internal;
+
+
+  /**
+   * Run plugin
+   *
+   * Notes:
+   *  - Currently only supports error type plugin but has been built to support other types
+   *  - -- FUTURE mdsouza: When supporting other plugin types put conditional compilation where applicable
+   *
+   * Related Tickets:
+   *  - #46
+   *
+   * @author Martin D'Souza
+   * @created 11-Mar-2015
+   * @param TODO
+   */
+  -- TODO mdsouza: make tests for this
+  procedure run_plugin(p_logger_log in logger.rec_logger_log)
+  as
+    l_plugin_fn logger_prefs.pref_value%type;
+    l_plugin_ctx varchar2(30);
+
+    l_sql varchar2(255);
+
+    -- For exception block
+    l_params logger.tab_param;
+    l_scope logger_logs.scope%type;
+
+    -- Mark "in_plugin" as true/false
+    -- Put in separate procedure since more logic may be applied
+    -- And called from exception block as well
+    procedure start_stop_plugin(
+      p_in_plugin boolean -- True/False depending on action
+    )
+    as
+    begin
+      if p_logger_log.logger_level = logger.g_error then
+        g_in_plugin_error := p_in_plugin;
+      end if;
+    end start_stop_plugin;
+
+    function f_get_set_global_context(
+      p_ctx in varchar2
+    )
+      return varchar2
+    as
+      l_return varchar2(255);
+    begin
+      $if $$logger_debug $then
+        dbms_output.put_line('Calling f_get_set_global_conext');
+      $end
+
+      l_return := upper(get_pref(p_pref_name =>
+        case
+          when p_logger_log.logger_level = g_error then gc_ctx_plugin_fn_error
+        end
+      ));
+
+      $if $$logger_debug $then
+        dbms_output.put_line('l_return: ' || l_return);
+      $end
+
+      save_global_context(p_attribute => p_ctx, p_value => l_return);
+      return l_return;
+    end f_get_set_global_context;
+
+  begin
+    start_stop_plugin(p_in_plugin => true);
+
+    $if $$logger_debug $then
+      dbms_output.put_line('in run_plugin. g_in_plugin_error: ' || logger.tochar(g_in_plugin_error));
+    $end
+
+    if 1=2 then
+      null;
+    elsif p_logger_log.logger_level = logger.g_error then
+      l_plugin_ctx := gc_ctx_plugin_fn_error;
+    end if;
+
+    if l_plugin_ctx is not null then
+      l_plugin_fn := coalesce(
+        sys_context(g_context_name, l_plugin_ctx),
+        f_get_set_global_context(p_ctx => l_plugin_ctx));
+
+      $if $$logger_debug $then
+        dbms_output.put_line('l_plugin_fn: ' || l_plugin_fn);
+      $end
+
+      if 1=1
+        and l_plugin_fn is not null
+        and l_plugin_fn != 'NONE' then
+
+        l_sql := 'begin ' || l_plugin_fn || '(logger.get_plugin_rec(' || p_logger_log.logger_level || ')); end;';
+
+        $if $$logger_debug $then
+          dbms_output.put_line('l_sql: ' || l_sql);
+        $end
+
+        execute immediate l_sql;
+
+      else
+        -- Should never reach this point since plugin_fn should have a value
+        logger.log_error('Error l_plugin_fn does not have value');
+      end if; -- l_plugin_fn
+    else
+      -- Should never reach this point since plugin_ctx should have a value
+      logger.log_error('Error l_plugin_ctx does not have value');
+    end if; -- l_plugin_ctx is not null
+
+    start_stop_plugin(p_in_plugin => false);
+
+  exception
+    when others then
+      logger.append_param(l_params, 'Logger.id', p_logger_log.id);
+      logger.append_param(l_params, 'Logger.logger_level', p_logger_log.logger_level);
+      logger.append_param(l_params, 'Plugin Function', l_plugin_fn);
+
+      select scope
+      into l_scope
+      from logger_logs_5_min
+      where 1=1
+        and id = p_logger_log.id;
+
+      logger.log_error('Exception in ', l_scope, null, l_params);
+
+      start_stop_plugin(p_in_plugin => false);
+
+      raise;
+  end run_plugin;
+
+
+
 
   -- **** PUBLIC ****
 
@@ -1035,7 +1170,7 @@ as
    *  -
    *
    * Related Tickets:
-   *  -
+   *  - #46: Added plugin support
    *
    * @author Tyler Muth
    * @created ???
@@ -1084,7 +1219,23 @@ as
           p_call_stack => l_call_stack,
           p_line_no => l_lineno,
           po_id => g_log_id);
-      end if;
+
+        -- Plugin
+        $if $$logger_plugin_error $then
+
+          if not g_in_plugin_error then
+            g_plug_logger_log_error.logger_level := logger.g_error;
+            g_plug_logger_log_error.id := g_log_id;
+
+            $if $$logger_debug $then
+              dbms_output.put_line('Starting call to run_plugin error');
+            $end
+
+            run_plugin(p_logger_log => g_plug_logger_log_error);
+          end if; -- not g_in_plugin_error
+        $end
+
+      end if; -- ok_to_log
     $end
   end log_error;
 
@@ -1771,7 +1922,7 @@ as
    * @param p_pref_name
    */
   function get_pref(
-    p_pref_name   in  varchar2)
+    p_pref_name in varchar2)
     return varchar2
     $if not dbms_db_version.ver_le_10_2  $then
       result_cache
@@ -1783,8 +1934,9 @@ as
     l_scope varchar2(30) := 'get_pref';
     l_pref_value logger_prefs.pref_value%type;
     l_client_id logger_prefs_by_client_id.client_id%type;
-
+    l_pref_name logger_prefs.pref_name%type := upper(p_pref_name);
   begin
+
     $if $$no_op $then
       return null;
     $else
@@ -1802,20 +1954,20 @@ as
           -- Client specific logger levels trump system level logger level
           select
             case
-              when p_pref_name = 'LEVEL' then logger_level
-              when p_pref_name = 'INCLUDE_CALL_STACK' then include_call_stack
+              when l_pref_name = 'LEVEL' then logger_level
+              when l_pref_name = 'INCLUDE_CALL_STACK' then include_call_stack
             end pref_value,
             1 rank
           from logger_prefs_by_client_id
           where 1=1
             and client_id = l_client_id
             -- Only try to get prefs at a client level if pref is in LEVEL or INCLUDE_CALL_STACK
-            and p_pref_name in ('LEVEL', 'INCLUDE_CALL_STACK')
+            and l_pref_name in ('LEVEL', 'INCLUDE_CALL_STACK')
           union
           -- System level configuration
           select pref_value, 2 rank
           from logger_prefs
-          where pref_name = p_pref_name
+          where pref_name = l_pref_name
         )
       )
       where rn = 1;
@@ -2018,17 +2170,13 @@ as
       $end
 
       -- #46 Only display plugins if enabled
-      $if $$logger_plugins_enabled $then
-        display_output('PLUGIN_FN_LOG',get_pref('PLUGIN_FN_LOG'));
-        display_output('PLUGIN_FN_INFORMATION',get_pref('PLUGIN_FN_INFORMATION'));
-        display_output('PLUGIN_FN_WARNING',get_pref('PLUGIN_FN_WARNING'));
+      $if $$logger_plugin_error $then
         display_output('PLUGIN_FN_ERROR',get_pref('PLUGIN_FN_ERROR'));
-        display_output('PLUGIN_FN_PERMANENT',get_pref('PLUGIN_FN_PERMANENT'));
       $end
 
       -- #64
       $if $$logger_debug $then
-        display_output('LOGGER_DEBUG',get_pref('LOGGER_DEBUG') || '   *** SHOULD BE TURN OFF!!! SET TO FALSE ***');
+        display_output('LOGGER_DEBUG',get_pref('LOGGER_DEBUG') || '   *** SHOULD BE TURNED OFF!!! SET TO FALSE ***');
       $end
 
 
@@ -2302,8 +2450,7 @@ as
     return varchar2
   as
   begin
-    return to_char(p_val); -- TODO mdsouza: should I add a number format conversion? Check Tom Kyte's blog about the security risk of not doing so
-    -- TODO mdsouza: same thought for remaining functions
+    return to_char(p_val);
   end tochar;
 
   function tochar(
@@ -2510,36 +2657,6 @@ as
     l_plugin_fn logger_prefs.pref_value%type;
     l_tmp_clob clob;
 
-    -- Gets and sets global cotext
-    function f_get_set_global_conext(
-      p_ctx in varchar2
-    )
-      return varchar2
-    as
-      l_return varchar2(255);
-    begin
-      $if $$logger_debug $then
-        dbms_output.put_line('Calling f_get_set_global_conext');
-      $end
-
-      l_return := upper(get_pref(p_pref_name =>
-        case
-          when p_logger_level = g_debug then gc_ctx_plugin_fn_log
-          when p_logger_level = g_information then gc_ctx_plugin_fn_info
-          when p_logger_level = g_warning then gc_ctx_plugin_fn_warn
-          when p_logger_level = g_error then gc_ctx_plugin_fn_error
-          when p_logger_level = g_permanent then gc_ctx_plugin_fn_perm
-        end
-      ));
-
-      $if $$logger_debug $then
-        dbms_output.put_line('l_return: ' || l_return);
-      $end
-
-      save_global_context(p_attribute => p_ctx, p_value => l_return);
-      return l_return;
-    end f_get_set_global_conext;
-
   begin
     $if $$no_op $then
       null;
@@ -2592,78 +2709,6 @@ as
          to_number(sys_context('userenv','sid')),
          sys_context('userenv','client_info')
          );
-
-      -- #46 Plugin support
-      -- Conditional compilation has been applied to ensure that minimal performance impact
-      $if $$logger_plugins_enabled $then
-
-        $if $$logger_debug $then
-          dbms_output.put_line('A Plugin is enabled. Processing. logger_level: ' || p_logger_level);
-        $end
-
-        -- TODO mdsouza: Have a preference parameter which wll then control a compile parameter to enable thus feature. A must for performance
-        -- TODO mdsouza: Need to detect if calling custom code with a type
-        -- Type will be of type typ_logger
-        /* todo clearn this up
-        -- TODO mdsouza: Need a way to configure this based on individual user sessions as well (use the logger_prefs_by_client_id and add columns?)
-        if code exists for logger_level (based on id) then
-          l_logger_logs.id = po_id;
-          l_logger_logs.logger_level = p_logger_level;
-          execute immediate <package.function> using l_logger;
-        end if;
-        */
-
-        if 1=2 then
-          null;
-        -- Use coalesce below since it will only run second call if first one is null
-        -- Using connditional compilation since want to avoid any additional overhead of plugins.
-        -- Though extra work could save on performance as we already know ahead of time what the possible functions are.
-        -- TODO: mdsouza test that it is only calling the second one once. It looks like it may call eit ea
-        $if $$logger_plugin_fn_log $then
-          elsif p_logger_level = g_debug then
-            l_plugin_fn := coalesce(sys_context(g_context_name, gc_ctx_plugin_fn_log), f_get_set_global_conext(p_ctx => gc_ctx_plugin_fn_log));
-        $end
-        $if $$logger_plugin_fn_information $then
-          elsif p_logger_level = g_information then
-            l_plugin_fn := coalesce(sys_context(g_context_name, gc_ctx_plugin_fn_info), f_get_set_global_conext(p_ctx => gc_ctx_plugin_fn_info));
-        $end
-        $if $$logger_plugin_fn_warning $then
-          elsif p_logger_level = g_warning then
-            l_plugin_fn := coalesce(sys_context(g_context_name, gc_ctx_plugin_fn_warn), f_get_set_global_conext(p_ctx => gc_ctx_plugin_fn_warn));
-        $end
-        $if $$logger_plugin_fn_error $then
-          elsif p_logger_level = g_error then
-            l_plugin_fn := coalesce(sys_context(g_context_name, gc_ctx_plugin_fn_error), f_get_set_global_conext(p_ctx => gc_ctx_plugin_fn_error));
-        $end
-        $if $$logger_plugin_fn_permanent $then
-          elsif p_logger_level = g_permanent then
-            l_plugin_fn := coalesce(sys_context(g_context_name, gc_ctx_plugin_fn_perm), f_get_set_global_conext(p_ctx => gc_ctx_plugin_fn_perm);
-        $end
-        end if;
-
-
-        if 1=1
-          and l_plugin_fn is not null
-          and l_plugin_fn != 'NONE'
-          -- TODO mdsouza: document this feature (That plugins won't work when being called from within a plugin)
-          and not g_in_plugin then -- Need this to prevent looping
-
-
-          -- TODO mdsouza: see what APEX code did.
-          -- TODO mdsouza: Set the logger_levels to a global parameter. Then call dynamic code referencing that variable
-          -- TODO mdsouza: Need ot also test out permissions (if this is a global logger package called from synonym.)
-              -- For solution see wwv_dbms_sql.RUN_BLOCK5 (Note Make sure this is supported)
-
-          -- TODO mdsouza: tag something in here that we're in plugin mode so we don't get infinte looping (i.e. once the initial log call has made the plugin code won't run)
-          -- TODO mdsouza: should we do a commit here before?
-          g_in_plugin := true;
-          g_rec_logger_logs.id := po_id;
-          g_rec_logger_logs.logger_level := p_logger_level;
-          execute immediate 'begin ' || l_plugin_fn || '(logger.g_rec_logger_logs); end;';
-          g_in_plugin := false;
-        end if;
-      $end -- $$logger_plugin
-
 
     $end -- $$NO_OP
 
@@ -2762,6 +2807,35 @@ as
     return l_return;
 
   end get_fmt_msg;
+
+
+  /**
+   * Returns the rec_logger_logs for given logger_level
+   * Used for plugin.
+   * Not meant to be called by general public, and thus not documented
+   *
+   * Notes:
+   *  -
+   *
+   * Related Tickets:
+   *  - #46
+   *
+   * @author Martin D'Souza
+   * @created 11-Mar-2015
+   * @param p_logger_level Logger level of plugin wanted to return
+   * @return Logger rec based on plugin type
+   */
+  -- TODO mdsouza: write test
+  function get_plugin_rec(
+    p_logger_level in logger_logs.logger_level%type)
+    return logger.rec_logger_log
+  as
+  begin
+
+    if p_logger_level = logger.g_error then
+      return g_plug_logger_log_error;
+    end if;
+  end get_plugin_rec;
 
 end logger;
 /

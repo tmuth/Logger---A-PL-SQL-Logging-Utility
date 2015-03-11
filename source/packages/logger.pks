@@ -41,7 +41,7 @@ as
 
   type tab_param is table of rec_param index by binary_integer;
 
-  type rec_logger_logs is record(
+  type rec_logger_log is record(
     id logger_logs.id%type,
     logger_level logger_logs.logger_level%type
   );
@@ -73,12 +73,6 @@ as
   g_apex_name constant varchar2(30) := 'APEX';
 
   gc_empty_tab_param tab_param;
-
-  -- TODO mdsouza: issue number?
-  -- TODO mdsouza: gc or g?
-  g_rec_logger_logs rec_logger_logs; -- TODO mdsouza: put this internal and create a get function so no outside access
-  g_in_plugin boolean := false; -- TODO mdsouza:  should be moved to internall only.
-
 
   -- Expose private functions only for testing during development
   $if $$logger_debug $then
@@ -366,5 +360,9 @@ as
     p_s09 in varchar2 default null,
     p_s10 in varchar2 default null)
     return varchar2;
+
+  function get_plugin_rec(
+    p_logger_level in logger_logs.logger_level%type)
+    return logger.rec_logger_log;
 end logger;
 /

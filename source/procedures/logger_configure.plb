@@ -120,7 +120,7 @@ begin
   for x in (
     select
       'LOGGER_' ||
-      lp.pref_name || ':' ||
+      regexp_replace(lp.pref_name, '^PLUGIN_FN_', 'PLUGIN_') || ':' ||
       decode(nvl(upper(lp.pref_value), 'NONE'), 'NONE', 'FALSE', 'TRUE') ||
       ',' var
     from logger_prefs lp

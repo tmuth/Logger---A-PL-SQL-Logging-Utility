@@ -69,12 +69,7 @@ using (
   select 'PREF_BY_CLIENT_ID_EXPIRE_HOURS' pref_name, '12' pref_value from dual union
   select 'INSTALL_SCHEMA' pref_name, sys_context('USERENV','CURRENT_SCHEMA') pref_value from dual union
   -- #46
-  -- TODO mdsouza: drop unsupported functions
-  select 'PLUGIN_FN_LOG' pref_name, 'NONE' pref_value from dual union
   select 'PLUGIN_FN_ERROR' pref_name, 'NONE' pref_value from dual union
-  select 'PLUGIN_FN_PERMANENT' pref_name, 'NONE' pref_value from dual union
-  select 'PLUGIN_FN_WARNING' pref_name, 'NONE' pref_value from dual union
-  select 'PLUGIN_FN_INFORMATION' pref_name, 'NONE' pref_value from dual union
   -- #64
   select 'LOGGER_DEBUG' pref_name, 'FALSE' pref_value from dual
   ) d
