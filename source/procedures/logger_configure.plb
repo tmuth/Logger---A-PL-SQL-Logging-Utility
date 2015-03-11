@@ -107,7 +107,7 @@ begin
   where 1=1
     and lp.pref_name = 'LOGGER_DEBUG';
   l_variables := l_variables || 'LOGGER_DEBUG:' || l_pref_value||',';
-  
+
   l_logger_debug := false;
   if upper(l_pref_value) = 'TRUE' then
     l_logger_debug := true;
@@ -116,18 +116,7 @@ begin
 
   -- #46
   -- Handle plugin settings
-  -- First set generic if plugins are enable
-  select count(1)
-  into l_dummy
-  from logger_prefs lp
-  where 1=1
-    and lp.pref_name like 'PLUGIN_FN%'
-    and lp.pref_value != 'NONE';
-  if l_dummy > 0 then
-    l_variables := l_variables || 'LOGGER_PLUGINS_ENABLED:TRUE,';
-  end if;
-
-  -- Now set for each plugin type
+-- Set for each plugin type
   for x in (
     select
       'LOGGER_' ||
@@ -154,7 +143,7 @@ begin
 	-- l_sql := q'[alter trigger BI_LOGGER_LOGS compile PLSQL_CCFLAGS=']'||l_variables||q'[' reuse settings]';
 	-- execute immediate l_sql;
 
-  l_sql := q'!alter trigger biu_logger_prefs compile PLSQL_CCFLAGS='LOGGER_PLUGINS_ENABLED:FALSE'!';
+  l_sql := q'!alter trigger biu_logger_prefs compile PLSQL_CCFLAGS='CURRENTLY_INSTALLING:FALSE'!';
   execute immediate l_sql;
 
   -- just in case this is a re-install / upgrade, the global contexts will persist so reset them
