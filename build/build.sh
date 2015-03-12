@@ -149,6 +149,9 @@ cp -fr ../demos $RELEASE_FOLDER
 #Copy docs #89
 cp -fr ../docs $RELEASE_FOLDER
 
+#Copy License
+cp -f ../LICENSE $RELEASE_FOLDER
+
 
 chmod 777 $RELEASE_FOLDER/*.*
 
