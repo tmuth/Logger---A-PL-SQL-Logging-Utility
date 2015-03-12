@@ -2,7 +2,7 @@
 
 <a name="about"></a>
 #About
-Plugins is a new feature that was introduced in Logger 3.0.0. They allow developers to run custom code after a log has been inserted. This can be very useful for things such as custom notifications after an error.
+Plugins are a new feature that was introduced in Logger 3.0.0. They allow developers to run custom code after a log has been inserted. This can be very useful for things such as custom notifications after an error.
 
 To help with performance, the plugin architecture uses conditional compilation (TODO link) which will only execute one a plugin has been configured properly.
 
