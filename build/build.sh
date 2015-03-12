@@ -8,6 +8,7 @@
 
 VERSION_NUMBER=$1
 SQL_CONNECTION=$2
+INCLUDE_RELEASE_FOLDER=$3
 
 {
 if [ -z "${VERSION_NUMBER}" ]; then
@@ -18,6 +19,14 @@ if [ -z "${SQL_CONNECTION}" ]; then
 	echo "SQL_CONNECTION (parameter 2) is not defined"
 	exit 0
 fi
+
+#91: Allow option to include release folder or not. Useful for developers, but should be excluded by default
+#Upper value
+INCLUDE_RELEASE_FOLDER=$(echo $INCLUDE_RELEASE_FOLDER | awk '{print toupper($0)}')
+if [ "$INCLUDE_RELEASE_FOLDER" = "" ]; then
+	INCLUDE_RELEASE_FOLDER=N
+fi
+echo "INCLUDE_RELEASE_FOLDER: $INCLUDE_RELEASE_FOLDER"
 }
 
 echo "Building release $VERSION_NUMBER"
@@ -168,3 +177,15 @@ rm -rf $RELEASE_FOLDER/*.del
 #By CDing into the release_folder we don't get the full path in the zip file
 cd $RELEASE_FOLDER
 zip -r logger_$VERSION_NUMBER.zip .
+
+#91: Copy zip to release root
+cp -f logger_$VERSION_NUMBER.zip ../.
+
+#Remove release folder if appliable
+if [ "$INCLUDE_RELEASE_FOLDER" != "Y" ]; then
+  echo Removing release folder
+  cd $START_DIR
+  rm -rf $RELEASE_FOLDER
+else
+  echo Keeping release folder
+fi
