@@ -30,6 +30,7 @@ See the [Logger API](docs/Logger API.md) documentation for complete set of proce
 In order to keep this page relatively small and for ease of use, the documentation has been moved to the [Logger Docs](docs). In there you you will find the following sections:
 - [Installation](docs/Installation.md)
 - [Logger API](docs/Logger API.md)
+- [Plugins](docs/Plugins.md)
 - [Best Practices](docs/Best Practices.md)
 
 #Download
