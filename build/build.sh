@@ -23,7 +23,7 @@ fi
 echo "Building release $VERSION_NUMBER"
 
 
-#TODO testing no_ops
+#Generate no_op code
 START_DIR="$PWD"
 cd ../source/packages
 sqlplus $SQL_CONNECTION @../gen_no_op.sql
@@ -115,7 +115,6 @@ printf '\n' >> $INSTALL
 #NO OP Code
 printf "\x2d\x2d This file installs a NO-OP version of the logger package that has all of the same procedures and functions,\n" > $NO_OP
 
-#TODO mdsouza: use gen_no_op.sql to build this
 printf "\x2d\x2d This file installs a NO-OP version of the logger package that has all of the same procedures and functions,\n " > $NO_OP
 
 printf "\x2d\x2d but does not actually write to any tables. Additionally, it has no other object dependencies.\n" >> $NO_OP
