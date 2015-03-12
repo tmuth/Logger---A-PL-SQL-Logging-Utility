@@ -5,6 +5,8 @@ declare
   type typ_required_columns is table of varchar2(30) index by pls_integer;
   l_required_columns typ_required_columns;
 
+  l_sql varchar2(2000);
+
 begin
   -- Create Table
   select count(1)
@@ -35,5 +37,17 @@ create table logger_prefs_by_client_id(
   execute immediate q'!comment on column logger_prefs_by_client_id.include_call_stack is 'Include call stack in logging'!';
   execute immediate q'!comment on column logger_prefs_by_client_id.created_date is 'Date that entry was created on'!';
   execute immediate q'!comment on column logger_prefs_by_client_id.expiry_date is 'After the given expiry date the logger_level will be disabled for the specific client_id. Unless sepcifically removed from this table a job will clean up old entries'!';
+
+
+  -- 92: Missing APEX and SYS_CONTEXT support
+  l_sql := 'alter table logger_prefs_by_client_id drop constraint logger_prefs_by_client_id_ck1';
+  execute immediate l_sql;
+
+  -- Rebuild constraint
+  l_sql := q'!alter table logger_prefs_by_client_id
+    add constraint logger_prefs_by_client_id_ck1
+    check (logger_level in ('OFF','PERMANENT','ERROR','WARNING','INFORMATION','DEBUG','TIMING', 'APEX', 'SYS_CONTEXT'))!';
+  execute immediate l_sql;
+
 end;
 /
