@@ -2714,17 +2714,20 @@ as
 
 
   /**
-   * Does string replacement similar to C printf
+   * Does string replacement similar to C's sprintf
    *
    * Notes:
-   *  -
+   *  - Uses the following replacement algorithm (in following order)
+   *    - Replaces %s<n> with p_s<n>
+   *    - Occurrences of %s (no number) are replaced with p_s1..p_s10 in order that they appear in text
+   *    - %% is escaped to %
    *
    * Related Tickets:
    *  - #32: Also see #59
    *
    * @author Martin D'Souza
    * @created 15-Jun-2014
-   * @param p_msg Messsage to format using %s and %d replacement strings
+   * @param p_str Messsage to format using %s and %d replacement strings
    * @param p_s1
    * @param p_s2
    * @param p_s3
@@ -2737,73 +2740,60 @@ as
    * @param p_s10
    * @return p_msg with strings replaced
    */
-  -- TODO mdsouza: What do we call this? get_fmt_msg, printf, f, getf ?
-  -- TODO mdsouza:
-  -- 3 ways to do this:
-  -- 1 Function to generate string.
-  -- 2 generic funciton with parameters of scope and level,
-  -- 3 expand logger.log function (or rename to handle each type.
-  -- TODO mdsouza: Documentation on this
-  function get_fmt_msg(
-    p_msg in varchar2,
-    p_s01 in varchar2 default null,
-    p_s02 in varchar2 default null,
-    p_s03 in varchar2 default null,
-    p_s04 in varchar2 default null,
-    p_s05 in varchar2 default null,
-    p_s06 in varchar2 default null,
-    p_s07 in varchar2 default null,
-    p_s08 in varchar2 default null,
-    p_s09 in varchar2 default null,
+  function sprintf(
+    p_str in varchar2,
+    p_s1 in varchar2 default null,
+    p_s2 in varchar2 default null,
+    p_s3 in varchar2 default null,
+    p_s4 in varchar2 default null,
+    p_s5 in varchar2 default null,
+    p_s6 in varchar2 default null,
+    p_s7 in varchar2 default null,
+    p_s8 in varchar2 default null,
+    p_s9 in varchar2 default null,
     p_s10 in varchar2 default null)
     return varchar2
   as
     l_return varchar2(4000);
-    l_count pls_integer;
-    c_substring_regexp constant varchar2(10) := '(%s|%d)';
+    c_substring_regexp constant varchar2(10) := '%s';
 
   begin
     $if $$no_op $then
       null;
     $else
-      -- TODO mdsouza: support for %s1 subs
+      l_return := p_str;
 
-      $if $$logger_utl_lms $then
+      -- Replace %s<n> with p_s<n>``
+      for i in 1..10 loop
+        l_return := regexp_replace(l_return, c_substring_regexp || i,
+          case
+            when i = 1 then p_s1
+            when i = 2 then p_s2
+            when i = 3 then p_s3
+            when i = 4 then p_s4
+            when i = 5 then p_s5
+            when i = 6 then p_s6
+            when i = 7 then p_s7
+            when i = 8 then p_s8
+            when i = 9 then p_s9
+            when i = 10 then p_s10
+            else null
+          end,
+          1,1,'c');
+      end loop;
 
-        -- TODO mdsouza: escape %%
+      $if $$logger_debug $then
+        dbms_output.put_line('Before sys.utl_lms: ' || l_return);
+      $end
 
-        -- True printf functionality (if supported): http://vbegun.blogspot.ca/2005/10/simple-plsql-printf.html
-        -- Note: Did performance tests and using sys.utl_lms is faster then custom code below.
-        l_return := sys.utl_lms.format_message(p_msg,p_s01, p_s02, p_s03, p_s04, p_s05, p_s06, p_s07, p_s08, p_s09, p_s10);
-      $else
-        -- TODO mdsouza: support for %% escaping
-        l_return := p_msg;
-        l_count := regexp_count(l_return, c_substring_regexp, 1, 'c');
-
-        for i in 1..l_count loop
-          l_return := regexp_replace(l_return, c_substring_regexp,
-            case
-              when i = 1 then p_s01
-              when i = 2 then p_s02
-              when i = 3 then p_s03
-              when i = 4 then p_s04
-              when i = 5 then p_s05
-              when i = 6 then p_s06
-              when i = 7 then p_s07
-              when i = 8 then p_s08
-              when i = 9 then p_s09
-              when i = 10 then p_s10
-              else null
-            end,
-            1,1,'c');
-        end loop;
-      $end -- $$logger_utl_lms
+      -- Replace any occurences of %s with p_s<n> (in order) and escape %% to %
+      l_return := sys.utl_lms.format_message(l_return,p_s1, p_s2, p_s3, p_s4, p_s5, p_s6, p_s7, p_s8, p_s9, p_s10);
 
     $end -- $$no_op
 
     return l_return;
 
-  end get_fmt_msg;
+  end sprintf;
 
 
   /**

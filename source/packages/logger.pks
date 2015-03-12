@@ -339,17 +339,17 @@ as
   );
 
 
-  function get_fmt_msg(
-    p_msg in varchar2,
-    p_s01 in varchar2 default null,
-    p_s02 in varchar2 default null,
-    p_s03 in varchar2 default null,
-    p_s04 in varchar2 default null,
-    p_s05 in varchar2 default null,
-    p_s06 in varchar2 default null,
-    p_s07 in varchar2 default null,
-    p_s08 in varchar2 default null,
-    p_s09 in varchar2 default null,
+  function sprintf(
+    p_str in varchar2,
+    p_s1 in varchar2 default null,
+    p_s2 in varchar2 default null,
+    p_s3 in varchar2 default null,
+    p_s4 in varchar2 default null,
+    p_s5 in varchar2 default null,
+    p_s6 in varchar2 default null,
+    p_s7 in varchar2 default null,
+    p_s8 in varchar2 default null,
+    p_s9 in varchar2 default null,
     p_s10 in varchar2 default null)
     return varchar2;
 

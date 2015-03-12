@@ -88,18 +88,6 @@ begin
   l_variables := l_variables||'FLASHBACK_ENABLED:'||l_flashback||',';
 
 
-  -- #32 Support for substrings
-  begin
-    execute immediate 'begin :d := sys.utl_lms.format_message(''%d'', 1); end; ' using out l_dummy; -- Note could have used q funciton but unsure of backwards support
-
-    l_utl_lms := 'TRUE';
-  exception
-    when others then
-    l_utl_lms := 'FALSE';
-  end;
-  l_variables := l_variables||'LOGGER_UTL_LMS:'||l_utl_lms||',';
-
-
   -- #64: Support to run Logger in debug mode
   select lp.pref_value
   into l_pref_value
