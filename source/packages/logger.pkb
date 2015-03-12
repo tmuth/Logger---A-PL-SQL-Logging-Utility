@@ -684,15 +684,15 @@ as
    * Notes:
    *  - Currently only supports error type plugin but has been built to support other types
    *  - -- FUTURE mdsouza: When supporting other plugin types put conditional compilation where applicable
+   *  - -- FUTURE mdsouza: Include this in tests (#86)
    *
    * Related Tickets:
    *  - #46
    *
    * @author Martin D'Souza
    * @created 11-Mar-2015
-   * @param TODO
+   * @param p_logger_log Record that plugin should be run for
    */
-  -- TODO mdsouza: make tests for this
   procedure run_plugin(p_logger_log in logger.rec_logger_log)
   as
     l_plugin_fn logger_prefs.pref_value%type;
@@ -2812,7 +2812,7 @@ as
    * Not meant to be called by general public, and thus not documented
    *
    * Notes:
-   *  -
+   *  - -- FUTURE mdsouza: Add tests for this (#86)
    *
    * Related Tickets:
    *  - #46
@@ -2822,7 +2822,6 @@ as
    * @param p_logger_level Logger level of plugin wanted to return
    * @return Logger rec based on plugin type
    */
-  -- TODO mdsouza: write test
   function get_plugin_rec(
     p_logger_level in logger_logs.logger_level%type)
     return logger.rec_logger_log
