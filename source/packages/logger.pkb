@@ -802,7 +802,7 @@ as
       where 1=1
         and id = p_logger_log.id;
 
-      logger.log_error('Exception in ', l_scope, null, l_params);
+      logger.log_error('Exception in plugin procedure: ' || l_plugin_fn, l_scope, null, l_params);
 
       start_stop_plugin(p_in_plugin => false);
 
