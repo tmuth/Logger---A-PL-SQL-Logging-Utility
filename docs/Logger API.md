@@ -131,6 +131,10 @@ This will still work, however it is recommended that you use the numeric values.
 		<td>tab_param</td>
 		<td>Array of rec_param</td>
 	</tr>
+	<tr>
+		<td>rec_logger_log</td>
+		<td>For plugins. See <a href="Plugins.md">Plugins documentation</a> for more information and examples.</td>
+	</tr>	
 </table>
 
 <a name="subprograms"></a>
