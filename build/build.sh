@@ -146,6 +146,9 @@ cp -f ../README.md $RELEASE_FOLDER
 #Copy demo scripts
 cp -fr ../demos $RELEASE_FOLDER
 
+#Copy docs #89
+cp -fr ../docs $RELEASE_FOLDER
+
 
 chmod 777 $RELEASE_FOLDER/*.*
 
