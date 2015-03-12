@@ -4,14 +4,12 @@
 #About
 Plugins are a new feature that was introduced in Logger 3.0.0. They allow developers to run custom code after a log has been inserted. This can be very useful for things such as custom notifications after an error.
 
-To help with performance, the plugin architecture uses conditional compilation (TODO link) which will only execute one a plugin has been configured properly.
+To help with performance, the plugin architecture uses conditional compilation which will only execute one a plugin has been configured properly.
 
 <a name="plugin-types"></a>
 ##Plugin Methods
 
 The following types of plugins are currently supported:
-
-TODO put the package type in the docs.
 
 <table>
   <tr>
@@ -50,7 +48,7 @@ procedure <name_of_procedure(
   p_rec in logger.rec_logger_log)
 ```
 
-For more information about the ```logger.rec_logger_log``` type please see the Types documentation. (TODO link)
+For more information about the ```logger.rec_logger_log``` type please see the [Types documentation](Logger%20API.md#types).
 
 <a name="example"></a>
 #Example
