@@ -30,9 +30,6 @@ as
   --
 
 
-
--- TODO mdsouza: Create package varis for string veriosns of error type
-
   -- TYPES
   type ts_array is table of timestamp index by varchar2(100);
 
