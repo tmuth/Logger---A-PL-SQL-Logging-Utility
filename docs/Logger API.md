@@ -559,6 +559,81 @@ PL/SQL procedure successfully completed.
 
 ```
 
+<a name="procedure-sprintf"></a>
+###SPRINTF
+
+```sprintf``` is similar to the common procedure [```printf```](http://en.wikipedia.org/wiki/Printf_format_string) found in many programming languages. It replaces substitution strings for a given string. Substitution strings can be either ```%s``` or ```%s<n>``` where ```<n>``` is a number 1~10. 
+
+The following rules are used to handle substitution strings (in order):
+- Replaces ```%s<n>``` with ```p_s<n>```, regardless of order that they appear in ```p_str```
+- Occurrences of ```%s``` (no number) are replaced with ```p_s1..p_s10``` in order that they appear in ```p_str```
+- ```%%``` is escaped to ```%```
+
+####Syntax
+```sql
+function sprintf(
+  p_str in varchar2,
+  p_s1 in varchar2 default null,
+  p_s2 in varchar2 default null,
+  p_s3 in varchar2 default null,
+  p_s4 in varchar2 default null,
+  p_s5 in varchar2 default null,
+  p_s6 in varchar2 default null,
+  p_s7 in varchar2 default null,
+  p_s8 in varchar2 default null,
+  p_s9 in varchar2 default null,
+  p_s10 in varchar2 default null)
+  return varchar2;
+```
+
+####Parameters
+<table border="0">
+  <tr>
+    <th>Prameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>p_str</td>
+    <td>String to apply substitution strings to</td>
+  </tr>
+    <tr>
+    <td>p_s&lt;1..10&gt;</td>
+    <td>Substitution strings</td>
+  </tr>
+  <tr>
+    <td>return</td>
+    <td>Formated string</td>
+  </tr>
+</table>
+
+####Example
+```sql
+select logger.sprintf('hello %s, how are you %s', 'martin', 'today') msg
+from dual;
+
+MSG
+-------------------------------
+hello martin, how are you today
+
+-- Advance features
+
+-- Escaping %
+select logger.sprintf('hello, %% (escape) %s1', 'martin') msg
+from dual;
+
+MSG
+-------------------------
+hello, % (escape) martin
+
+-- %s<n> replacement
+select logger.sprintf('%s1, %s2, %s', 'one', 'two') msg
+from dual;
+
+MSG
+-------------------------
+one, two, one
+```
+
 
 <a name="procedure-get_cgi_env"></a>
 ###GET_CGI_ENV
