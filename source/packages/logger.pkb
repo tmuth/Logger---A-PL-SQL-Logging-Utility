@@ -2233,10 +2233,11 @@ as
   is
     l_level varchar2(20);
     l_ctx varchar2(2000);
-    l_old_level varchar2(20);
     l_include_call_stack varchar2(255);
     l_client_id_expire_hours number;
     l_expiry_date logger_prefs_by_client_id.expiry_date%type;
+
+    l_id logger_logs.id%type;
     pragma autonomous_transaction;
   begin
     $if $$no_op $then
@@ -2288,26 +2289,19 @@ as
 
         else
           -- Global settings
-          l_old_level := logger.get_pref('LEVEL');
           update logger_prefs set pref_value = l_level where pref_name = 'LEVEL';
         end if;
 
-        -- TODO mdsouza: Remove the second iterations. Doesn't seem necessary.
         logger.save_global_context(
           p_attribute => gc_ctx_attr_level,
           p_value => logger.convert_level_char_to_num(l_level),
-          p_client_id => p_client_id);
+          p_client_id => p_client_id); -- Note: if p_client_id is null then it will set for global`
 
-        if p_client_id is not null then
-          logger.save_global_context(
-            p_attribute => gc_ctx_attr_include_call_stack,
-            p_value => l_include_call_stack,
-            p_client_id => p_client_id);
-
-        else
-          -- TODO mdsouza: is this the right log_information message since no client_id at this point?
-          logger.log_information('Log level set to ' || l_level || ' for client_id: ' || p_client_id || ' include_call_stack=' || l_include_call_stack || ' by ' || l_ctx);
-        end if;
+          -- Manual insert to ensure that data gets logged, regardless of logger_level
+        logger.ins_logger_logs(
+          p_logger_level => logger.g_information,
+          p_text => 'Log level set to ' || l_level || ' for client_id: ' || nvl(p_client_id, '<global>') || ', include_call_stack=' || l_include_call_stack || ' by ' || l_ctx,
+          po_id => l_id);
 
       end if;
     $end
