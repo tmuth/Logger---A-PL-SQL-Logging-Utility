@@ -2763,7 +2763,7 @@ as
             when i = 10 then p_s10
             else null
           end,
-          1,1,'c');
+          1,0,'c');
       end loop;
 
       $if $$logger_debug $then
