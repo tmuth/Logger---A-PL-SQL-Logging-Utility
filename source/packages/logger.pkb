@@ -416,8 +416,6 @@ as
   end admin_security_check;
 
 
-  -- TODO mdsouza: test this on XE to see if it runs?
-  -- TODO mdsouza: I don't think this runs at all
   /**
    *
    *
