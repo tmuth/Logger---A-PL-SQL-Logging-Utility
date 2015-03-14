@@ -1,9 +1,9 @@
-This page contains all of Logger's Change Logs.
+This page contains all of Logger's Change Logs. Starting in version 3.0.0 onwards, only major tickets will be listed here. To see a complete list of all the issues for each version, review the appropriate release page.
 
-<a name="change-log-2.2.0"></a>
-##Change Log 2.2.0
-[Download](TODO_URL)<br/>
-[Release Page](TODO_URL)<br/>
+<a name="change-log-3.0.0"></a>
+##Change Log 3.0.0
+[Download](https://github.com/oraopensource/logger/tree/master/releases/2.1.2)<br/>
+[Release Page](https://github.com/OraOpenSource/Logger/issues?q=milestone%3A%22Release+3.0.0%22+)<br/>
 Release Articles
 - [TODO_NAME](TOOD_URL)
 
@@ -14,23 +14,13 @@ Release Articles
     <td>Articles</td>
   </tr>
   <tr>
-    <td><a href="https://github.com/oraopensource/logger/issues/67" target="_blank">67</a></td>
-    <td>Added TOCHAR function</td>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/25" target="_blank">25</a></td>
+    <td>Add CLIENT_INFO to logger_logs</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/oraopensource/logger/pull/51" target="_blank">51</a></td>
-    <td>Fix exception in log_apex_items</td>
-    <td></td>
-  </tr>
-  <tr>
-    <td><a href="https://github.com/oraopensource/logger/issues/50" target="_blank">50</a></td>
-    <td>Added SID column</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
-  </tr>
-  <tr>
-    <td><a href="https://github.com/oraopensource/logger/issues/43" target="_blank">43</a></td>
-    <td>Reference new global constants for names</td>
+    <td><a href="https://github.com/oraopensource/logger/issues/32" target="_blank">32</a></td>
+    <td>printf type support for substitution strings (printf)</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
@@ -39,13 +29,38 @@ Release Articles
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
+    <td><a href="https://github.com/oraopensource/logger/issues/43" target="_blank">43</a></td>
+    <td>Reference new global constants for names</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
     <td><a href="https://github.com/oraopensource/logger/issues/47" target="_blank">47</a></td>
     <td>Support for both logger level name and number</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/oraopensource/logger/issues/32" target="_blank">32</a></td>
-    <td>printf type support for substitution strings</td>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/44" target="_blank">44</a></td>
+    <td>Global Constants for Logger Level Names</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/46" target="_blank">46</a></td>
+    <td>Plugins for Logger</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/oraopensource/logger/issues/50" target="_blank">50</a></td>
+    <td>Added SID column</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/51" target="_blank">51</a></td>
+    <td>Add SID to logger_logs</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/56" target="_blank">56</a></td>
+    <td>Updated documentation format to use Flatdoc</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
@@ -59,10 +74,21 @@ Release Articles
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
-    <td>TODO</td>
+    <td><a href="https://github.com/oraopensource/logger/issues/68" target="_blank">68</a></td>
+    <td>Added TOCHAR function</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
+  <tr>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/80" target="_blank">80</a></td>
+    <td>Added log_warn and log_info shortcuts</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/oraopensource/logger/pull/89" target="_blank">89</a></td>
+    <td>Include docs with each release</td>
+    <td></td>
+  </tr>
+
 
 </table>
 
