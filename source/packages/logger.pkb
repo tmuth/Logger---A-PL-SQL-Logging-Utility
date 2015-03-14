@@ -1114,8 +1114,6 @@ as
   end get_character_codes;
 
 
-
-  -- TODO mdsouza: need to support as part of APEX items
   procedure snapshot_apex_items(
     p_log_id in number)
   is
