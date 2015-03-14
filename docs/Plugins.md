@@ -2,9 +2,9 @@
 
 <a name="about"></a>
 #About
-Plugins are a new feature that was introduced in Logger 3.0.0. They allow developers to run custom code after a log has been inserted. This can be very useful for things such as custom notifications after an error.
+Plugins is a new feature that was introduced in Logger 3.0.0. They allow developers to run custom code after a log has been inserted. This can be very useful for things such as custom notifications after an error.
 
-To help with performance, the plugin architecture uses conditional compilation which will only execute one a plugin has been configured properly.
+To help with performance, the plugin architecture uses conditional compilation which will only execute one a plugin has been properly configured.
 
 <a name="plugin-types"></a>
 ##Plugin Methods
@@ -24,24 +24,24 @@ The following types of plugins are currently supported:
 
 <a name="config"></a>
 #Configuration
-They're two steps to configure a plugin. The first is to register a custom function (more on this below) in the logger prefs table. The following examples shows how to register a custom plugin procedure (in this example called ```custom_plugin_method``` for errors:
+They're two steps to configure a plugin. The first is to register a custom function ([more on this below](#plugin-interface)) in the logger prefs table. The following examples shows how to register a custom plugin procedure (in this example called ```custom_plugin_method```) to be run after calls to ```logger.log_error```:
 ```sql
 update logger_prefs
 set pref_value = 'custom_plugin_method'
 where pref_name = 'PLUGIN_FN_ERROR'
 ```
 
-Once the custom method has been set in the logger_prefs table, you must run the ```logger_configure``` procedure which will recompile logger. 
+Once the custom method has been set in the ```logger_prefs table```, you must run the ```logger_configure``` procedure which will recompile Logger. 
 
 ```sql
 exec logger_configure;
 ```
 
-To deregister a plugin set the appropriate ```logger_prefs.pref_value``` to ```NONE``` and re-run the ```logger_configure``` procedure.
+To deregister a plugin, set the appropriate ```logger_prefs.pref_value``` to ```null``` and re-run the ```logger_configure``` procedure. *Note: since ```pref_value``` is not a nullable column, null values will be automatically converted to "NONE".*
 
 <a name="plugin-interface"></a>
 #Plugin Interface
-Plugins can either be a standalone procedure or a procedure in a package. Plugins must implement the following interface:
+Plugins can either be standalone procedures or a procedure in a package. Plugins must implement the following interface:
 
 ```sql
 procedure <name_of_procedure(
@@ -110,7 +110,7 @@ Text: hello
 They're several important things to know about plugins.
 
 ##Recursion
-Plugins do not support recursing for the same type of plugin. I.e. when in an error plugin, and the plugin code calls ```logger.log_error```, the error plugin will not execute for the recursive call. This is to avoid infinite loops in the plugin.
+Plugins do not support recursing for the same type of plugin. I.e. when in an error plugin and the plugin code calls ```logger.log_error```, the error plugin will not execute for the recursive call (but the error record is still stored in ```logger.log_error```. This is to avoid infinite loops in the plugin.
 
 The following example highlights this (note that ```logger.log_error``` is called in the plugin).
 
@@ -167,10 +167,10 @@ ORA-06512: at line 1
 
 select id, text
 from logger_logs_5_min
-order by id desc;
+order by id asc;
 
   ID TEXT
----- ---------------------------------------------------------------------------
- 819 Exception in plugin procedure: LOG_TEST_PLUGIN ORA-20001: test error
- 818 testing plugin error
+---- -----------------------------------------------
+  818 testing plugin error
+  819 Exception in plugin procedure: LOG_TEST_PLUGIN ORA-20001: test error
 ```
