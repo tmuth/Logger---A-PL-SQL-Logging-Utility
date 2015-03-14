@@ -50,6 +50,11 @@ begin
         logger.g_timing_name || ', ' || logger.g_sys_context_name || ', ' || logger.g_apex_name);
     end if;
 
+    -- Allow for null to be used for Plugins, then default to NONE
+    if :new.pref_name like 'PLUGIN_FN%' and :new.pref_value is null then
+      :new.pref_value := 'NONE';
+    end if;
+
     -- this is because the logger package is not installed yet.  We enable it in logger_configure
     logger.null_global_contexts;
   $end
@@ -57,7 +62,7 @@ end;
 /
 
 
--- Configu Data
+-- Configure Data
 merge into logger_prefs p
 using (
   select 'PURGE_AFTER_DAYS' pref_name, '7' pref_value from dual union
