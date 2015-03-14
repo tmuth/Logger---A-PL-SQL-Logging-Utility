@@ -970,12 +970,6 @@ as
    * @return True of statement can be logged to LOGGER_LOGS
    */
   function ok_to_log(p_level in number)
-    -- TODO mdsouza: test this on an 11gR2 system.
-    -- TODO mdsouza: Also read up on dbms_utility.is_cluster_database (set in logger_configure.
-    -- TODO mdsouza: I think there's a big bug with result_cache not working.
-    -- TODO mdsouza: compare this with logger_configure proc and it seems impossible for result_cache
-    -- TODO mdsouza: do a performance test before and after
-
     return boolean
     $if 1=1
       and $$rac_lt_11_2
