@@ -2321,7 +2321,7 @@ as
    */
   procedure unset_client_level(p_client_id in varchar2)
   as
-    -- TODO mdsouza: create this as a pragma since it comments? Check the other statements that call dbms_session
+    pragma autonomous_transaction;
   begin
     $if $$no_op $then
       null;
