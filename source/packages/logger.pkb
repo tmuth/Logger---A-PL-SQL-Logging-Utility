@@ -2705,9 +2705,11 @@ as
    *    - Replaces %s<n> with p_s<n>
    *    - Occurrences of %s (no number) are replaced with p_s1..p_s10 in order that they appear in text
    *    - %% is escaped to %
+   *  - As this function could be useful for non-logging purposes will not apply a NO_OP to it for conditional compilation
    *
    * Related Tickets:
    *  - #32: Also see #59
+   *  - #95: Remove no_op clause
    *
    * @author Martin D'Souza
    * @created 15-Jun-2014
@@ -2742,38 +2744,33 @@ as
     c_substring_regexp constant varchar2(10) := '%s';
 
   begin
-    $if $$no_op $then
-      null;
-    $else
-      l_return := p_str;
+    l_return := p_str;
 
-      -- Replace %s<n> with p_s<n>``
-      for i in 1..10 loop
-        l_return := regexp_replace(l_return, c_substring_regexp || i,
-          case
-            when i = 1 then p_s1
-            when i = 2 then p_s2
-            when i = 3 then p_s3
-            when i = 4 then p_s4
-            when i = 5 then p_s5
-            when i = 6 then p_s6
-            when i = 7 then p_s7
-            when i = 8 then p_s8
-            when i = 9 then p_s9
-            when i = 10 then p_s10
-            else null
-          end,
-          1,0,'c');
-      end loop;
+    -- Replace %s<n> with p_s<n>``
+    for i in 1..10 loop
+      l_return := regexp_replace(l_return, c_substring_regexp || i,
+        case
+          when i = 1 then p_s1
+          when i = 2 then p_s2
+          when i = 3 then p_s3
+          when i = 4 then p_s4
+          when i = 5 then p_s5
+          when i = 6 then p_s6
+          when i = 7 then p_s7
+          when i = 8 then p_s8
+          when i = 9 then p_s9
+          when i = 10 then p_s10
+          else null
+        end,
+        1,0,'c');
+    end loop;
 
-      $if $$logger_debug $then
-        dbms_output.put_line('Before sys.utl_lms: ' || l_return);
-      $end
+    $if $$logger_debug $then
+      dbms_output.put_line('Before sys.utl_lms: ' || l_return);
+    $end
 
-      -- Replace any occurences of %s with p_s<n> (in order) and escape %% to %
-      l_return := sys.utl_lms.format_message(l_return,p_s1, p_s2, p_s3, p_s4, p_s5, p_s6, p_s7, p_s8, p_s9, p_s10);
-
-    $end -- $$no_op
+    -- Replace any occurences of %s with p_s<n> (in order) and escape %% to %
+    l_return := sys.utl_lms.format_message(l_return,p_s1, p_s2, p_s3, p_s4, p_s5, p_s6, p_s7, p_s8, p_s9, p_s10);
 
     return l_return;
 

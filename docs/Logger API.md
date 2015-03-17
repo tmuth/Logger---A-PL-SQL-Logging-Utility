@@ -569,6 +569,9 @@ The following rules are used to handle substitution strings (in order):
 - Occurrences of ```%s``` (no number) are replaced with ```p_s1..p_s10``` in order that they appear in ```p_str```
 - ```%%``` is escaped to ```%```
 
+**Note: ```sprintf ``` does not use the *no_op* conditional compilation so it will always execute.** This means that you can use outside of Logger (i.e. within your own application business logic).
+
+
 ####Syntax
 ```sql
 function sprintf(
