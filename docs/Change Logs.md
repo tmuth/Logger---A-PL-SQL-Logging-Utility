@@ -5,7 +5,8 @@ This page contains all of Logger's Change Logs. Starting in version 3.0.0 onward
 [Download](https://github.com/oraopensource/logger/tree/master/releases/2.1.2)<br/>
 [Release Page](https://github.com/OraOpenSource/Logger/issues?q=milestone%3A%22Release+3.0.0%22+)<br/>
 Release Articles
-- [TODO_NAME](TOOD_URL)
+
+- [Logger 3.0.0 EA1](http://www.oraopensource.com/blog/2015/3/14/logger-300-ea1)
 
 <table border="0">
   <tr>
@@ -21,7 +22,7 @@ Release Articles
   <tr>
     <td><a href="https://github.com/oraopensource/logger/issues/32" target="_blank">32</a></td>
     <td>printf type support for substitution strings (printf)</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td><a href="http://oraopensource.com/blog/2015/3/19/logger-300-printf-support" target="_blank">printf support</a></td>
   </tr>
   <tr>
     <td><a href="https://github.com/oraopensource/logger/issues/42" target="_blank">42</a></td>
@@ -46,7 +47,7 @@ Release Articles
   <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/46" target="_blank">46</a></td>
     <td>Plugins for Logger</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td><a href="http://oraopensource.com/blog/2015/3/17/logger-plugins" target="_blank">Plugins</a></td>
   </tr>
   <tr>
     <td><a href="https://github.com/oraopensource/logger/issues/50" target="_blank">50</a></td>
@@ -76,11 +77,16 @@ Release Articles
   <tr>
     <td><a href="https://github.com/oraopensource/logger/issues/68" target="_blank">68</a></td>
     <td>Added TOCHAR function</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td><a href="http://oraopensource.com/blog/2015/3/18/loggertochar-explicit-conversions" target="_blank">Explicit Conversions Using logger.tochar</a></td>
   </tr>
   <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/80" target="_blank">80</a></td>
     <td>Added log_warn and log_info shortcuts</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/88" target="_blank">88</a></td>
+    <td>Developer documentation</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
