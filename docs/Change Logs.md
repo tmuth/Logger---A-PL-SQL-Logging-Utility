@@ -17,7 +17,7 @@ Release Articles
   <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/25" target="_blank">25</a></td>
     <td>Add CLIENT_INFO to logger_logs</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td><a href="http://oraopensource.com/blog/2015/3/20/logger-300-new-fields-clientinfo-and-sid" target="_blank">New fields CLIENT_INFO and SID</a></td>
   </tr>
   <tr>
     <td><a href="https://github.com/oraopensource/logger/issues/32" target="_blank">32</a></td>
@@ -27,22 +27,22 @@ Release Articles
   <tr>
     <td><a href="https://github.com/oraopensource/logger/issues/42" target="_blank">42</a></td>
     <td>ok_to_log takes in both name or number of logger level</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td></td>
   </tr>
   <tr>
     <td><a href="https://github.com/oraopensource/logger/issues/43" target="_blank">43</a></td>
     <td>Reference new global constants for names</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
-  </tr>
-  <tr>
-    <td><a href="https://github.com/oraopensource/logger/issues/47" target="_blank">47</a></td>
-    <td>Support for both logger level name and number</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td></td>
   </tr>
   <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/44" target="_blank">44</a></td>
     <td>Global Constants for Logger Level Names</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td><a href="http://oraopensource/blog/2015/3/25/logger-300-global-names" target="_blank">Global Level Names</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/oraopensource/logger/issues/47" target="_blank">47</a></td>
+    <td>Support for both logger level name and number</td>
+    <td></td>
   </tr>
   <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/46" target="_blank">46</a></td>
@@ -50,29 +50,24 @@ Release Articles
     <td><a href="http://oraopensource.com/blog/2015/3/17/logger-plugins" target="_blank">Plugins</a></td>
   </tr>
   <tr>
-    <td><a href="https://github.com/oraopensource/logger/issues/50" target="_blank">50</a></td>
-    <td>Added SID column</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
-  </tr>
-  <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/51" target="_blank">51</a></td>
     <td>Add SID to logger_logs</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td><a href="http://oraopensource.com/blog/2015/3/20/logger-300-new-fields-clientinfo-and-sid" target="_blank">New fields CLIENT_INFO and SID</a></td>
   </tr>
   <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/56" target="_blank">56</a></td>
     <td>Updated documentation format to use Flatdoc</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td><a href="http://oraopensource/blog/2015/3/24/logger-300-better-documentation-navigation" target="_blank">Flatdoc Documentation</a></td>
   </tr>
   <tr>
     <td><a href="https://github.com/oraopensource/logger/issues/57" target="_blank">57</a></td>
     <td>Modify build script so that no_op code is auto generated as part of build</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td></td>
   </tr>
   <tr>
     <td><a href="https://github.com/oraopensource/logger/issues/59" target="_blank">59</a></td>
     <td>Allow security check to be bypassed for client specific logging level</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td></td>
   </tr>
   <tr>
     <td><a href="https://github.com/oraopensource/logger/issues/68" target="_blank">68</a></td>
@@ -82,7 +77,7 @@ Release Articles
   <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/80" target="_blank">80</a></td>
     <td>Added log_warn and log_info shortcuts</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td><a href="http://oraopensource/blog/2015/3/26/logger-300-logwarn-and-loginfo-shortcuts" target="_blank">log_warn and log_info shortcuts</a></td>
   </tr>
   <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/88" target="_blank">88</a></td>
@@ -93,6 +88,11 @@ Release Articles
     <td><a href="https://github.com/oraopensource/logger/pull/89" target="_blank">89</a></td>
     <td>Include docs with each release</td>
     <td></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/90" target="_blank">90</a></td>
+    <td>Change License</td>
+    <td><a href="http://oraopensource/blog/2015/3/23/logger-300-new-license" target="_blank">New License</a></td>
   </tr>
 
 
