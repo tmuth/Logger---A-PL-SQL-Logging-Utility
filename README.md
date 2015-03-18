@@ -38,7 +38,7 @@ In order to keep this page relatively small and for ease of use, the documentati
 It is recommended that you download a certified release (from the [releases](https://github.com/oraopensource/logger/releases) folder). The files in the current repository are for the next release and should be considered unstable.
 
 #Change Log
-[Change Logs](docs/Change Logs.md). TODO mdsouza: Just move this file to use milestones instead.
+The [Change Logs](docs/Change Logs.md) contain all the major updates for each release. Complete set of issues can be found on [Milestones](milestones?state=closed) page.
 
 #History
 Logger was originally created by [Tyler Muth](https://twitter.com/tmuth) and is now maintained by [OraOpenSource](http://www.oraopensource.com).
