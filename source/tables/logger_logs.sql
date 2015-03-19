@@ -82,10 +82,10 @@ create table logger_logs(
     from user_tab_columns
     where 1=1
       and table_name = 'LOGGER_LOGS'
-      and column_name = l_new_col.column_name;
-
+      and column_name = l_new_cols(i).column_name;
+    
     if l_count = 0 then
-      execute immediate 'alter table LOGGER_LOGS add (' || l_new_col.column_name || ' ' || l_new_col.data_type || ')';
+      execute immediate 'alter table LOGGER_LOGS add (' || l_new_cols(i).column_name || ' ' || l_new_cols(i).data_type || ')';
     end if;
   end loop;
 
