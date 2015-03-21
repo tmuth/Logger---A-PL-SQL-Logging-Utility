@@ -10,5 +10,5 @@ The documents have been broken up into the following pages for easier navigation
 	- Set of best practices and suggested code templates to use when leveraging Logger.
 - [Change Logs](Change Logs.md)
 	- Set of best practices and suggested code templates to use when leveraging Logger.
-- [Development Guide](docs/Development Guide.md)
+- [Development Guide](Development Guide.md)
     - For people who want to help develop Logger.
