@@ -40,6 +40,9 @@ If developing a new method you must support the `no_op` conditional compilation 
 
 When [building](#build-process) a version of logger the `logger_no_op.pkb` installation file will automatically be generated based on the results of the `no_op` conditional compilation flag.
 
+The generated version of `logger_no_op.pkb` is stored in `source/packages/` and then the build script copies the file over to the `releases` folder as part of the build. There is no need to commit `logger_no_op.pkb` to Git for version control. By default there is a reference to `source/packages/logger_no_op.pkb` in the `.gitignore` file to ignore this from Git checkins.
+
+
 ##Issues
 Unless an change is very small, please register an [issue](https://github.com/OraOpenSource/Logger/issues) for it in Github. This way it is easy to reference this issue in the code and we can keep track of all the features in a given release.
 
