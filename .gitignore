@@ -1,3 +1,4 @@
 *.orig
 _tmp*
 source/packages/logger_no_op.pkb
+videos
