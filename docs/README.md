@@ -12,3 +12,5 @@ The documents have been broken up into the following pages for easier navigation
 	- Set of best practices and suggested code templates to use when leveraging Logger.
 - [Development Guide](Development Guide.md)
     - For people who want to help develop Logger.
+- [3rd Party Addons](Addons.md)
+    - Listing of 3rd party products for Logger.

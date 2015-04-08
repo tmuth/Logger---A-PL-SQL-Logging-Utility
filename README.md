@@ -33,6 +33,7 @@ In order to keep this page relatively small and for ease of use, the documentati
 - [Plugins](docs/Plugins.md)
 - [Best Practices](docs/Best Practices.md)
 - [Development Guide](docs/Development Guide.md)
+- [3rd Party Addons](docs/Addons.md)
 
 #Download
 It is recommended that you download a certified release (from the [releases](https://github.com/oraopensource/logger/releases) folder). The files in the current repository are for the next release and should be considered unstable.
