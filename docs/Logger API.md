@@ -133,7 +133,11 @@ This will still work, however it is recommended that you use the numeric values.
 	</tr>
 	<tr>
 		<td>rec_logger_log</td>
-		<td>For plugins. See <a href="Plugins.md">Plugins documentation</a> for more information and examples.</td>
+		<td>Consists of:<br />
+		  id (number) <br/>
+		  logger_level (number) </br>
+		  </br>
+         See <a href="Plugins.md">Plugins documentation</a> for more information and examples.</td>
 	</tr>	
 </table>
 

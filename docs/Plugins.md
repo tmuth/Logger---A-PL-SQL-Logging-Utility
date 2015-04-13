@@ -44,7 +44,7 @@ To deregister a plugin, set the appropriate ```logger_prefs.pref_value``` to ```
 Plugins can either be standalone procedures or a procedure in a package. Plugins must implement the following interface:
 
 ```sql
-procedure <name_of_procedure(
+procedure <name_of_procedure>(
   p_rec in logger.rec_logger_log)
 ```
 
@@ -110,7 +110,7 @@ Text: hello
 They're several important things to know about plugins.
 
 ##Recursion
-Plugins do not support recursing for the same type of plugin. I.e. when in an error plugin and the plugin code calls ```logger.log_error```, the error plugin will not execute for the recursive call (but the error record is still stored in ```logger.log_error```. This is to avoid infinite loops in the plugin.
+Plugins do not support recursing for the same type of plugin. I.e. when in an error plugin and the plugin code calls ```logger.log_error```, the error plugin will not execute for the recursive call (but the second error record is still stored in ```logger_logs```. This is to avoid infinite loops in the plugin.
 
 The following example highlights this (note that ```logger.log_error``` is called in the plugin).
 
