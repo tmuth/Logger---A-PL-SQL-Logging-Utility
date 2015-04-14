@@ -36,7 +36,7 @@ In order to keep this page relatively small and for ease of use, the documentati
 - [3rd Party Addons](docs/Addons.md)
 
 #Download
-It is recommended that you download a certified release (from the [releases](tree/master/releases) folder). The files in the current repository are for the next release and should be considered unstable.
+It is recommended that you download a certified release (from the [releases](/tree/master/releases) folder). The files in the current repository are for the next release and should be considered unstable.
 
 #Change Log
 The [Change Logs](docs/Change Logs.md) contain all the major updates for each release. Complete set of issues can be found on [Milestones](https://github.com/OraOpenSource/Logger/milestones?state=closed) page.
