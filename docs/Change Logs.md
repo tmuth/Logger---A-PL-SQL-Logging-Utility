@@ -6,7 +6,7 @@ This page contains all of Logger's Change Logs. Starting in version 3.0.0 onward
 [Release Page](https://github.com/OraOpenSource/Logger/issues?q=milestone%3A%22Release+3.0.0%22+)<br/>
 Release Articles
 
-- [Logger 3.0.0 EA1](http://www.oraopensource.com/blog/2015/3/14/logger-300-ea1)
+- [Logger 3.0.0 EA1](http://www.oraopensource.com/blog/2015/3/14/logger-300-ea1): this contains a list of the top ten features of 3.0.0.
 
 <table border="0">
   <tr>
@@ -81,8 +81,8 @@ Release Articles
   </tr>
   <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/88" target="_blank">88</a></td>
-    <td>Developer documentation</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td>Developer Guide</td>
+    <td><a href="http://www.oraopensource.com/blog/2015/3/27/logger-300-developers-guide" target="_blank">Developer's Guide</a></td>
   </tr>
   <tr>
     <td><a href="https://github.com/oraopensource/logger/pull/89" target="_blank">89</a></td>
