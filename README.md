@@ -1,3 +1,5 @@
+[![Analytics](https://ga-beacon.appspot.com/UA-59573016-4/Logger/README.md?pixel)](https://github.com/igrigorik/ga-beacon)
+
 - [What is Logger?](#what-is-logger)
 - [Documentation](#documentation)
 - [Download](#download)
