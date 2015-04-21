@@ -1,5 +1,3 @@
-[![Analytics](https://ga-beacon.appspot.com/UA-59573016-4/Logger/README.md?pixel)](https://github.com/igrigorik/ga-beacon)
-
 - [What is Logger?](#what-is-logger)
 - [Documentation](#documentation)
 - [Download](#download)
@@ -8,7 +6,7 @@
 
 #What is Logger?
 
-Logger is a PL/SQL logging and debugging framework. The goal of logger is to be as simple as possible to install and use. The primary use cases for this utility include:
+[![Analytics](https://ga-beacon.appspot.com/UA-59573016-4/Logger/README.md?pixel)](https://github.com/igrigorik/ga-beacon)Logger is a PL/SQL logging and debugging framework. The goal of logger is to be as simple as possible to install and use. The primary use cases for this utility include:
 
 * **Debugging**: It's often difficult to track down the source of an error without some form of debugging instrumentation. This is particularly true in multi-tier, stateless architectures such as Application Exp qress.
 * **Error Logging**: While most experts agree that it's important not to mask errors, it's also nice to have a persistent record of them.
