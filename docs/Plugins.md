@@ -2,7 +2,7 @@
 
 <a name="about"></a>
 #About
-Plugins is a new feature that was introduced in Logger 3.0.0. They allow developers to run custom code after a log has been inserted. This can be very useful for things such as custom notifications after an error.
+Plugins are a new feature introduced in Logger 3.0.0. They allow developers to run custom code after a log has been inserted. This can be very useful for things such as custom notifications after an error.
 
 To help with performance, the plugin architecture uses conditional compilation which will only execute one a plugin has been properly configured.
 
@@ -15,16 +15,18 @@ The following types of plugins are currently supported:
   <tr>
     <th>Name</th>
     <th>Associated Procedure</th>
+    <th>Description</th>
   </tr>
   <tr>
     <td>PLUGIN_FN_ERROR</td>
     <td>logger.log_error</td>
+    <td>Allows you to take a logger record type returned as part of the logger.log_error method and use the attributes of it for subsequent actions</td>
   </tr>
 </table>
 
 <a name="config"></a>
 #Configuration
-They're two steps to configure a plugin. The first is to register a custom function ([more on this below](#plugin-interface)) in the logger prefs table. The following examples shows how to register a custom plugin procedure (in this example called ```custom_plugin_method```) to be run after calls to ```logger.log_error```:
+There are two steps to configure a plugin. The first is to register a custom function ([more on this below](#plugin-interface)) in the logger prefs table. The following examples shows how to register a custom plugin procedure (in this example called ```custom_plugin_method```) to be run after calls to ```logger.log_error```:
 ```sql
 update logger_prefs
 set pref_value = 'custom_plugin_method'
@@ -107,7 +109,7 @@ Text: hello
 
 <a name="other"></a>
 #Other
-They're several important things to know about plugins.
+There are several important things to know about plugins.
 
 ##Recursion
 Plugins do not support recursing for the same type of plugin. I.e. when in an error plugin and the plugin code calls ```logger.log_error```, the error plugin will not execute for the recursive call (but the second error record is still stored in ```logger_logs```. This is to avoid infinite loops in the plugin.
