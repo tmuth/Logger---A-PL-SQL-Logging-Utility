@@ -1968,6 +1968,61 @@ as
       raise;
   end get_pref;
 
+   /**
+    * Creates or Changes a Custom Preference
+    * Custom Preferences must have the prefix CUST_
+    * It is not allowed to set the values of
+    * standard Preferences through this procedure
+    *
+    * Passing a NULL for the p_pref_value will
+    * remove the Custom Preference from the table
+    *
+    * @author Alex Nuijten
+    * @created 24-APR-2015
+    *
+    * @param p_pref_name
+    * @param p_pref_value
+    */
+   procedure set_cust_pref (
+      p_pref_name  in logger_prefs.pref_name%type,
+      p_pref_value in logger_prefs.pref_value%type
+   )
+   is
+      l_pref_name logger_prefs.pref_name%type := upper (p_pref_name);
+   begin
+      $if $$no_op $then
+        null;
+      $else
+         if substr (l_pref_name, 1, 5) = 'CUST_'
+         then
+            if p_pref_value is not null
+            then
+               merge into logger_prefs p
+               using (select l_pref_name pref_name
+                            ,p_pref_value pref_value
+                        from dual
+                        ) args
+               on (p.pref_name = args.pref_name)
+               when matched then
+                 update
+                    set p.pref_value =  args.pref_value
+               when not matched then
+                 insert
+                  (pref_name
+                  ,pref_value)
+               values
+                   (args.pref_name
+                   ,args.pref_value
+                   );
+            else
+               delete from logger_prefs p
+                where p.pref_name = l_pref_name;
+            end if;
+         else
+            raise_application_error (-20000, 'Only Custom Preferences that begin with "CUST_" are allowed');
+         end if;
+      $end
+   end set_cust_pref;
 
   /**
    * Purges logger_logs data

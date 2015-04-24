@@ -233,6 +233,12 @@ as
     $END
     ;
 
+   --#103
+   procedure set_cust_pref (
+      p_pref_name in logger_prefs.pref_name%type,
+      p_pref_value in logger_prefs.pref_value%type
+   );
+
 	procedure purge(
 		p_purge_after_days in varchar2 default null,
 		p_purge_min_level	in varchar2	default null);
