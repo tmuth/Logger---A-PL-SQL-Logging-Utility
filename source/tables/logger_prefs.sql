@@ -55,6 +55,26 @@ begin
       :new.pref_value := 'NONE';
     end if;
 
+    -- #103
+    -- Only predefined preferences and Custom Preferences are allowed
+    -- Custom Preferences must be prefixed with CUST_
+    if substr (:new.pref_name, 1, 5) <> 'CUST_'
+    and :new.pref_name not in ('GLOBAL_CONTEXT_NAME'
+                           ,'INCLUDE_CALL_STACK'
+                           ,'INSTALL_SCHEMA'
+                           ,'LEVEL'
+                           ,'LOGGER_DEBUG'
+                           ,'LOGGER_VERSION'
+                           ,'PLUGIN_FN_ERROR'
+                           ,'PREF_BY_CLIENT_ID_EXPIRE_HOURS'
+                           ,'PROTECT_ADMIN_PROCS'
+                           ,'PURGE_AFTER_DAYS'
+                           ,'PURGE_MIN_LEVEL'
+                           )
+    then
+       raise_application_error (-20000, 'Only Predefined Preferences and Custom Preferences that begin with "CUST_" are allowed');
+    end if;
+
     -- this is because the logger package is not installed yet.  We enable it in logger_configure
     logger.null_global_contexts;
   $end
