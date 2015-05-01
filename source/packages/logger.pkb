@@ -1975,7 +1975,7 @@ as
     * standard Preferences through this procedure
     *
     * Passing a NULL for the p_pref_value will
-    * remove the Custom Preference from the table
+    * raise an exception
     *
     * @author Alex Nuijten
     * @created 24-APR-2015
@@ -2015,14 +2015,44 @@ as
                    ,args.pref_value
                    );
             else
-               delete from logger_prefs p
-                where p.pref_name = l_pref_name;
+               raise_application_error (-20000, 'Preferences must have a Value');
             end if;
          else
             raise_application_error (-20000, 'Only Custom Preferences that begin with "CUST_" are allowed');
          end if;
       $end
    end set_cust_pref;
+
+   /**
+    * Removes a Custom Preference
+    * Custom Preferences must have the prefix CUST_
+    * It is not allowed to remove the values of
+    * standard Preferences through this procedure
+    *
+    * @author Alex Nuijten
+    * @created 30-APR-2015
+    *
+    * @param p_pref_name
+    */
+   procedure del_cust_pref (
+      p_pref_name in logger_prefs.pref_name%type
+   )
+   is
+      l_pref_name logger_prefs.pref_name%type := upper (p_pref_name);
+   begin
+   $if $$no_op $then
+     null;
+   $else
+      if substr (l_pref_name, 1, 5) = 'CUST_'
+      then
+         delete from logger_prefs
+          where pref_name = l_pref_name;
+      else
+         raise_application_error (-20000, 'Only Custom Preferences are allowed to be deleted');
+      end if;
+   $end
+   end del_cust_pref;
+
 
   /**
    * Purges logger_logs data

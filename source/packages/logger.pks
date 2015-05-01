@@ -233,10 +233,15 @@ as
     $END
     ;
 
-   --#103
+   -- #103
    procedure set_cust_pref (
       p_pref_name in logger_prefs.pref_name%type,
       p_pref_value in logger_prefs.pref_value%type
+   );
+
+   -- #103
+   procedure del_cust_pref (
+      p_pref_name in logger_prefs.pref_name%type
    );
 
 	procedure purge(
