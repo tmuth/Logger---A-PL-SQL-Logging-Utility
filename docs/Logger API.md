@@ -746,7 +746,7 @@ logger.set_cust_pref(
 ```
 
 
-<a name="procedure-set_cust_pref"></a>
+<a name="procedure-del_cust_pref"></a>
 ###DEL_CUST_PREF
 Deletes a custom preference.
 
