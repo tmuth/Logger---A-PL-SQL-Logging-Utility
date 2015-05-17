@@ -673,13 +673,14 @@ logger.get_cgi_env(
 TODO
 ```
 
+
 <a name="procedure-get_pref"></a>
 ###GET_PREF
 Returns the preference from LOGGER_PREFS.
 
 ####Syntax
 ```sql
-logger.function get_pref(
+logger.get_pref(
   p_pref_name     in  varchar2)
   return varchar2
 ```
@@ -704,6 +705,75 @@ logger.function get_pref(
 ```sql
 TODO
 ```
+
+
+<a name="procedure-set_cust_pref"></a>
+###SET_CUST_PREF
+In some cases you may want to store custom preferences in the `LOGGER_PREFS` table. A use case for this would be when creating a plugin that needs to reference some parameters. 
+
+This procedure allows you to leverage the `LOGGER_PREFS` table to store your custom preferences. To avoid any naming comflicts with Logger, all custom preferences must be prefixed with `CUST_`. 
+
+`SET_CUST_PREF` will either create or udpate a value. Values must contain data. If not, use [`DEL_CUST_PREF`](#procedure-del_cust_pref) to delete unused preferences.
+
+####Syntax
+```sql
+logger.set_cust_pref(
+  p_pref_name  in logger_prefs.pref_name%type,
+  p_pref_value in logger_prefs.pref_value%type)
+```
+
+####Parameters
+<table border="0">
+  <tr>
+    <th>Prameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>p_pref_name</td>
+    <td>Preference to get value for. Must be prefixed with "CUST_". Value will be created or updated. This value will be stored as uppercase.</td>
+  </tr>
+    <tr>
+    <td>p_pref_value</td>
+    <td>Prefence value.</td>
+  </tr>
+</table>
+
+####Example
+```sql
+logger.set_cust_pref(
+  p_pref_name => 'CUST_MY_PREF',
+  p_pref_value => 'some value');
+```
+
+
+<a name="procedure-set_cust_pref"></a>
+###DEL_CUST_PREF
+Deletes a custom preference.
+
+####Syntax
+```sql
+logger.del_cust_pref(
+  p_pref_name  in logger_prefs.pref_name%type);
+```
+
+####Parameters
+<table border="0">
+  <tr>
+    <th>Prameter</th>
+    <th>Description</th>
+  </tr>
+  <tr>
+    <td>p_pref_name</td>
+    <td>Custom preference to delete.</td>
+  </tr>
+</table>
+
+####Example
+```sql
+logger.del_cust_pref(
+  p_pref_name => 'CUST_MY_PREF');
+```
+
 
 <a name="procedure-purge"></a>
 ###PURGE
