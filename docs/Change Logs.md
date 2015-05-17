@@ -1,5 +1,46 @@
 This page contains all of Logger's Change Logs. Starting in version 3.0.0 onwards, only major tickets will be listed here. To see a complete list of all the issues for each version, review the appropriate release page.
 
+<a name="change-log-TODOVERSION"></a>
+##Change Log 3.1.0
+[Download](TODO_URL)<br/>
+[Release Page](https://github.com/OraOpenSource/Logger/milestones/Release%203.1.0)<br/>
+Release Articles
+- [TODO_NAME](TOOD_URL)
+
+<table border="0">
+  <tr>
+  	<td>Issue#</td>
+    <td>Feature</td>
+    <td>Articles</td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/103" target="_blank">103</a></td>
+    <td>Custom Preferences</br>set_cust_pref</br>del_cust_pref</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td>TODO</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td>TODO</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td>TODO</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td>TODO</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+</table>
+
+
 <a name="change-log-3.0.0"></a>
 ##Change Log 3.0.0
 [Download](https://github.com/oraopensource/logger/tree/master/releases/2.1.2)<br/>
