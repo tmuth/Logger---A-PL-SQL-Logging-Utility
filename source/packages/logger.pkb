@@ -2685,6 +2685,7 @@ as
    *  - #31: Initial ticket
    *  - #51: Added SID column
    *  - #70: Fixed missing no_op flag
+   *  - #109: Fix length check for multibyte characters
    *
    * @param p_logger_level
    * @param p_text
@@ -2727,7 +2728,7 @@ as
       $if $$large_text_column $then -- Only check for moving to Clob if small text column
         -- Don't do anything since column supports large text
       $else
-        if length(l_text) > 4000 then
+        if lengthb(l_text) > 4000 then -- #109 Using lengthb for multibyte characters
           if l_extra is null then
             l_extra := l_text;
           else
