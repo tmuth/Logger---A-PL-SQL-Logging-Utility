@@ -703,7 +703,7 @@ logger.get_pref(
 
 ####Example
 ```sql
-TODO
+dbms_output.put_line('Logger level: ' || logger.get_pref('LEVEL'));
 ```
 
 
