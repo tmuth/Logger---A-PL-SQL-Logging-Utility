@@ -2,3 +2,5 @@
 _tmp*
 source/packages/logger_no_op.pkb
 videos
+#Only accept the zip files in the release directory
+!releases/*.zip
