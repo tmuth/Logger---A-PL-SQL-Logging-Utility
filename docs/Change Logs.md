@@ -19,9 +19,9 @@ Release Articles
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
-    <td>TODO</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/108" target="_blank">108</a></td>
+    <td>Grants and Synonyms script</td>
+    <td><a href="http://www.oraopensource.com/blog/2015/5/15/restrict-loggers-access-to-your-data" target="_blank">Restrict Logger's Access to Your Data</a></td>
   </tr>
   <tr>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>

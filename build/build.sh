@@ -146,6 +146,9 @@ printf '\n\n' >> $NO_OP
 cp -f ../source/install/create_user.sql $RELEASE_FOLDER
 cp -f ../source/install/drop_logger.sql $RELEASE_FOLDER
 
+#Copy Scripts
+cp -r ../source/scripts $RELEASE_FOLDER
+
 #Copy main package file for developers to easily review
 cp -f ../source/packages/logger.* $RELEASE_FOLDER
 

@@ -1,6 +1,8 @@
-[Installation](#installation)<br/>
-[Configuration](#configuration)<br/>
-[Maintenance](#maintenance)
+- [Installation](#installation)<br/>
+    - [Restrict Logger Access (Grants & Synonyms)](#restrict-access)<br/>
+- [Configuration](#configuration)<br/>
+- [Maintenance](#maintenance)
+
 <a name="installation"></a>
 #Installation
 
@@ -22,6 +24,7 @@ To uninstall an older version of logger, see the [Uninstall](#uninstall) instruc
 ###Install Through APEX
 Logger is no longer supported from a web-only installation if the schema was provisioned by APEX. Essentially the APEX team removed the "create any context" privilege when provisioning a new workspace, likely for security reasons. I agree with their choice, it unfortunately impacts logger.
 
+<a name="install-into-new-schema"></a>
 ##Install into a new schema
 
 1. Using sql*plus or SQL Developer, connect to the database as system or a user with the DBA role.
@@ -84,6 +87,29 @@ To uninstall Logger simple run the following script in the schema that Logger wa
 ```sql
 @drop_logger.sql
 ```
+
+<a name="restrict-access"></a>
+##Restrict Access (Grants & Synonyms)
+You may want to [install Logger into it's own schema](#install-into-new-schema) for various reasons. Some of the most common ones are:
+
+- DBA does not want to give `CREATE ANY CONTEXT` access to your user.
+    - If this is the case, the DBA can then lock the Logger schema after running the grant scripts (below) to prevent any access to the privileged user.
+- Restrict Logger to never be able to access your data. *Note: Logger does not try to reference any of your data. Some security policies require that 3rd party solutions can not reside in the same schema as your data. This follows the concept that Logger doesn't need to see your data, your schema just needs access to Logger.*
+
+Once you have installed Logger into it's own schema they're two additional scripts that need to be run. The first grants the appropriate privileges to your schema and the second will create synonyms in your schema.
+
+Run as the user with Logger installed:
+
+```sql
+@scripts/grant_logger_to_user.sql <grant_to_username>
+```
+
+Run as the user that needs to access Logger:
+
+```sql
+@scripts/create_logger_synonyms.sql <from_username>
+```
+
 
 <a name="configuration"></a>
 #Configuration
