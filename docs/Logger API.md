@@ -1,5 +1,5 @@
 <style>
-.deprecated{font-style: italic;}
+.deprecated{font-style: italic; color: red;}
 </style>
 
 ***This document is best viewed in [flatdoc format](http://oraopensource.github.io/flatdoc?repo=logger&path=docs%2FLogger+API.md)***
@@ -70,8 +70,8 @@ This is the preferred method
 		<td>Logger level sys context (64). This is applicable for logging system variables.</td>
 	</tr>
 	<tr>
-		<td class="deprecated">g_apex</td>
-		<td>Logger level apex (128).</td>
+		<td><span class="deprecated">g_apex</span></td>
+		<td><span class="deprecated">Logger level apex (128).</span></td>
 	</tr>
 </table>
 
