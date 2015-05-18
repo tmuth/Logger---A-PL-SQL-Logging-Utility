@@ -818,6 +818,7 @@ as
    *
    * Related Tickets:
    *  - #46 Plugin support
+   *  - #110 Clear all contexts (including ones with client identifier)
    *
    * @author Tyler Muth
    * @created ???
@@ -829,41 +830,8 @@ as
     $if $$no_op or $$rac_lt_11_2 $then
       null;
     $else
-      dbms_session.set_context(
-        namespace  => g_context_name,
-        attribute  => gc_ctx_attr_level,
-        value      => null);
-
-      dbms_session.set_context(
-        namespace  => g_context_name,
-        attribute  => gc_ctx_attr_include_call_stack,
-        value      => null);
-
-      -- #46 Plugins
-      dbms_session.set_context(
-        namespace  => g_context_name,
-        attribute  => gc_ctx_plugin_fn_log,
-        value      => null);
-
-      dbms_session.set_context(
-        namespace  => g_context_name,
-        attribute  => gc_ctx_plugin_fn_info,
-        value      => null);
-
-      dbms_session.set_context(
-        namespace  => g_context_name,
-        attribute  => gc_ctx_plugin_fn_warn,
-        value      => null);
-
-      dbms_session.set_context(
-        namespace  => g_context_name,
-        attribute  => gc_ctx_plugin_fn_error,
-        value      => null);
-
-      dbms_session.set_context(
-        namespace  => g_context_name,
-        attribute  => gc_ctx_plugin_fn_perm,
-        value      => null);
+      dbms_session.clear_all_context(
+         namespace => g_context_name);
     $end
 
     commit;
@@ -2280,7 +2248,7 @@ as
    * Related Tickets:
    *  - #60 Allow security check to be bypassed for client specific logging level
    *  - #48 Allow of numbers to be passed in p_level. Did not overload (see ticket comments as to why)
-   *
+   *  - #110 Clear context values when level changes globally
    *
    * @author Tyler Muth
    * @created ???
@@ -2356,6 +2324,12 @@ as
         else
           -- Global settings
           update logger_prefs set pref_value = l_level where pref_name = 'LEVEL';
+        end if;
+
+        -- #110 Need to reset all contexts so that level is reset for sessions where client_identifier is defined
+        -- This is required for global changes since sessions with client_identifier set won't be properly updated.
+        if p_client_id is null then
+          logger.null_global_contexts;
         end if;
 
         logger.save_global_context(
