@@ -70,7 +70,7 @@ This is the preferred method
 		<td>Logger level sys context (64). This is applicable for logging system variables.</td>
 	</tr>
 	<tr>
-		<td><span class="deprecated">g_apex</span></td>
+		<td><span style="font-style: italic; color: red;">g_apex</span></td>
 		<td><span class="deprecated">Logger level apex (128).</span></td>
 	</tr>
 </table>
