@@ -1,7 +1,3 @@
-<style>
-.deprecated{font-style: italic; color: red;}
-</style>
-
 ***This document is best viewed in [flatdoc format](http://oraopensource.github.io/flatdoc?repo=logger&path=docs%2FLogger+API.md)***
 <a name="constants"></a>
 #Constants
@@ -70,8 +66,8 @@ This is the preferred method
 		<td>Logger level sys context (64). This is applicable for logging system variables.</td>
 	</tr>
 	<tr>
-		<td><span style="font-style: italic; color: red;">g_apex</span></td>
-		<td><span class="deprecated">Logger level apex (128).</span></td>
+		<td>g_apex</td>
+		<td>Logger level apex (128).</td>
 	</tr>
 </table>
 
