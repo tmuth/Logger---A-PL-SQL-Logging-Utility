@@ -1490,25 +1490,27 @@ as
    *  -
    *
    * Related Tickets:
-   *  -
+   * - #29 Support for definging level
    *
    * @author Tyler Muth
    * @created ???
    * @param p_detail_level USER, ALL, NLS, INSTANCE
    * @param p_show_null
    * @param p_scope
+   * @param p_level Highest level to run at (default logger.g_debug). Example. If you set to logger.g_error it will work when both in DEBUG and ERROR modes. However if set to logger.g_debug(default) will not store values when level is set to ERROR.
    */
   procedure log_userenv(
     p_detail_level in varchar2 default 'USER',-- ALL, NLS, USER, INSTANCE,
     p_show_null in boolean default false,
-    p_scope in varchar2 default null)
+    p_scope in logger_logs.scope%type default null,
+    p_level in logger_logs.logger_level%type default logger.g_debug)
   is
     l_extra clob;
   begin
     $if $$no_op $then
       null;
     $else
-      if ok_to_log(logger.g_debug) then
+      if ok_to_log(p_level) then
         l_extra := get_sys_context(
           p_detail_level => p_detail_level,
           p_vertical => true,
