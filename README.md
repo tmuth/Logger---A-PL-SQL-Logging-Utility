@@ -1,3 +1,10 @@
+<script
+  src="https://www.paypalobjects.com/js/external/paypal-button.min.js?merchant=J88GRNDU5D9QE"
+  data-button="donate"
+  data-name="OraOpenSource: Logger"
+  async
+></script>
+
 - [What is Logger?](#what-is-logger)
 - [Documentation](#documentation)
 - [Download](#download)
