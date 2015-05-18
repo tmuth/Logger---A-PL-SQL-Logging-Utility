@@ -2242,6 +2242,7 @@ as
    *  - #60 Allow security check to be bypassed for client specific logging level
    *  - #48 Allow of numbers to be passed in p_level. Did not overload (see ticket comments as to why)
    *  - #110 Clear context values when level changes globally
+   *  - #29 If p_level is deprecated, set to DEBUG
    *
    * @author Tyler Muth
    * @created ???
@@ -2296,6 +2297,18 @@ as
         l_ctx := l_ctx || ', CURRENT_USER: '||sys_context('USERENV','CURRENT_USER');
         l_ctx := l_ctx || ', SESSION_USER: '||sys_context('USERENV','SESSION_USER');
 
+        -- #29 Deprecate old levels. Log and set to DEBUG
+        if l_level in (logger.g_apex_name, logger.g_sys_context_name, logger.g_timing_name)  then
+          logger.ins_logger_logs(
+            p_logger_level => logger.g_warning,
+            p_text =>
+              logger.sprintf('Logger level: %s1 is deprecated. Set for client_id %s2. Automatically setting to %s3', l_level, nvl(p_client_id, '<global>'), logger.g_debug_name),
+            po_id => l_id);
+
+          l_level := logger.g_debug_name;
+        end if;
+
+
         -- Separate updates/inserts for client_id or global settings
         if p_client_id is not null then
           l_client_id_expire_hours := nvl(p_client_id_expire_hours, get_pref(logger.gc_pref_client_id_expire_hours));
@@ -2332,13 +2345,13 @@ as
           p_value => logger.convert_level_char_to_num(l_level),
           p_client_id => p_client_id); -- Note: if p_client_id is null then it will set for global`
 
-          -- Manual insert to ensure that data gets logged, regardless of logger_level
+        -- Manual insert to ensure that data gets logged, regardless of logger_level
         logger.ins_logger_logs(
           p_logger_level => logger.g_information,
           p_text => 'Log level set to ' || l_level || ' for client_id: ' || nvl(p_client_id, '<global>') || ', include_call_stack=' || l_include_call_stack || ' by ' || l_ctx,
           po_id => l_id);
 
-      end if;
+      end if; -- p_client_id is not null or admin_security_check
     $end
     commit;
   end set_level;

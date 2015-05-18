@@ -26,6 +26,8 @@
 <a name="constants-logger-levels"></a>
 ##Logger Levels
 For historical purposes, logger levels supports both integers and names which are intergchangble when calling a function that requires a logger level.
+
+Note: If setting the Logger level to a deprecated level, it will automatically default to `g_debug`.
 ###Numeric
 This is the preferred method
 <table border="0">
@@ -59,15 +61,15 @@ This is the preferred method
 	</tr>
 	<tr>
 		<td>g_timing</td>
-		<td>Logger level timing (32).</td>
+		<td>*Deprecated* Logger level timing (32).</td>
 	</tr>
 	<tr>
 		<td>g_sys_context</td>
-		<td>Logger level sys context (64). This is applicable for logging system variables.</td>
+		<td>*Deprecated* Logger level sys context (64). This is applicable for logging system variables.</td>
 	</tr>
 	<tr>
 		<td>g_apex</td>
-		<td>Logger level apex (128).</td>
+		<td>*Deprecated* Logger level apex (128).</td>
 	</tr>
 </table>
 
@@ -100,15 +102,15 @@ This will still work, however it is recommended that you use the numeric values.
   </tr>
   <tr>
     <td>g_timing_name</td>
-    <td>Logger level name: TIMING</td>
+    <td>*Deprecated* Logger level name: TIMING</td>
   </tr>
   <tr>
     <td>g_sys_context_name</td>
-    <td>Logger level name: SYS_CONTEXT</td>
+    <td>*Deprecated* Logger level name: SYS_CONTEXT</td>
   </tr>
   <tr>
     <td>g_apex_name</td>
-    <td>Logger level name: APEX</td>
+    <td>*Deprecated* Logger level name: APEX</td>
   </tr>
 </table>
 
@@ -1065,7 +1067,7 @@ logger.set_level(
   </tr>
   <tr>
     <td>p_level</td>
-    <td>Use logger.g_&lt;level&gt;_name variables. See [Constants](#constants-logger-levels) </td>
+    <td>Use logger.g_&lt;level&gt;_name variables. See [Constants](#constants-logger-levels). If the level is deprecated it will automatically be set to DEBUG.</td>
   </tr>
     <tr>
     <td>p_client_id</td>
