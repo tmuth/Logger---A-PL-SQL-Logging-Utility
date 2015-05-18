@@ -65,6 +65,18 @@ as
   gc_ctx_plugin_fn_error constant varchar2(30) := 'plugin_fn_error';
   gc_ctx_plugin_fn_perm constant varchar2(30) := 'plugin_fn_permanent';
 
+  -- #113 Preference names
+  gc_pref_level constant logger_prefs.pref_name%type := 'LEVEL';
+  gc_pref_include_call_stack constant logger_prefs.pref_name%type := 'INCLUDE_CALL_STACK';
+  gc_pref_protect_admin_procs constant logger_prefs.pref_name%type := 'PROTECT_ADMIN_PROCS';
+  gc_pref_install_schema constant logger_prefs.pref_name%type := 'INSTALL_SCHEMA';
+  gc_pref_purge_after_days constant logger_prefs.pref_name%type := 'PURGE_AFTER_DAYS';
+  gc_pref_purge_min_level constant logger_prefs.pref_name%type := 'PURGE_MIN_LEVEL';
+  gc_pref_logger_version constant logger_prefs.pref_name%type := 'LOGGER_VERSION';
+  gc_pref_client_id_expire_hours constant logger_prefs.pref_name%type := 'PREF_BY_CLIENT_ID_EXPIRE_HOURS';
+  gc_pref_logger_debug constant logger_prefs.pref_name%type := 'LOGGER_DEBUG';
+  gc_pref_plugin_fn_error constant logger_prefs.pref_name%type := 'PLUGIN_FN_ERROR';
+
 
 
 
@@ -398,9 +410,9 @@ as
     $if $$no_op $then
       l_return := true;
     $else
-      l_protect_admin_procs := get_pref('PROTECT_ADMIN_PROCS');
+      l_protect_admin_procs := get_pref(logger.gc_pref_protect_admin_procs);
       if l_protect_admin_procs = 'TRUE' then
-        if get_pref('INSTALL_SCHEMA') = sys_context('USERENV','SESSION_USER') then
+        if get_pref(logger.gc_pref_install_schema) = sys_context('USERENV','SESSION_USER') then
           l_return := true;
         else
           l_return := false;
@@ -423,7 +435,7 @@ as
    *  - Private
    *
    * Related Tickets:
-   *  -
+   *  - #111 Use get_pref to remove duplicate code
    *
    * @author Tyler Muth
    * @created ???
@@ -453,26 +465,7 @@ as
         dbms_output.put_line(l_scope || ': selecting logger_level');
       $end
 
-      -- If enabled then first try to get the level from it. If not go to the original code below
-      select logger_level
-      into l_level_char
-      from (
-        select logger_level, row_number () over (order by rank) rn
-        from (
-          -- Client specific logger levels trump system level logger level
-          select logger_level, 1 rank
-          from logger_prefs_by_client_id
-          where client_id = sys_context('userenv','client_identifier')
-          union
-          -- System level configuration
-          select pref_value logger_level, 2 rank
-          from logger_prefs
-          where pref_name = 'LEVEL'
-        )
-      )
-      where rn = 1;
-
-      l_level := convert_level_char_to_num(l_level_char);
+      l_level := convert_level_char_to_num(logger.get_pref(logger.gc_pref_level));
 
       return l_level;
     $end
@@ -507,12 +500,12 @@ as
       return false;
     $else
       $if $$rac_lt_11_2 $then
-        l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
+        l_call_stack_pref := get_pref(logger.gc_pref_include_call_stack);
       $else
         l_call_stack_pref := sys_context(g_context_name,gc_ctx_attr_include_call_stack);
 
         if l_call_stack_pref is null then
-          l_call_stack_pref := get_pref('INCLUDE_CALL_STACK');
+          l_call_stack_pref := get_pref(logger.gc_pref_include_call_stack);
           save_global_context(
             p_attribute => gc_ctx_attr_include_call_stack,
             p_value => l_call_stack_pref,
@@ -1909,15 +1902,15 @@ as
           -- Client specific logger levels trump system level logger level
           select
             case
-              when l_pref_name = 'LEVEL' then logger_level
-              when l_pref_name = 'INCLUDE_CALL_STACK' then include_call_stack
+              when l_pref_name = logger.gc_pref_level then logger_level
+              when l_pref_name = logger.gc_pref_include_call_stack then include_call_stack
             end pref_value,
             1 rank
           from logger_prefs_by_client_id
           where 1=1
             and client_id = l_client_id
             -- Only try to get prefs at a client level if pref is in LEVEL or INCLUDE_CALL_STACK
-            and l_pref_name in ('LEVEL', 'INCLUDE_CALL_STACK')
+            and l_pref_name in (logger.gc_pref_level, logger.gc_pref_include_call_stack)
           union
           -- System level configuration
           select pref_value, 2 rank
@@ -2033,7 +2026,7 @@ as
 
   is
     $if $$no_op is null or not $$no_op $then
-      l_purge_after_days number := nvl(p_purge_after_days,get_pref('PURGE_AFTER_DAYS'));
+      l_purge_after_days number := nvl(p_purge_after_days,get_pref(logger.gc_pref_purge_after_days));
     $end
     pragma autonomous_transaction;
   begin
@@ -2078,7 +2071,7 @@ as
     $else
       purge(
         p_purge_after_days => to_number(p_purge_after_days),
-        p_purge_min_level => convert_level_char_to_num(nvl(p_purge_min_level,get_pref('PURGE_MIN_LEVEL'))));
+        p_purge_min_level => convert_level_char_to_num(nvl(p_purge_min_level,get_pref(logger.gc_pref_purge_min_level))));
     $end
   end purge;
 
@@ -2177,7 +2170,7 @@ as
         l_apex := 'Enabled';
       $end
 
-      for c1 in (select pref_value from logger_prefs where pref_name = 'LEVEL') loop
+      for c1 in (select pref_value from logger_prefs where pref_name = logger.gc_pref_level) loop
         l_debug := c1.pref_value;
       end loop; --c1
 
@@ -2185,29 +2178,29 @@ as
         l_flashback := 'Enabled';
       $end
 
-      l_version := get_pref('LOGGER_VERSION');
+      l_version := get_pref(logger.gc_pref_logger_version);
 
       display_output('Logger Version',l_version);
       display_output('Debug Level',l_debug);
-      display_output('Capture Call Stack',get_pref('INCLUDE_CALL_STACK'));
-      display_output('Protect Admin Procedures',get_pref('PROTECT_ADMIN_PROCS'));
+      display_output('Capture Call Stack',get_pref(logger.gc_pref_include_call_stack));
+      display_output('Protect Admin Procedures',get_pref(logger.gc_pref_protect_admin_procs));
       display_output('APEX Tracing',l_apex);
       display_output('SCN Capture',l_flashback);
-      display_output('Min. Purge Level',get_pref('PURGE_MIN_LEVEL'));
-      display_output('Purge Older Than',get_pref('PURGE_AFTER_DAYS')||' days');
-      display_output('Pref by client_id expire hours',get_pref('PREF_BY_CLIENT_ID_EXPIRE_HOURS')||' hours');
+      display_output('Min. Purge Level',get_pref(logger.gc_pref_purge_min_level));
+      display_output('Purge Older Than',get_pref(logger.gc_pref_purge_after_days)||' days');
+      display_output('Pref by client_id expire hours',get_pref(logger.gc_pref_client_id_expire_hours)||' hours');
       $if $$rac_lt_11_2  $then
         display_output('RAC pre-11.2 Code','TRUE');
       $end
 
       -- #46 Only display plugins if enabled
       $if $$logger_plugin_error $then
-        display_output('PLUGIN_FN_ERROR',get_pref('PLUGIN_FN_ERROR'));
+        display_output('PLUGIN_FN_ERROR',get_pref(logger.gc_pref_plugin_fn_error));
       $end
 
       -- #64
       $if $$logger_debug $then
-        display_output('LOGGER_DEBUG',get_pref('LOGGER_DEBUG') || '   *** SHOULD BE TURNED OFF!!! SET TO FALSE ***');
+        display_output('LOGGER_DEBUG',get_pref(logger.gc_pref_logger_debug) || '   *** SHOULD BE TURNED OFF!!! SET TO FALSE ***');
       $end
 
 
@@ -2284,7 +2277,7 @@ as
         l_level := convert_level_num_to_char(p_level => p_level);
       end if;
 
-      l_include_call_stack := nvl(trim(upper(p_include_call_stack)), get_pref('INCLUDE_CALL_STACK'));
+      l_include_call_stack := nvl(trim(upper(p_include_call_stack)), get_pref(logger.gc_pref_include_call_stack));
 
       assert(
           l_level in (g_off_name, g_permanent_name, g_error_name, g_warning_name, g_information_name, g_debug_name, g_timing_name, g_sys_context_name, g_apex_name),
@@ -2305,7 +2298,7 @@ as
 
         -- Separate updates/inserts for client_id or global settings
         if p_client_id is not null then
-          l_client_id_expire_hours := nvl(p_client_id_expire_hours, get_pref('PREF_BY_CLIENT_ID_EXPIRE_HOURS'));
+          l_client_id_expire_hours := nvl(p_client_id_expire_hours, get_pref(logger.gc_pref_client_id_expire_hours));
           l_expiry_date := sysdate + l_client_id_expire_hours/24;
 
           merge into logger_prefs_by_client_id ci
@@ -2323,7 +2316,9 @@ as
 
         else
           -- Global settings
-          update logger_prefs set pref_value = l_level where pref_name = 'LEVEL';
+          update logger_prefs
+          set pref_value = l_level
+          where pref_name = logger.gc_pref_level;
         end if;
 
         -- #110 Need to reset all contexts so that level is reset for sessions where client_identifier is defined
