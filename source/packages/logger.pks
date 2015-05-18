@@ -198,8 +198,10 @@ as
 		p_show_common_codes 	in boolean default true);
 
   procedure log_apex_items(
-		p_text		in varchar2 default 'Log APEX Items',
-    p_scope		in varchar2 default null);
+    p_text in varchar2 default 'Log APEX Items',
+    p_scope in logger_logs.scope%type default null,
+    p_log_null_items in boolean default true,
+    p_level in logger_logs.logger_level%type default logger.g_debug);
 
 	procedure time_start(
 		p_unit				in varchar2,

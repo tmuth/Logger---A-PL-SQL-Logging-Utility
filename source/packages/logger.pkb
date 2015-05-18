@@ -1074,40 +1074,65 @@ as
 
   end get_character_codes;
 
-
+  /**
+   * Store APEX items in logger_logs_apex_items
+   *
+   * Notes:
+   *  -
+   *
+   * Related Tickets:
+   *  - #115 Only log not-null values
+   *
+   * @author Tyler Muth
+   * @created ???
+   * @param p_log_id logger_logs.id to reference
+   * @param p_log_null_items If set to false, null values won't be logged
+   */
   procedure snapshot_apex_items(
-    p_log_id in number)
+    p_log_id in logger_logs.id%type,
+    p_log_null_items in boolean)
   is
     l_app_session number;
-    l_app_id       number;
+    l_app_id number;
+    l_log_null_item_yn varchar2(1);
   begin
-    $IF $$NO_OP $THEN
+    $if $$no_op $then
       null;
-    $ELSE
-      $IF $$APEX $THEN
+    $else
+      $if $$apex $then
         l_app_session := v('APP_SESSION');
         l_app_id := v('APP_ID');
+
+        l_log_null_item_yn := 'N';
+        if p_log_null_items then
+          l_log_null_item_yn := 'Y';
+        end if;
+
         for c1 in (
-          select item_name
-          from apex_application_items
-          where application_id = l_app_id)
+          select item_name, item_value
+          from (
+            select 1 app_page_seq, 0 page_id, item_name, v(item_name) item_value
+            from apex_application_items
+            where 1=1
+              and application_id = l_app_id
+            union all
+            select 2 app_page_seq, page_id, item_name, v(item_name) item_value
+            from apex_application_page_items
+            where 1=1
+              and application_id = l_app_id
+            )
+          where 1=1
+            and (l_log_null_item_yn = 'Y' or item_value is not null)
+          order by app_page_seq, page_id, item_name
+          )
         loop
           insert into logger_logs_apex_items(log_id,app_session,item_name,item_value)
           values (p_log_id,l_app_session,c1.item_name,v(c1.item_name));
         end loop; --c1
 
-        for c1 in (
-          select item_name
-          from apex_application_page_items
-          where application_id = l_app_id)
-        loop
-          insert into logger_logs_apex_items(log_id,app_session,item_name,item_value)
-          values (p_log_id,l_app_session,c1.item_name,v(c1.item_name));
-        end loop; --c1
-
-      $END
-      null;
-    $END
+      $end -- $if $$apex $then
+      null; -- Keep this in place incase APEX is not compiled
+    $end -- $$no_op
   end snapshot_apex_items;
 
 
@@ -1580,16 +1605,21 @@ as
    *  -
    *
    * Related Tickets:
-   *  -
+   *  - #115 Only log not-null values
+   *  - #29 Support for definging level
    *
    * @author Tyler Muth
    * @created ???
-   * @param p_scope
    * @param p_text
+   * @param p_scope
+   * @param p_log_null_items If set to false, null values won't be logged
+   * @param p_level Highest level to run at (default logger.g_debug). Example. If you set to logger.g_error it will work when both in DEBUG and ERROR modes. However if set to logger.g_debug(default) will not store values when level is set to ERROR.
    */
   procedure log_apex_items(
     p_text in varchar2 default 'Log APEX Items',
-    p_scope in varchar2 default null)
+    p_scope in logger_logs.scope%type default null,
+    p_log_null_items in boolean default true,
+    p_level in logger_logs.logger_level%type default logger.g_debug)
   is
     l_error varchar2(4000);
     pragma autonomous_transaction;
@@ -1597,15 +1627,17 @@ as
     $if $$no_op $then
       null;
     $else
-      if ok_to_log(logger.g_debug) then
+      if ok_to_log(p_level) then
 
         $if $$apex $then
           log_internal(
-            p_text        => p_text,
-            p_log_level     => logger.g_apex,
-            p_scope             => p_scope);
+            p_text => p_text,
+            p_log_level => logger.g_apex,
+            p_scope => p_scope);
 
-          snapshot_apex_items(p_log_id => g_log_id);
+          snapshot_apex_items(
+            p_log_id => g_log_id,
+            p_log_null_items => p_log_null_items);
         $else
           l_error := 'Error! Logger is not configured for APEX yet. ';
 
