@@ -5,3 +5,5 @@ videos
 #Only accept the zip files in the release directory
 releases/*
 !releases/*.zip
+#For developers
+temp/*
