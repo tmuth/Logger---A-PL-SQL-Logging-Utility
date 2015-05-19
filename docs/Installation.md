@@ -104,6 +104,12 @@ Run as the user with Logger installed:
 @scripts/grant_logger_to_user.sql <grant_to_username>
 ```
 
+If you want to restrict access to the "Logger Schema" (since it has `CREATE ANY CONTEXT privilege) you can simple lock it as `SYSTEM`:
+
+```sql
+alter user <username> account lock;
+```
+
 Run as the user that needs to access Logger:
 
 ```sql
