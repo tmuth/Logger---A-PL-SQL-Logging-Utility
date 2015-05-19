@@ -187,24 +187,24 @@ as
     p_detail_level in varchar2 default 'USER',-- ALL, NLS, USER, INSTANCE,
     p_show_null in boolean default false,
     p_scope in logger_logs.scope%type default null,
-    p_level in logger_logs.logger_level%type default logger.g_debug);
+    p_level in logger_logs.logger_level%type default null);
 
   procedure log_cgi_env(
     p_show_null in boolean default false,
     p_scope in logger_logs.scope%type default null,
-    p_level in logger_logs.logger_level%type default logger.g_debug);
+    p_level in logger_logs.logger_level%type default null);
 
   procedure log_character_codes(
     p_text in varchar2,
     p_scope in logger_logs.scope%type default null,
     p_show_common_codes in boolean default true,
-    p_level in logger_logs.logger_level%type default logger.g_debug);
+    p_level in logger_logs.logger_level%type default null);
 
   procedure log_apex_items(
     p_text in varchar2 default 'Log APEX Items',
     p_scope in logger_logs.scope%type default null,
     p_log_null_items in boolean default true,
-    p_level in logger_logs.logger_level%type default logger.g_debug);
+    p_level in logger_logs.logger_level%type default null);
 
 	procedure time_start(
 		p_unit				in varchar2,

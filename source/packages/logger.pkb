@@ -1503,14 +1503,14 @@ as
     p_detail_level in varchar2 default 'USER',-- ALL, NLS, USER, INSTANCE,
     p_show_null in boolean default false,
     p_scope in logger_logs.scope%type default null,
-    p_level in logger_logs.logger_level%type default logger.g_debug)
+    p_level in logger_logs.logger_level%type default null)
   is
     l_extra clob;
   begin
     $if $$no_op $then
       null;
     $else
-      if ok_to_log(p_level) then
+      if ok_to_log(nvl(p_level, logger.g_debug)) then
         l_extra := get_sys_context(
           p_detail_level => p_detail_level,
           p_vertical => true,
@@ -1518,7 +1518,7 @@ as
 
         log_internal(
           p_text => 'USERENV values stored in the EXTRA column',
-          p_log_level => logger.g_sys_context,
+          p_log_level => nvl(p_level, logger.g_sys_context),
           p_scope => p_scope,
           p_extra => l_extra);
       end if;
@@ -1544,18 +1544,18 @@ as
   procedure log_cgi_env(
     p_show_null in boolean default false,
     p_scope in logger_logs.scope%type default null,
-    p_level in logger_logs.logger_level%type default logger.g_debug)
+    p_level in logger_logs.logger_level%type default null)
   is
     l_extra clob;
   begin
     $if $$no_op $then
       null;
     $else
-      if ok_to_log(p_level) then
+      if ok_to_log(nvl(p_level, logger.g_debug)) then
         l_extra := get_cgi_env(p_show_null    => p_show_null);
         log_internal(
           p_text => 'CGI ENV values stored in the EXTRA column',
-          p_log_level => logger.g_sys_context,
+          p_log_level => nvl(p_level, logger.g_sys_context),
           p_scope => p_scope,
           p_extra => l_extra);
       end if;
@@ -1583,7 +1583,7 @@ as
     p_text in varchar2,
     p_scope in logger_logs.scope%type default null,
     p_show_common_codes in boolean default true,
-    p_level in logger_logs.logger_level%type default logger.g_debug)
+    p_level in logger_logs.logger_level%type default null)
   is
     l_error varchar2(4000);
     l_dump clob;
@@ -1591,12 +1591,12 @@ as
     $if $$no_op $then
       null;
     $else
-      if ok_to_log(p_level) then
+      if ok_to_log(nvl(p_level, logger.g_debug)) then
         l_dump := get_character_codes(p_text,p_show_common_codes);
 
         log_internal(
           p_text => 'GET_CHARACTER_CODES output stored in the EXTRA column',
-          p_log_level => logger.g_debug,
+          p_log_level => nvl(p_level, logger.g_debug),
           p_scope => p_scope,
           p_extra => l_dump);
       end if;
@@ -1625,7 +1625,7 @@ as
     p_text in varchar2 default 'Log APEX Items',
     p_scope in logger_logs.scope%type default null,
     p_log_null_items in boolean default true,
-    p_level in logger_logs.logger_level%type default logger.g_debug)
+    p_level in logger_logs.logger_level%type default null)
   is
     l_error varchar2(4000);
     pragma autonomous_transaction;
@@ -1633,12 +1633,12 @@ as
     $if $$no_op $then
       null;
     $else
-      if ok_to_log(p_level) then
+      if ok_to_log(nvl(p_level, logger.g_debug)) then
 
         $if $$apex $then
           log_internal(
             p_text => p_text,
-            p_log_level => logger.g_apex,
+            p_log_level => nvl(p_level, logger.g_apex),
             p_scope => p_scope);
 
           snapshot_apex_items(
