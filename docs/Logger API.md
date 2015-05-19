@@ -404,9 +404,10 @@ Have you ever run into an issue with a string that contains control characters s
 
 ```sql
 logger.log_character_codes(
-  p_text          in varchar2,
-  p_scope         in varchar2 default null,
-  p_show_common_codes   in boolean default true);
+  p_text in varchar2,
+  p_scope in logger_logs.scope%type default null,
+  p_show_common_codes in boolean default true,
+  p_level in logger_logs.logger_level%type default logger.g_debug);
 ```
 
 ####Parameters
@@ -426,6 +427,10 @@ logger.log_character_codes(
   <tr>
     <td>p_show_common_codes</td>
     <td>Provides legend of common character codes in output.</td>
+  </tr>
+  <tr>
+    <td>p_level</td>
+    <td>Highest level to run at (default logger.g_debug). Example. If you set to logger.g_error it will work when both in DEBUG and ERROR modes. However if set to logger.g_debug(default) will not store values when level is set to ERROR.</td>
   </tr>
 </table>
 
