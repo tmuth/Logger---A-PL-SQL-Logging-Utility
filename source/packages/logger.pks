@@ -190,8 +190,9 @@ as
     p_level in logger_logs.logger_level%type default logger.g_debug);
 
   procedure log_cgi_env(
-    p_show_null 	in boolean default false,
-    p_scope         in varchar2 default null);
+    p_show_null in boolean default false,
+    p_scope in logger_logs.scope%type default null,
+    p_level in logger_logs.logger_level%type default logger.g_debug);
 
 	procedure log_character_codes(
 		p_text					in varchar2,

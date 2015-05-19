@@ -140,7 +140,7 @@ This will still work, however it is recommended that you use the numeric values.
 		  logger_level (number) </br>
 		  </br>
          See <a href="Plugins.md">Plugins documentation</a> for more information and examples.</td>
-	</tr>	
+	</tr>
 </table>
 
 <a name="subprograms"></a>
@@ -353,7 +353,8 @@ This option only works within a web session, but it's a great way to quickly tak
 ```sql
 logger.log_cgi_env(
   p_show_null in boolean default false,
-  p_scope in varchar2 default null);
+  p_scope in logger_logs.scope%type default null,
+  p_level in logger_logs.logger_level%type default logger.g_debug);
 ```
 
 ####Parameters
@@ -369,6 +370,10 @@ logger.log_cgi_env(
     <tr>
     <td>p_scope</td>
     <td>Scope to log CGI variables under.</td>
+  </tr>
+  <tr>
+    <td>p_level</td>
+    <td>Highest level to run at (default logger.g_debug). Example. If you set to logger.g_error it will work when both in DEBUG and ERROR modes. However if set to logger.g_debug(default) will not store values when level is set to ERROR.</td>
   </tr>
 </table>
 
@@ -583,7 +588,7 @@ PL/SQL procedure successfully completed.
 <a name="procedure-sprintf"></a>
 ###SPRINTF
 
-```sprintf``` is similar to the common procedure [```printf```](http://en.wikipedia.org/wiki/Printf_format_string) found in many programming languages. It replaces substitution strings for a given string. Substitution strings can be either ```%s``` or ```%s<n>``` where ```<n>``` is a number 1~10. 
+```sprintf``` is similar to the common procedure [```printf```](http://en.wikipedia.org/wiki/Printf_format_string) found in many programming languages. It replaces substitution strings for a given string. Substitution strings can be either ```%s``` or ```%s<n>``` where ```<n>``` is a number 1~10.
 
 The following rules are used to handle substitution strings (in order):
 - Replaces ```%s<n>``` with ```p_s<n>```, regardless of order that they appear in ```p_str```
@@ -726,9 +731,9 @@ dbms_output.put_line('Logger level: ' || logger.get_pref('LEVEL'));
 
 <a name="procedure-set_cust_pref"></a>
 ###SET_CUST_PREF
-In some cases you may want to store custom preferences in the `LOGGER_PREFS` table. A use case for this would be when creating a plugin that needs to reference some parameters. 
+In some cases you may want to store custom preferences in the `LOGGER_PREFS` table. A use case for this would be when creating a plugin that needs to reference some parameters.
 
-This procedure allows you to leverage the `LOGGER_PREFS` table to store your custom preferences. To avoid any naming comflicts with Logger, all custom preferences must be prefixed with `CUST_`. 
+This procedure allows you to leverage the `LOGGER_PREFS` table to store your custom preferences. To avoid any naming comflicts with Logger, all custom preferences must be prefixed with `CUST_`.
 
 `SET_CUST_PREF` will either create or udpate a value. Values must contain data. If not, use [`DEL_CUST_PREF`](#procedure-del_cust_pref) to delete unused preferences.
 
@@ -1617,4 +1622,3 @@ logger.time_stop_seconds(
 ```sql
 TODO
 ```
-
