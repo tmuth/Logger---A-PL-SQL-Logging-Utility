@@ -1081,7 +1081,8 @@ as
    *  -
    *
    * Related Tickets:
-   *  - #115 Only log not-null values
+   *  - #115: Only log not-null values
+   *  - #114: Bulk insert (no more row by row)
    *
    * @author Tyler Muth
    * @created ???
@@ -1108,29 +1109,27 @@ as
           l_log_null_item_yn := 'Y';
         end if;
 
-        for c1 in (
-          select item_name, item_value
-          from (
-            select 1 app_page_seq, 0 page_id, item_name, v(item_name) item_value
-            from apex_application_items
-            where 1=1
-              and application_id = l_app_id
-            union all
-            select 2 app_page_seq, page_id, item_name, v(item_name) item_value
-            from apex_application_page_items
-            where 1=1
-              and application_id = l_app_id
-            )
+        insert into logger_logs_apex_items(log_id,app_session,item_name,item_value)
+        select p_log_id, l_app_session, item_name, item_value
+        from (
+          -- Application items
+          select 1 app_page_seq, 0 page_id, item_name, v(item_name) item_value
+          from apex_application_items
           where 1=1
-            and (l_log_null_item_yn = 'Y' or item_value is not null)
-          order by app_page_seq, page_id, item_name
+            and application_id = l_app_id
+          union all
+          -- Application page items
+          select 2 app_page_seq, page_id, item_name, v(item_name) item_value
+          from apex_application_page_items
+          where 1=1
+            and application_id = l_app_id
           )
-        loop
-          insert into logger_logs_apex_items(log_id,app_session,item_name,item_value)
-          values (p_log_id,l_app_session,c1.item_name,v(c1.item_name));
-        end loop; --c1
+        where 1=1
+          and (l_log_null_item_yn = 'Y' or item_value is not null)
+        order by app_page_seq, page_id, item_name;
 
       $end -- $if $$apex $then
+
       null; -- Keep this in place incase APEX is not compiled
     $end -- $$no_op
   end snapshot_apex_items;
