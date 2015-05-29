@@ -83,39 +83,44 @@ create table logger_logs(
     where 1=1
       and table_name = 'LOGGER_LOGS'
       and column_name = l_new_cols(i).column_name;
-    
+
     if l_count = 0 then
       execute immediate 'alter table LOGGER_LOGS add (' || l_new_cols(i).column_name || ' ' || l_new_cols(i).data_type || ')';
     end if;
   end loop;
 
 
-  -- SEQUENCE
-  select count(1)
-  into l_count
-  from user_sequences
-  where sequence_name = 'LOGGER_LOGS_SEQ';
+  $if $$logger_no_op_install $then
+    null;
+  $else
+    -- SEQUENCE
+    select count(1)
+    into l_count
+    from user_sequences
+    where sequence_name = 'LOGGER_LOGS_SEQ';
 
-  if l_count = 0 then
-    execute immediate '
-      create sequence logger_logs_seq
-          minvalue 1
-          maxvalue 999999999999999999999999999
-          start with 1
-          increment by 1
-          cache 20
-    ';
-  end if;
+    if l_count = 0 then
+      execute immediate '
+        create sequence logger_logs_seq
+            minvalue 1
+            maxvalue 999999999999999999999999999
+            start with 1
+            increment by 1
+            cache 20
+      ';
+    end if;
 
-  -- INDEXES
-  select count(1)
-  into l_count
-  from user_indexes
-  where index_name = 'LOGGER_LOGS_IDX1';
+    -- INDEXES
+    select count(1)
+    into l_count
+    from user_indexes
+    where index_name = 'LOGGER_LOGS_IDX1';
 
-  if l_count = 0 then
-    execute immediate 'create index logger_logs_idx1 on logger_logs(time_stamp,logger_level)';
-  end if;
+    if l_count = 0 then
+      execute immediate 'create index logger_logs_idx1 on logger_logs(time_stamp,logger_level)';
+    end if;
+  $end
+
 end;
 /
 

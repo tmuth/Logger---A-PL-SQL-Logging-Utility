@@ -2,6 +2,7 @@ set sqlprompt ''
 set feedback off
 set linesize 200
 set serverout on
+set termout off
 
 alter package logger compile body PLSQL_CCFLAGS='NO_OP:TRUE';
 
