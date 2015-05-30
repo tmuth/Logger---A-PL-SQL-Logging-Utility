@@ -176,6 +176,10 @@ This will still work, however it is recommended that you use the numeric values.
 ##Main Logger Procedures
 Since the main Logger procedures all have the same syntax and behavior (except for the procedure names) the documentation has been combined to avoid replication.
 
+<a name="main-logger-best-practices"></a>
+###Best Practices
+The [Best Practices](Best%20Practices.md#logger-level-guide) guide covers which Logger procedure to use in different circumstances.
+
 <a name="main-logger-syntax"></a>
 ###Syntax
 The syntax for the main Logger procedures are all the same.
