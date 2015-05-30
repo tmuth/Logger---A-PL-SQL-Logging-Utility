@@ -67,9 +67,11 @@ as
   gc_empty_tab_param tab_param;
 
   -- #54: Types for log_apex_items
-  g_log_apex_items_all constant varchar2(30) := 'ALL'; -- Application items and page items
-  g_log_apex_items_app constant varchar2(30) := 'APP'; -- All application items
-  g_log_apex_items_page constant varchar2(30) := 'PAGE'; -- All page items
+  -- TODO mdsouza: use g_apex_item_type_...
+  -- TODO mdsouza: update documentation
+  g_apex_item_type_all constant varchar2(30) := 'ALL'; -- Application items and page items
+  g_apex_item_type_app constant varchar2(30) := 'APP'; -- All application items
+  g_apex_item_type_page constant varchar2(30) := 'PAGE'; -- All page items
   -- To log items on a particular page, just enter the page number
 
   -- Expose private functions only for testing during development
@@ -209,7 +211,7 @@ as
     procedure log_apex_items(
       p_text in varchar2 default 'Log APEX Items',
       p_scope in logger_logs.scope%type default null,
-      p_item_scope in varchar2 default logger.g_log_apex_items_all,
+      p_item_type in varchar2 default logger.g_apex_item_type_all,
       p_log_null_items in boolean default true,
       p_level in logger_logs.logger_level%type default null);
 

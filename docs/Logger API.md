@@ -114,8 +114,8 @@ This will still work, however it is recommended that you use the numeric values.
   </tr>
 </table>
 
-<a name="apex-item-scopes"></a>
-##APEX Item Scopes
+<a name="apex-item-types"></a>
+##APEX Item Types
 `log_apex_items` takes in an optional variable `p_item_scope`. This determines which items to log in APEX. Use the following global variables as valid vaules.
 <table>
   <tr>
@@ -123,15 +123,15 @@ This will still work, however it is recommended that you use the numeric values.
     <th>Description</th>
   </tr>
   <tr>
-    <td>g_log_apex_items_all</td>
+    <td>g_apex_item_type_all</td>
     <td>Log both application and page level items</td>
   </tr>
   <tr>
-    <td>g_log_apex_items_app</td>
+    <td>g_apex_item_type_app</td>
     <td>Only application level items</td>
   </tr>
   <tr>
-    <td>g_log_apex_items_page</td>
+    <td>g_apex_item_type_page</td>
     <td>Only page level items</td>
   </tr>
   <tr>
@@ -482,7 +482,7 @@ This feature is useful in debugging issues in an APEX application that are relat
 logger.log_apex_items(
   p_text in varchar2 default 'Log APEX Items',
   p_scope in logger_logs.scope%type default null,
-  p_item_scope in varchar2 default logger.g_log_apex_items_all,
+  p_item_type in varchar2 default logger.g_apex_item_type_all,
   p_log_null_items in boolean default true,
   p_level in logger_logs.logger_level%type default null);
 ```
@@ -502,8 +502,8 @@ logger.log_apex_items(
     <td>Scope to log text under.</td>
   </tr>
   <tr>
-    <td>p_item_scope</td>
-    <td>Determines what type of APEX items are logged (all, application, page). See the <a href="#apex-item-scopes">corresponding global variables</a> that it can reference. Alternatively it can reference a page_id which will then only log items on the defined page.</td>
+    <td>p_item_type</td>
+    <td>Determines what type of APEX items are logged (all, application, page). See the <a href="#apex-item-type">corresponding global variables</a> that it can reference. Alternatively it can reference a page_id which will then only log items on the defined page.</td>
   </tr>
   <tr>
     <td>p_log_null_items</td>
