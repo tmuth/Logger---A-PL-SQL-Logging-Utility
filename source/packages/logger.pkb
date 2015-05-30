@@ -1710,7 +1710,8 @@ as
         g_running_timers := g_running_timers + 1;
 
         if g_running_timers > 1 then
-          l_pad := lpad(' ',g_running_timers,'>')||' ';
+          -- Use 'a' since lpad requires a value to pad
+          l_pad := replace(lpad('a',logger.g_running_timers,'>')||' ', 'a', null);
         end if;
 
         g_proc_start_times(p_unit) := systimestamp;
@@ -1735,7 +1736,7 @@ as
    *  -
    *
    * Related Tickets:
-   *  -
+   *  - #73: Remove additional timer decrement since it was already happening in function time_stop
    *
    * @author Tyler Muth
    * @created ???
@@ -1757,23 +1758,22 @@ as
         if g_proc_start_times.exists(p_unit) then
 
           if g_running_timers > 1 then
-            l_pad := lpad(' ',g_running_timers,'>')||' ';
+            -- Use 'a' since lpad requires a value to pad
+            l_pad := replace(lpad('a',logger.g_running_timers,'>')||' ', 'a', null);
           end if;
 
           --l_time_string := rtrim(regexp_replace(systimestamp-(g_proc_start_times(p_unit)),'.+?[[:space:]](.*)','\1',1,0),0);
+          -- Function time_stop will decrement the timers and pop the name from the g_proc_start_times array
           l_time_string := time_stop(
             p_unit => p_unit,
             p_log_in_table => false);
 
           l_text := l_pad||'STOP : '||p_unit ||' - '||l_time_string;
 
-          g_proc_start_times.delete(p_unit);
-          g_running_timers := g_running_timers - 1;
-
           ins_logger_logs(
             p_unit_name => p_unit,
             p_scope => p_scope ,
-            p_logger_level =>g_timing,
+            p_logger_level => g_timing,
             p_text =>l_text,
             po_id => g_log_id);
         end if;
@@ -1789,7 +1789,7 @@ as
    *  -
    *
    * Related Tickets:
-   *  -
+   *  - #73: Trim timezone from systimestamp
    *
    * @author Tyler Muth
    * @created ???
@@ -1798,14 +1798,14 @@ as
    * @param p_log_in_table
    * @return Timer string
    */
-  FUNCTION time_stop(
-    p_unit        IN VARCHAR2,
-    p_scope             in varchar2 default null,
-    p_log_in_table      IN boolean default true
-    )
+  function time_stop(
+    p_unit in varchar2,
+    p_scope in varchar2 default null,
+    p_log_in_table IN boolean default true)
     return varchar2
   is
-    l_time_string     varchar2(50);
+    l_time_string varchar2(50);
+    l_now timestamp := systimestamp;
   begin
     $if $$no_op $then
       null;
@@ -1813,7 +1813,7 @@ as
       if ok_to_log(logger.g_debug) then
         if g_proc_start_times.exists(p_unit) then
 
-          l_time_string := rtrim(regexp_replace(systimestamp-(g_proc_start_times(p_unit)),'.+?[[:space:]](.*)','\1',1,0),0);
+          l_time_string := rtrim(regexp_replace(l_now - (g_proc_start_times(p_unit)),'.+?[[:space:]](.*)','\1',1,0),0);
 
           g_proc_start_times.delete(p_unit);
           g_running_timers := g_running_timers - 1;
@@ -1842,7 +1842,7 @@ as
    *  -
    *
    * Related Tickets:
-   *  -
+   *  - #73: Trim timezone from systimestamp
    *
    * @author Tyler Muth
    * @created ???
@@ -1858,9 +1858,10 @@ as
     )
     return number
   is
-    l_time_string     varchar2(50);
-    l_seconds   number;
-    l_interval  interval day to second;
+    l_time_string varchar2(50);
+    l_seconds number;
+    l_interval interval day to second;
+    l_now timestamp := systimestamp;
 
   begin
     $if $$no_op $then
@@ -1868,7 +1869,7 @@ as
     $else
       if ok_to_log(logger.g_debug) then
         if g_proc_start_times.exists(p_unit) then
-          l_interval := systimestamp-(g_proc_start_times(p_unit));
+          l_interval := l_now - (g_proc_start_times(p_unit));
           l_seconds := extract(day from l_interval) * 86400 + extract(hour from l_interval) * 3600 + extract(minute from l_interval) * 60 + extract(second from l_interval);
 
           g_proc_start_times.delete(p_unit);
