@@ -642,11 +642,11 @@ as
       l_text := p_text;
 
       -- Generate callstack text
-      if p_callstack is not null and include_call_stack then
-        get_debug_info(
-          p_callstack     => p_callstack,
-          o_unit          => l_proc_name,
-          o_lineno        => l_lineno);
+      if p_callstack is not null and logger.include_call_stack then
+        logger.get_debug_info(
+          p_callstack => p_callstack,
+          o_unit => l_proc_name,
+          o_lineno => l_lineno);
 
         l_callstack  := regexp_replace(p_callstack,'^.*$','',1,4,'m');
         l_callstack  := regexp_replace(l_callstack,'^.*$','',1,1,'m');
@@ -1295,11 +1295,11 @@ as
     $else
       if ok_to_log(logger.g_warning) then
         log_internal(
-          p_text        => p_text,
-          p_log_level     => logger.g_warning,
-          p_scope             => p_scope,
-          p_extra             => p_extra,
-          p_callstack         => dbms_utility.format_call_stack,
+          p_text => p_text,
+          p_log_level => logger.g_warning,
+          p_scope => p_scope,
+          p_extra => p_extra,
+          p_callstack => dbms_utility.format_call_stack,
           p_params => p_params);
       end if;
     $end
