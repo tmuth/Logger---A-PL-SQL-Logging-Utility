@@ -1083,19 +1083,24 @@ as
    * Related Tickets:
    *  - #115: Only log not-null values
    *  - #114: Bulk insert (no more row by row)
+   *  - #54: Support for p_item_scope
    *
    * @author Tyler Muth
    * @created ???
    * @param p_log_id logger_logs.id to reference
+   * @param p_item_scope Either the g_log_apex_items_... type or just the APEX page number for a specific page. It is assumed that it has been validated by the time it hits here.
    * @param p_log_null_items If set to false, null values won't be logged
    */
   procedure snapshot_apex_items(
     p_log_id in logger_logs.id%type,
+    p_item_scope in varchar2,
     p_log_null_items in boolean)
   is
     l_app_session number;
     l_app_id number;
     l_log_null_item_yn varchar2(1);
+    l_item_scope varchar2(30) := upper(p_item_scope);
+    l_item_scope_page_id number;
   begin
     $if $$no_op $then
       null;
@@ -1109,6 +1114,10 @@ as
           l_log_null_item_yn := 'Y';
         end if;
 
+        if logger.is_number(l_item_scope) then
+          l_item_scope_page_id := to_number(l_item_scope);
+        end if;
+
         insert into logger_logs_apex_items(log_id,app_session,item_name,item_value)
         select p_log_id, l_app_session, item_name, item_value
         from (
@@ -1117,12 +1126,18 @@ as
           from apex_application_items
           where 1=1
             and application_id = l_app_id
+            and l_item_scope in (logger.g_log_apex_items_all, logger.g_log_apex_items_app)
           union all
           -- Application page items
           select 2 app_page_seq, page_id, item_name, v(item_name) item_value
           from apex_application_page_items
           where 1=1
             and application_id = l_app_id
+            and (
+              1=2
+              or l_item_scope in (logger.g_log_apex_items_all, logger.g_log_apex_items_page)
+              or (l_item_scope_page_id is not null and l_item_scope_page_id = page_id)
+            )
           )
         where 1=1
           and (l_log_null_item_yn = 'Y' or item_value is not null)
@@ -1612,17 +1627,20 @@ as
    * Related Tickets:
    *  - #115 Only log not-null values
    *  - #29 Support for definging level
+   *  - #54: Add p_item_scope
    *
    * @author Tyler Muth
    * @created ???
    * @param p_text
    * @param p_scope
+   * @param p_item_scope Either the g_log_apex_items_... type or just the APEX page number for a specific page.
    * @param p_log_null_items If set to false, null values won't be logged
    * @param p_level Highest level to run at (default logger.g_debug). Example. If you set to logger.g_error it will work when both in DEBUG and ERROR modes. However if set to logger.g_debug(default) will not store values when level is set to ERROR.
    */
   procedure log_apex_items(
     p_text in varchar2 default 'Log APEX Items',
     p_scope in logger_logs.scope%type default null,
+    p_item_scope in varchar2 default logger.g_log_apex_items_all,
     p_log_null_items in boolean default true,
     p_level in logger_logs.logger_level%type default null)
   is
@@ -1635,6 +1653,11 @@ as
       if ok_to_log(nvl(p_level, logger.g_debug)) then
 
         $if $$apex $then
+          -- Validate p_item_scope
+          assert(
+            p_condition => upper(p_item_scope) in (logger.g_log_apex_items_all, logger.g_log_apex_items_app, logger.g_log_apex_items_page) or logger.is_number(p_item_scope),
+            p_message => logger.sprintf('APEX Item Scope was set to %s. Must be %s, %s, %s, or page number', p_item_scope, logger.g_log_apex_items_all, logger.g_log_apex_items_page, logger.g_log_apex_items_page));
+
           log_internal(
             p_text => p_text,
             p_log_level => nvl(p_level, logger.g_apex),
@@ -1642,6 +1665,7 @@ as
 
           snapshot_apex_items(
             p_log_id => g_log_id,
+            p_item_scope => upper(p_item_scope),
             p_log_null_items => p_log_null_items);
         $else
           l_error := 'Error! Logger is not configured for APEX yet. ';

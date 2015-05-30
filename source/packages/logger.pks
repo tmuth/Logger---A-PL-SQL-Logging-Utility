@@ -66,6 +66,12 @@ as
 
   gc_empty_tab_param tab_param;
 
+  -- #54: Types for log_apex_items
+  g_log_apex_items_all constant varchar2(30) := 'ALL'; -- Application items and page items
+  g_log_apex_items_app constant varchar2(30) := 'APP'; -- All application items
+  g_log_apex_items_page constant varchar2(30) := 'PAGE'; -- All page items
+  -- To log items on a particular page, just enter the page number
+
   -- Expose private functions only for testing during development
   $if $$logger_debug $then
     function is_number(p_str in varchar2)
@@ -200,11 +206,12 @@ as
     p_show_common_codes in boolean default true,
     p_level in logger_logs.logger_level%type default null);
 
-  procedure log_apex_items(
-    p_text in varchar2 default 'Log APEX Items',
-    p_scope in logger_logs.scope%type default null,
-    p_log_null_items in boolean default true,
-    p_level in logger_logs.logger_level%type default null);
+    procedure log_apex_items(
+      p_text in varchar2 default 'Log APEX Items',
+      p_scope in logger_logs.scope%type default null,
+      p_item_scope in varchar2 default logger.g_log_apex_items_all,
+      p_log_null_items in boolean default true,
+      p_level in logger_logs.logger_level%type default null);
 
 	procedure time_start(
 		p_unit				in varchar2,
