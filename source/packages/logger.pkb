@@ -1710,7 +1710,8 @@ as
         g_running_timers := g_running_timers + 1;
 
         if g_running_timers > 1 then
-          l_pad := lpad(' ',g_running_timers,'>')||' ';
+          -- Use 'a' since lpad requires a value to pad
+          l_pad := replace(lpad('a',logger.g_running_timers,'>')||' ', 'a', null);
         end if;
 
         g_proc_start_times(p_unit) := systimestamp;
@@ -1735,7 +1736,7 @@ as
    *  -
    *
    * Related Tickets:
-   *  -
+   *  - #73: Remove additional timer decrement since it was already happening in function time_stop
    *
    * @author Tyler Muth
    * @created ???
@@ -1757,23 +1758,22 @@ as
         if g_proc_start_times.exists(p_unit) then
 
           if g_running_timers > 1 then
-            l_pad := lpad(' ',g_running_timers,'>')||' ';
+            -- Use 'a' since lpad requires a value to pad
+            l_pad := replace(lpad('a',logger.g_running_timers,'>')||' ', 'a', null);
           end if;
 
           --l_time_string := rtrim(regexp_replace(systimestamp-(g_proc_start_times(p_unit)),'.+?[[:space:]](.*)','\1',1,0),0);
+          -- Function time_stop will decrement the timers and pop the name from the g_proc_start_times array
           l_time_string := time_stop(
             p_unit => p_unit,
             p_log_in_table => false);
 
           l_text := l_pad||'STOP : '||p_unit ||' - '||l_time_string;
 
-          g_proc_start_times.delete(p_unit);
-          g_running_timers := g_running_timers - 1;
-
           ins_logger_logs(
             p_unit_name => p_unit,
             p_scope => p_scope ,
-            p_logger_level =>g_timing,
+            p_logger_level => g_timing,
             p_text =>l_text,
             po_id => g_log_id);
         end if;
@@ -1804,7 +1804,7 @@ as
     p_log_in_table IN boolean default true)
     return varchar2
   is
-    l_time_string     varchar2(50);
+    l_time_string varchar2(50);
   begin
     $if $$no_op $then
       null;
