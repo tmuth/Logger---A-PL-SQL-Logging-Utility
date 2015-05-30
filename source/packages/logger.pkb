@@ -1798,11 +1798,10 @@ as
    * @param p_log_in_table
    * @return Timer string
    */
-  FUNCTION time_stop(
-    p_unit        IN VARCHAR2,
-    p_scope             in varchar2 default null,
-    p_log_in_table      IN boolean default true
-    )
+  function time_stop(
+    p_unit in varchar2,
+    p_scope in varchar2 default null,
+    p_log_in_table IN boolean default true)
     return varchar2
   is
     l_time_string     varchar2(50);
