@@ -1688,7 +1688,7 @@ as
    *  -
    *
    * Related Tickets:
-   *  -
+   *  - #73/#75: Use localtimestamp
    *
    * @author Tyler Muth
    * @created ???
@@ -1714,7 +1714,7 @@ as
           l_pad := replace(lpad('a',logger.g_running_timers,'>')||' ', 'a', null);
         end if;
 
-        g_proc_start_times(p_unit) := systimestamp;
+        g_proc_start_times(p_unit) := localtimestamp;
 
         l_text := l_pad||'START: '||p_unit;
 
@@ -1789,7 +1789,7 @@ as
    *  -
    *
    * Related Tickets:
-   *  - #73: Trim timezone from systimestamp
+   *  - #73/#75: Trim timezone from systimestamp to localtimestamp
    *
    * @author Tyler Muth
    * @created ???
@@ -1805,7 +1805,6 @@ as
     return varchar2
   is
     l_time_string varchar2(50);
-    l_now timestamp := systimestamp;
   begin
     $if $$no_op $then
       null;
@@ -1813,7 +1812,7 @@ as
       if ok_to_log(logger.g_debug) then
         if g_proc_start_times.exists(p_unit) then
 
-          l_time_string := rtrim(regexp_replace(l_now - (g_proc_start_times(p_unit)),'.+?[[:space:]](.*)','\1',1,0),0);
+          l_time_string := rtrim(regexp_replace(localtimestamp - (g_proc_start_times(p_unit)),'.+?[[:space:]](.*)','\1',1,0),0);
 
           g_proc_start_times.delete(p_unit);
           g_running_timers := g_running_timers - 1;
@@ -1842,7 +1841,7 @@ as
    *  -
    *
    * Related Tickets:
-   *  - #73: Trim timezone from systimestamp
+   *  - #73/#75: Trim timezone from systimestamp to localtimestamp
    *
    * @author Tyler Muth
    * @created ???
@@ -1861,7 +1860,6 @@ as
     l_time_string varchar2(50);
     l_seconds number;
     l_interval interval day to second;
-    l_now timestamp := systimestamp;
 
   begin
     $if $$no_op $then
@@ -1869,7 +1867,7 @@ as
     $else
       if ok_to_log(logger.g_debug) then
         if g_proc_start_times.exists(p_unit) then
-          l_interval := l_now - (g_proc_start_times(p_unit));
+          l_interval := localtimestamp - (g_proc_start_times(p_unit));
           l_seconds := extract(day from l_interval) * 86400 + extract(hour from l_interval) * 3600 + extract(minute from l_interval) * 60 + extract(second from l_interval);
 
           g_proc_start_times.delete(p_unit);
