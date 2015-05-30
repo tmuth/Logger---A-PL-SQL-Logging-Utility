@@ -1,5 +1,5 @@
 - [PL/SQL Procedure / Function Template](#plsql-example)
-- [Logger Levels Guide](#logger-levels)
+- [Logger Levels Guide](#logger-level-guide)
 
 <a name="plsql-example"></a>
 ##PL/SQL Procedure / Function Template
@@ -66,15 +66,15 @@ By default, Logger is configured to delete all `debug` level calls after 7 days.
 ###Information
 `logger.log_info[rmation]` should be used for messages that need to be retained at a higher level than `debug` but are not actionable issues.
 
-Information logging will vary in each organization but should fall between the rules for `debug` and `warning`. An example could be to use it in a scheduled job that runs each night at the start and end of the block to highlight that the job was actually run with no errors.
+Information logging will vary in each organization but should fall between the rules for `debug` and `warning`. An example is to use it in a scheduled job that runs each night at the start and end of the block to highlight that the job was actually run with no errors.
 
 ###Warning
-`logger.log_warn[ing]` should be used for non-critical system level / business logic issues that are actionable. If it is a critical issue than an error should be raised and `logger.log_error` should be used. An example would be when a non-critical configuration item is missing. In this case a warning message should be logged stating that the configuration option was not set / mssing and the deafult value that the code is using in place.
+`logger.log_warn[ing]` should be used for non-critical system level / business logic issues that are actionable. If it is a critical issue than an error should be raised and `logger.log_error` should be called. An example would be when a non-critical configuration item is missing. In this case a warning message should be logged stating that the configuration option was not set / mssing and the deafult value that the code is using in place.
 
 ###Error
 `logger.log_error` should be used when a PL/SQL error has occurred. In most cases this is in an exception block. Regardless of any other configuration, `log_error` will store the callstack. Errors are considered actionalble items as an error has occurred and something (code, configuration, server down, etc) needs attention.
 
 ###Permanent
-`logger.log_permanent` should be used for messages that need to be permanently retained. `logger.purge` and `logger.purge_all` will not delete these messages. Only an implicit delete to `logger_logs` will delete these messages.
+`logger.log_permanent` should be used for messages that need to be permanently retained. `logger.purge` and `logger.purge_all` will not delete these messages regardless of the `PURGE_MIN_LEVEL` configuration option. Only an implicit delete to `logger_logs` will delete these messages.
 
 An example would be to use this procedure when updating your application to a new version. At the end of the update you can log that the upgrade was successful and the new version number. This way you can find exactly when all the upgrades occurred on your system.
