@@ -56,11 +56,51 @@ end pkg_example;
 ##Logger Levels Guide
 Logger supports multiple logging levels. This section will provide an outline of recommended situations for calling each level. The procedures are ordered in most frequently used to least frequently used.
 
-*Actionable* means issues that require follow up either by developers or business users.
+###Summary
+
+<table>
+  <tr>
+    <th>Level</th>
+    <th>Actionable</th>
+    <th>Target Audience</th>
+    <th>~%Reference</th>
+  </tr>
+  <tr>
+    <td>Debug</td>
+    <td>No</td>
+    <td>Developers</td>
+    <td>90%</td>
+  </tr>
+  <tr>
+    <td>Information</td>
+    <td>No</td>
+    <td>Developers/Business</td>
+    <td>1%</td>
+  </tr>
+  <tr>
+    <td>Warning</td>
+    <td>Yes</td>
+    <td>Developers/Business</td>
+    <td>1%</td>
+  </tr>
+  <tr>
+    <td>Error</td>
+    <td>Yes</td>
+    <td>Developers/IT/DBA</td>
+    <td>5%</td>
+  </tr>
+  <tr>
+    <td>Permanent</td>
+    <td>No</td>
+    <td>Developers/Business</td>
+    <td>0.5%</td>
+  </tr>
+</table>
+
+*Actionable* means issues that require follow up by a business unit.
+
 
 ###Debug / Log
-Actionable: No
-Audience: Developer
 
 `logger.log` should be used for all developer related content. This can really be anything and everything except for items that require additional investigation. In those situations use the other logging options.
 
