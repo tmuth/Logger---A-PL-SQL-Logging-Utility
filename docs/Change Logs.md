@@ -1,6 +1,6 @@
 This page contains all of Logger's Change Logs. Starting in version 3.0.0 onwards, only major tickets will be listed here. To see a complete list of all the issues for each version, review the appropriate release page.
 
-<a name="change-log-TODOVERSION"></a>
+<a name="change-log-3.1.0"></a>
 ##Change Log 3.1.0
 [Download](TODO_URL)<br/>
 [Release Page](https://github.com/OraOpenSource/Logger/milestones/Release%203.1.0)<br/>
@@ -14,6 +14,41 @@ Release Articles
     <td>Articles</td>
   </tr>
   <tr>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/29" target="_blank">29</a></td>
+    <td>Allow level to be passed to other functions</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/50" target="_blank">50</a></td>
+    <td>Deprecate levels Timing, APEX, and Context.</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/54" target="_blank">54</a></td>
+    <td>Enhance log_apex_items</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/57" target="_blank">57</a></td>
+    <td>Secure Logger schema setup</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/73" target="_blank">73</a>, <a href="https://github.com/OraOpenSource/Logger/issues/75" target="_blank">75</a></td>
+    <td>Bug fix: Timing issues</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/78" target="_blank">78</a></td>
+    <td>Bug fix: NO_OP installer references Logger objects</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/94" target="_blank">94</a></td>
+    <td>Best practices guide</td>
+    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
+  </tr>
+  <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/103" target="_blank">103</a></td>
     <td>Custom Preferences</br>set_cust_pref</br>del_cust_pref</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
@@ -24,18 +59,13 @@ Release Articles
     <td><a href="http://www.oraopensource.com/blog/2015/5/15/restrict-loggers-access-to-your-data" target="_blank">Restrict Logger's Access to Your Data</a></td>
   </tr>
   <tr>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
-    <td>TODO</td>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
-  </tr>
-  <tr>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
-    <td>TODO</td>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/109" target="_blank">109</a></td>
+    <td>Bug fix: Length doesn't factor multi byte characters</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
   <tr>
-    <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
-    <td>TODO</td>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/110" target="_blank">110</a></td>
+    <td>Bug fix: Level changes don't propogate to sessions with client_identifer</td>
     <td><a href="TODO_URL" target="_blank">TODO_TITLE</a></td>
   </tr>
 </table>
