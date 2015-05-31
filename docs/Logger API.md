@@ -335,7 +335,7 @@ log_userenv(
   </tr>
   <tr>
     <td>p_level</td>
-    <td>Highest level to run at (default logger.g_debug). Example. If you set to logger.g_error it will work when both in DEBUG and ERROR modes. However if set to logger.g_debug(default) will not store values when level is set to ERROR.</td>
+    <td>Highest level to run at (default logger.g_debug). Example. If you set to logger.g_error it will work when both in DEBUG and ERROR modes. However if set to logger.g_debug (default) will not store values when level is set to ERROR.</td>
   </tr>
 </table>
 
@@ -403,7 +403,7 @@ logger.log_cgi_env(
   </tr>
   <tr>
     <td>p_level</td>
-    <td>Highest level to run at (default logger.g_debug). Example. If you set to logger.g_error it will work when both in DEBUG and ERROR modes. However if set to logger.g_debug(default) will not store values when level is set to ERROR.</td>
+    <td>Highest level to run at (default logger.g_debug). Example. If you set to logger.g_error it will work when both in DEBUG and ERROR modes. However if set to logger.g_debug (default) will not store values when level is set to ERROR.</td>
   </tr>
 </table>
 
@@ -460,7 +460,7 @@ logger.log_character_codes(
   </tr>
   <tr>
     <td>p_level</td>
-    <td>Highest level to run at (default logger.g_debug). Example. If you set to logger.g_error it will work when both in DEBUG and ERROR modes. However if set to logger.g_debug(default) will not store values when level is set to ERROR.</td>
+    <td>Highest level to run at (default logger.g_debug). Example. If you set to logger.g_error it will work when both in DEBUG and ERROR modes. However if set to logger.g_debug (default) will not store values when level is set to ERROR.</td>
   </tr>
 </table>
 
@@ -515,7 +515,7 @@ logger.log_apex_items(
   </tr>
   <tr>
     <td>p_level</td>
-    <td>Highest level to run at (default logger.g_debug). Example. If you set to logger.g_error it will work when both in DEBUG and ERROR modes. However if set to logger.g_debug(default) will not store values when level is set to ERROR.</td>
+    <td>Highest level to run at (default logger.g_debug). Example. If you set to logger.g_error it will work when both in DEBUG and ERROR modes. However if set to logger.g_debug (default) will not store values when level is set to ERROR.</td>
   </tr>
 </table>
 
