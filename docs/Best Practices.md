@@ -59,7 +59,10 @@ Logger supports multiple logging levels. This section will provide an outline of
 *Actionable* means issues that require follow up either by developers or business users.
 
 ###Debug / Log
-`logger.log` should be used for all developer related content. This can really be anything and everything except for items that require some more investigative work (i.e. non actionable messages). In those situations use the other logging options.
+Actionable: No
+Audience: Developer
+
+`logger.log` should be used for all developer related content. This can really be anything and everything except for items that require additional investigation. In those situations use the other logging options.
 
 By default, Logger is configured to delete all `debug` level calls after 7 days. As such, developers are encouraged to log as much as they need to with this option. Using other logging levels may result (depending on the settings) in permanent storage and should not be used as frequently.
 
