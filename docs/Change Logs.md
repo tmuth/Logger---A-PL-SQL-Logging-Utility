@@ -3,7 +3,7 @@ This page contains all of Logger's Change Logs. Starting in version 3.0.0 onward
 <a name="change-log-3.1.0"></a>
 ##Change Log 3.1.0
 [Download](TODO_URL)<br/>
-[Release Page](https://github.com/OraOpenSource/Logger/milestones/Release%203.1.0)<br/>
+[Release Page](https://github.com/OraOpenSource/Logger/issues?utf8=%E2%9C%93&q=milestone%3A%22Release+3.1.0%22+)<br/>
 Release Articles
 - [TODO_NAME](TOOD_URL)
 

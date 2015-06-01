@@ -93,7 +93,7 @@ To uninstall Logger simple run the following script in the schema that Logger wa
 You may want to [install Logger into it's own schema](#install-into-new-schema) for various reasons. Some of the most common ones are:
 
 - DBA does not want to give `CREATE ANY CONTEXT` access to your user.
-    - If this is the case, the DBA can then lock the Logger schema after running the grant scripts (below) to prevent any access to the privileged user.
+  - If this is the case, the DBA can then lock the Logger schema after running the grant scripts (below) to prevent any access to the privileged user.
 - Restrict Logger to never be able to access your data. *Note: Logger does not try to reference any of your data. Some security policies require that 3rd party solutions can not reside in the same schema as your data. This follows the concept that Logger doesn't need to see your data, your schema just needs access to Logger.*
 
 Once you have installed Logger into it's own schema they're two additional scripts that need to be run. The first grants the appropriate privileges to your schema and the second will create synonyms in your schema.
@@ -104,7 +104,7 @@ Run as the user with Logger installed:
 @scripts/grant_logger_to_user.sql <grant_to_username>
 ```
 
-If you want to restrict access to the "Logger Schema" (since it has `CREATE ANY CONTEXT privilege) you can simple lock it as `SYSTEM`:
+If you want to restrict access to the "Logger Schema" (since it has `CREATE ANY CONTEXT` privilege) you can simple lock it as `SYSTEM`:
 
 ```sql
 alter user <username> account lock;
