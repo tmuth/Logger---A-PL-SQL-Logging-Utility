@@ -2584,12 +2584,13 @@ as
     return to_char(p_val, gc_timestamp_tz_format);
   end tochar;
 
+  -- #119: Return null for null booleans
   function tochar(
     p_val in boolean)
     return varchar2
   as
   begin
-    return case when p_val then 'TRUE' else 'FALSE' end;
+    return case p_val when true then 'TRUE' when false then 'FALSE' else null end;
   end tochar;
 
 
