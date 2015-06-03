@@ -109,7 +109,12 @@ By default, Logger is configured to delete all `debug` level calls after 7 days.
 ###Information
 `logger.log_info[rmation]` should be used for messages that need to be retained at a higher level than `debug` but are not actionable issues.
 
-Information logging will vary in each organization but should fall between the rules for `debug` and `warning`. An example is to use it in a scheduled job that runs each night at the start and end of the block to highlight that the job was actually run with no errors.
+Information logging will vary in each organization but should fall between the rules for `debug` and `warning`. An example is to use it for a long running process to highlight some of the following items:
+
+- When did the process start
+- Major steps/milestones in the process
+- Number of rows processed
+- When did the process end
 
 ###Warning
 `logger.log_warn[ing]` should be used for non-critical system level / business logic issues that are actionable. If it is a critical issue than an error should be raised and `logger.log_error` should be called. An example would be when a non-critical configuration item is missing. In this case a warning message should be logged stating that the configuration option was not set / mssing and the deafult value that the code is using in place.
