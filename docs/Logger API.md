@@ -736,12 +736,13 @@ TODO
 
 <a name="procedure-get_pref"></a>
 ###GET_PREF
-Returns the preference from LOGGER_PREFS.
+Returns the preference from LOGGER_PREFS. If `p_pref_type` is not defined then the system level preferences will be returned.
 
 ####Syntax
 ```sql
 logger.get_pref(
-  p_pref_name     in  varchar2)
+  p_pref_name in logger_prefs.pref_name%type,
+  p_pref_type in logger_prefs.pref_type%type default logger.g_pref_type_logger)
   return varchar2
 ```
 
@@ -755,7 +756,11 @@ logger.get_pref(
     <td>p_pref_name</td>
     <td>Preference to get value for.</td>
   </tr>
-    <tr>
+  <tr>
+    <td>p_pref_type</td>
+    <td>Preference type</td>
+  </tr>
+  <tr>
     <td>return</td>
     <td>Prefence value.</td>
   </tr>
@@ -767,19 +772,20 @@ dbms_output.put_line('Logger level: ' || logger.get_pref('LEVEL'));
 ```
 
 
-<a name="procedure-set_cust_pref"></a>
-###SET_CUST_PREF
+<a name="procedure-set_pref"></a>
+###SET_PREF
 In some cases you may want to store custom preferences in the `LOGGER_PREFS` table. A use case for this would be when creating a plugin that needs to reference some parameters.
 
-This procedure allows you to leverage the `LOGGER_PREFS` table to store your custom preferences. To avoid any naming comflicts with Logger, all custom preferences must be prefixed with `CUST_`.
+This procedure allows you to leverage the `LOGGER_PREFS` table to store your custom preferences. To avoid any naming conflicts with Logger, you must use a type (defined in `p_pref_type`). You can not use the type `LOGGER` as it is reserved for Logger system preferences.
 
-`SET_CUST_PREF` will either create or udpate a value. Values must contain data. If not, use [`DEL_CUST_PREF`](#procedure-del_cust_pref) to delete unused preferences.
+`SET_PREF` will either create or udpate a value. Values must contain data. If not, use [`DEL_PREF`](#procedure-del_pref) to delete unused preferences.
 
 ####Syntax
 ```sql
-logger.set_cust_pref(
-  p_pref_name  in logger_prefs.pref_name%type,
-  p_pref_value in logger_prefs.pref_value%type)
+logger.set_pref(
+  p_pref_type in logger_prefs.pref_type%type,
+  p_pref_name in logger_prefs.pref_name%type,
+  p_pref_value in logger_prefs.pref_value%type);
 ```
 
 ####Parameters
@@ -789,10 +795,14 @@ logger.set_cust_pref(
     <th>Description</th>
   </tr>
   <tr>
+    <td>p_pref_type</td>
+    <td>Type of preference. Use your own name space to avoid conflicts with Logger. Types will automatically be converted to uppercase</td>
+  </tr>
+  <tr>
     <td>p_pref_name</td>
     <td>Preference to get value for. Must be prefixed with "CUST_". Value will be created or updated. This value will be stored as uppercase.</td>
   </tr>
-    <tr>
+  <tr>
     <td>p_pref_value</td>
     <td>Prefence value.</td>
   </tr>
@@ -800,20 +810,22 @@ logger.set_cust_pref(
 
 ####Example
 ```sql
-logger.set_cust_pref(
-  p_pref_name => 'CUST_MY_PREF',
+logger.set_pref(
+  p_pref_type => 'CUSTOM'
+  p_pref_name => 'MY_PREF',
   p_pref_value => 'some value');
 ```
 
 
-<a name="procedure-del_cust_pref"></a>
-###DEL_CUST_PREF
-Deletes a custom preference.
+<a name="procedure-del_pref"></a>
+###DEL_PREF
+Deletes a preference except for system level preferences.
 
 ####Syntax
 ```sql
-logger.del_cust_pref(
-  p_pref_name  in logger_prefs.pref_name%type);
+logger.del_pref(
+  p_pref_type in logger_prefs.pref_type%type,
+  p_pref_name in logger_prefs.pref_name%type);
 ```
 
 ####Parameters
@@ -821,6 +833,10 @@ logger.del_cust_pref(
   <tr>
     <th>Prameter</th>
     <th>Description</th>
+  </tr>
+  <tr>
+    <td>p_pref_type</td>
+    <td>Namepsace / type of preference.</td>
   </tr>
   <tr>
     <td>p_pref_name</td>
@@ -830,8 +846,9 @@ logger.del_cust_pref(
 
 ####Example
 ```sql
-logger.del_cust_pref(
-  p_pref_name => 'CUST_MY_PREF');
+logger.del_pref(
+  p_pref_type => 'CUSTOM'
+  p_pref_name => 'MY_PREF');
 ```
 
 

@@ -329,7 +329,9 @@ p_test2: test2' then
     -- Test simple case
     update logger_prefs
     set pref_value = 'FALSE'
-    where pref_name = 'PROTECT_ADMIN_PROCS';
+    where 1=1
+      and pref_type = logger.g_pref_type_logger
+      and pref_name = 'PROTECT_ADMIN_PROCS';
 
     l_bool := logger.admin_security_check;
 
@@ -340,11 +342,15 @@ p_test2: test2' then
     -- Test when install schema is same as current schema. This should still pass
     update logger_prefs
     set pref_value = 'TRUE'
-    where pref_name = 'PROTECT_ADMIN_PROCS';
+    where 1=1
+      and pref_type = logger.g_pref_type_logger
+      and pref_name = 'PROTECT_ADMIN_PROCS';
 
     update logger_prefs
     set pref_value = sys_context('USERENV','SESSION_USER')
-    where pref_name = 'INSTALL_SCHEMA';
+    where 1=1
+      and pref_type = logger.g_pref_type_logger
+      and pref_name = 'INSTALL_SCHEMA';
 
     l_bool := logger.admin_security_check;
 
@@ -355,7 +361,9 @@ p_test2: test2' then
     -- Test when install schema is different as current schema (still set to TRUE)
     update logger_prefs
     set pref_value = 'DUMMY'
-    where pref_name = 'INSTALL_SCHEMA';
+    where 1=1
+      and pref_type = logger.g_pref_type_logger
+      and pref_name = 'INSTALL_SCHEMA';
 
     begin
       -- This should raise an exception
@@ -381,7 +389,9 @@ p_test2: test2' then
 
     update logger_prefs
     set pref_value = 'DEBUG'
-    where pref_name = 'LEVEL';
+    where 1=1
+      and pref_type = logger.g_pref_type_logger
+      and pref_name = 'LEVEL';
 
     l_level := logger.get_level_number;
 
@@ -410,7 +420,9 @@ p_test2: test2' then
 
     update logger_prefs
     set pref_value = 'TRUE'
-    where pref_name = 'INCLUDE_CALL_STACK';
+    where 1=1
+      and pref_type = logger.g_pref_type_logger
+      and pref_name = 'INCLUDE_CALL_STACK';
 
     if not logger.include_call_stack then
       util_add_error('Faling on true');
@@ -418,7 +430,9 @@ p_test2: test2' then
 
     update logger_prefs
     set pref_value = 'FALSE'
-    where pref_name = 'INCLUDE_CALL_STACK';
+    where 1=1
+      and pref_type = logger.g_pref_type_logger
+      and pref_name = 'INCLUDE_CALL_STACK';
 
     -- reset contexts so that it looks at new one (could have called Logger.configure but more than what I need here)
     logger.null_global_contexts;
@@ -732,7 +746,9 @@ new line',
     -- Reset callstack context and set pref to false to ensure that callstack is still set even though this setting is false
     update logger_prefs
     set pref_value = 'FALSE'
-    where pref_name = 'INCLUDE_CALL_STACK';
+    where 1=1
+      and pref_type = logger.g_pref_type_logger
+      and pref_name = 'INCLUDE_CALL_STACK';
 
     -- Wipe the sys context so that it reloads
     logger.save_global_context(

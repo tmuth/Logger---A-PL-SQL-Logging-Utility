@@ -15,7 +15,9 @@ exec logger.set_level(p_level => logger.g_debug);
 
 update logger_prefs
   set pref_value = 'log_test_plugin'
-  where pref_name = 'PLUGIN_FN_ERROR';
+  where 1=1
+    and pref_type = 'LOGGER'
+    and pref_name = 'PLUGIN_FN_ERROR';
 
 exec logger_configure;
 

@@ -24,6 +24,7 @@ is
   l_pref_value logger_prefs.pref_Value%type;
   l_logger_debug boolean;
 
+	l_pref_type_logger logger_prefs.pref_type%type;
 begin
 
   -- Check to see if we are in a RAC Database, 11.1 or lower.
@@ -89,10 +90,18 @@ begin
 
 
   -- #64: Support to run Logger in debug mode
+
+	-- #127
+	-- Since this procedure will recompile Logger, if it directly references a variable in Logger
+	-- It will lock itself while trying to recompile
+	-- Work around is to pre-store the variable using execute immediate
+	execute immediate 'begin :x := logger.g_pref_type_logger; end;' using out l_pref_type_logger;
+
   select lp.pref_value
   into l_pref_value
   from logger_prefs lp
   where 1=1
+		and lp.pref_type = upper(l_pref_type_logger)
     and lp.pref_name = 'LOGGER_DEBUG';
   l_variables := l_variables || 'LOGGER_DEBUG:' || l_pref_value||',';
 
@@ -113,6 +122,7 @@ begin
       ',' var
     from logger_prefs lp
     where 1=1
+			and lp.pref_type = l_pref_type_logger
       and lp.pref_name like 'PLUGIN_FN%'
   ) loop
     l_variables := l_variables || x.var;
@@ -122,9 +132,12 @@ begin
   l_variables := rtrim(l_variables,',');
   if l_logger_debug then
     dbms_output.put_line('l_variables: ' || l_variables);
-  end  if;
+  end if;
 
- 	l_sql := q'!alter package logger compile body PLSQL_CCFLAGS='!' || l_variables || q'!' reuse settings!';
+
+	-- Recompile Logger
+ 	l_sql := q'!alter package logger compile body PLSQL_CCFLAGS='%VARIABLES%' reuse settings!';
+	l_sql := replace(l_sql, '%VARIABLES%', l_variables);
 	execute immediate l_sql;
 
   -- #31: Dropped trigger

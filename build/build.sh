@@ -85,12 +85,6 @@ printf 'PROMPT tables/logger_prefs_by_client_id.sql \n' | tee -a $INSTALL $NO_OP
 cat ../source/tables/logger_prefs_by_client_id.sql | tee -a $INSTALL $NO_OP > /dev/null
 printf '\n' | tee -a $INSTALL $NO_OP > /dev/null
 
-
-#CONTEXTS
-printf 'PROMPT contexts/logger_context.sql \n' >> $INSTALL
-cat ../source/contexts/logger_context.sql >> $INSTALL
-printf '\n' >> $INSTALL
-
 #JOBS
 printf 'PROMPT jobs/logger_purge_job.sql \n' >> $INSTALL
 cat ../source/jobs/logger_purge_job.sql >> $INSTALL
@@ -119,6 +113,14 @@ cat ../source/packages/logger.pkb >> $INSTALL
 printf '\n' >> $INSTALL
 
 
+#Recompile logger_prefs trigger as it has dependencies on logger.pks
+printf 'PROMPT Recompile biu_logger_prefs after logger.pkb \n' >> $INSTALL
+printf '\nalter trigger biu_logger_prefs compile;\n' | tee -a $INSTALL $NO_OP > /dev/null
+
+#CONTEXTS
+printf 'PROMPT contexts/logger_context.sql \n' >> $INSTALL
+cat ../source/contexts/logger_context.sql >> $INSTALL
+printf '\n' >> $INSTALL
 
 #PROCEDURES
 printf 'PROMPT procedures/logger_configure.plb \n' >> $INSTALL
@@ -150,7 +152,6 @@ printf '\n\n' >> $NO_OP
 
 #Recompile logger_logs_terse since it depends on logger
 printf '\nalter view logger_logs_terse compile;\n' | tee -a $INSTALL $NO_OP > /dev/null
-
 
 #Copy "other" scripts
 cp -f ../source/install/create_user.sql $RELEASE_FOLDER

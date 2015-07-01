@@ -48,6 +48,7 @@ as
 
 
 
+
   -- CONSTANTS
   gc_line_feed constant varchar2(1) := chr(10);
   gc_cflf constant varchar2(2) := chr(13)||chr(10);
@@ -1924,13 +1925,18 @@ as
    *  - 2.0.0: Added user preference support
    *  - 2.1.2: Fixed issue when calling set_level with the same client_id multiple times
    *
+   * Related Tickets:
+   *  - #127: Added logger_prefs.pref_type
+   *
    * @author Tyler Muth
    * @created ???
    *
    * @param p_pref_name
+   * @param p_pref_type Namespace for preference
    */
   function get_pref(
-    p_pref_name in varchar2)
+    p_pref_name in logger_prefs.pref_name%type,
+    p_pref_type in logger_prefs.pref_type%type default logger.g_pref_type_logger)
     return varchar2
     $if not dbms_db_version.ver_le_10_2  $then
       result_cache
@@ -1943,6 +1949,7 @@ as
     l_pref_value logger_prefs.pref_value%type;
     l_client_id logger_prefs_by_client_id.client_id%type;
     l_pref_name logger_prefs.pref_name%type := upper(p_pref_name);
+    l_pref_type logger_prefs.pref_type%type := upper(p_pref_type);
   begin
 
     $if $$no_op $then
@@ -1970,12 +1977,19 @@ as
           where 1=1
             and client_id = l_client_id
             -- Only try to get prefs at a client level if pref is in LEVEL or INCLUDE_CALL_STACK
+            and l_client_id is not null
+            -- #127
+            -- Prefs by client aren't available for custom prefs right now
+            -- Only need to search this table if p_pref_type is LOGGER
+            and l_pref_type = logger.g_pref_type_logger
             and l_pref_name in (logger.gc_pref_level, logger.gc_pref_include_call_stack)
           union
           -- System level configuration
           select pref_value, 2 rank
           from logger_prefs
-          where pref_name = l_pref_name
+          where 1=1
+            and pref_name = l_pref_name
+            and pref_type = l_pref_type
         )
       )
       where rn = 1;
@@ -1989,81 +2003,91 @@ as
       raise;
   end get_pref;
 
+
   /**
-   * Creates or Changes a Custom Preference
-   * Custom Preferences must have the prefix CUST_
-   * It is not allowed to set the values of
-   * standard Preferences through this procedure
+   * Sets a preference
+   * If it does not exist, it will insert one
    *
-   * Passing a NULL for the p_pref_value will
-   * raise an exception
+   * Notes:
+   *  - Does not support setting system preferences
    *
-   * @author Alex Nuijten
+   * Related Tickets:
+   *  - #127
+   *
+   * @author Alex Nuijten / Martin D'Souza
    * @created 24-APR-2015
-   *
+   * @param p_pref_type
    * @param p_pref_name
    * @param p_pref_value
    */
-  procedure set_cust_pref (
-    p_pref_name  in logger_prefs.pref_name%type,
-    p_pref_value in logger_prefs.pref_value%type
-  )
-  is
-    l_pref_name logger_prefs.pref_name%type := upper (p_pref_name);
+  procedure set_pref(
+    p_pref_type in logger_prefs.pref_type%type,
+    p_pref_name in logger_prefs.pref_name%type,
+    p_pref_value in logger_prefs.pref_value%type)
+  as
+    l_pref_type logger_prefs.pref_type%type := trim(upper(p_pref_type));
+    l_pref_name logger_prefs.pref_name%type := trim(upper(p_pref_name));
   begin
+
     $if $$no_op $then
       null;
     $else
-      if substr (l_pref_name, 1, 5) = 'CUST_' then
-        if p_pref_value is not null then
-          merge into logger_prefs p
-          using (select l_pref_name pref_name ,p_pref_value pref_value
-                 from dual) args
-          on (p.pref_name = args.pref_name)
-          when matched then
-            update
-            set p.pref_value =  args.pref_value
-          when not matched then
-            insert (pref_name ,pref_value)
-          values
-            (args.pref_name ,args.pref_value);
-        else
-          raise_application_error (-20000, 'Preferences must have a Value');
-        end if;
-      else
-        raise_application_error (-20000, 'Only Custom Preferences that begin with "CUST_" are allowed');
+      if l_pref_type = logger.g_pref_type_logger then
+        raise_application_error(-20001, 'Can not set ' || l_pref_type || '. Reserved for Logger');
       end if;
-    $end
-  end set_cust_pref;
+
+      merge into logger_prefs p
+      using (select l_pref_type pref_type, l_pref_name pref_name, p_pref_value pref_value
+             from dual) args
+      on ( 1=1
+        and p.pref_type = args.pref_type
+        and p.pref_name = args.pref_name)
+      when matched then
+        update
+        set p.pref_value =  args.pref_value
+      when not matched then
+        insert (pref_type, pref_name ,pref_value)
+      values
+        (args.pref_type, args.pref_name ,args.pref_value);
+    $end -- $no_op
+
+  end set_pref;
 
   /**
-   * Removes a Custom Preference
-   * Custom Preferences must have the prefix CUST_
-   * It is not allowed to remove the values of
-   * standard Preferences through this procedure
+   * Removes a Preference
    *
-   * @author Alex Nuijten
+   * Notes:
+   *  - Does not support setting system preferences
+   *
+   * Related Tickets:
+   *  - #127
+   *
+   * @author Alex Nuijten / Martin D'Souza
    * @created 30-APR-2015
    *
+   * @param p_pref_type
    * @param p_pref_name
    */
-  procedure del_cust_pref (
-    p_pref_name in logger_prefs.pref_name%type
-  )
+  procedure del_pref(
+    p_pref_type in logger_prefs.pref_type%type,
+    p_pref_name in logger_prefs.pref_name%type)
   is
-    l_pref_name logger_prefs.pref_name%type := upper (p_pref_name);
+    l_pref_type logger_prefs.pref_type%type := trim(upper(p_pref_type));
+    l_pref_name logger_prefs.pref_name%type := trim(upper (p_pref_name));
   begin
     $if $$no_op $then
       null;
     $else
-      if substr (l_pref_name, 1, 5) = 'CUST_' then
-        delete from logger_prefs
-        where pref_name = l_pref_name;
-      else
-        raise_application_error (-20000, 'Only Custom Preferences are allowed to be deleted');
+      if l_pref_type = logger.g_pref_type_logger then
+        raise_application_error(-20001, 'Can not delete ' || l_pref_type || '. Reserved for Logger');
       end if;
+
+      delete from logger_prefs
+      where 1=1
+        and pref_type = l_pref_type
+        and pref_name = l_pref_name;
     $end
-  end del_cust_pref;
+  end del_pref;
 
 
   /**
@@ -2230,9 +2254,12 @@ as
         l_apex := 'Enabled';
       $end
 
-      for c1 in (select pref_value from logger_prefs where pref_name = logger.gc_pref_level) loop
-        l_debug := c1.pref_value;
-      end loop; --c1
+      select pref_value
+      into l_debug
+      from logger_prefs
+      where 1=1
+        and pref_type = logger.g_pref_type_logger
+        and pref_name = logger.gc_pref_level;
 
       $if $$flashback_enabled $then
         l_flashback := 'Enabled';
@@ -2391,7 +2418,9 @@ as
           -- Global settings
           update logger_prefs
           set pref_value = l_level
-          where pref_name = logger.gc_pref_level;
+          where 1=1
+            and pref_type = logger.g_pref_type_logger
+            and pref_name = logger.gc_pref_level;
         end if;
 
         -- #110 Need to reset all contexts so that level is reset for sessions where client_identifier is defined
@@ -2755,7 +2784,6 @@ as
     l_id logger_logs.id%type;
     l_text varchar2(32767) := p_text;
     l_extra logger_logs.extra%type := p_extra;
-    l_plugin_fn logger_prefs.pref_value%type;
     l_tmp_clob clob;
 
   begin

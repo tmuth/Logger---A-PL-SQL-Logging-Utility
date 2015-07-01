@@ -30,16 +30,18 @@ There are two steps to configure a plugin. The first is to register a custom fun
 ```sql
 update logger_prefs
 set pref_value = 'custom_plugin_method'
-where pref_name = 'PLUGIN_FN_ERROR'
+where 1=1
+  and pref_type = logger.g_pref_type_logger
+  and pref_name = 'PLUGIN_FN_ERROR'
 ```
 
-Once the custom method has been set in the ```logger_prefs table```, you must run the ```logger_configure``` procedure which will recompile Logger. 
+Once the custom method has been set in the `logger_prefs table`, you must run the `logger_configure` procedure which will recompile Logger.
 
 ```sql
 exec logger_configure;
 ```
 
-To deregister a plugin, set the appropriate ```logger_prefs.pref_value``` to ```null``` and re-run the ```logger_configure``` procedure. *Note: since ```pref_value``` is not a nullable column, null values will be automatically converted to "NONE".*
+To deregister a plugin, set the appropriate `logger_prefs.pref_value` to `null` and re-run the `logger_configure` procedure. *Note: since `pref_value` is not a nullable column, null values will be automatically converted to "NONE".*
 
 <a name="plugin-interface"></a>
 #Plugin Interface
@@ -50,7 +52,7 @@ procedure <name_of_procedure>(
   p_rec in logger.rec_logger_log)
 ```
 
-For more information about the ```logger.rec_logger_log``` type please see the [Types documentation](Logger%20API.md#types).
+For more information about the `logger.rec_logger_log` type please see the [Types documentation](Logger%20API.md#types).
 
 <a name="example"></a>
 #Example
@@ -69,14 +71,14 @@ as
 begin
   dbms_output.put_line('In Plugin');
   dbms_output.put_line('p_rec.id: ' || p_rec.id);
-  
+
   select text
   into l_text
   from logger_logs_5_min
   where id = p_rec.id;
-  
+
   dbms_output.put_line('Text: ' || l_text);
-  
+
 end;
 /
 ```
@@ -88,7 +90,9 @@ end;
 -- Register new plugin procedure for errors
 update logger_prefs
   set pref_value = 'log_test_plugin'
-  where pref_name = 'PLUGIN_FN_ERROR';
+  where 1=1
+    and pref_type = logger.g_pref_type_logger
+    and pref_name = 'PLUGIN_FN_ERROR';
 
 -- Configure with Logger
 exec logger_configure;
@@ -123,8 +127,8 @@ as
   l_text logger_logs.text%type;
 begin
   dbms_output.put_line('In Plugin');
-  
-  -- This will not trigger the plugin to be 
+
+  -- This will not trigger the plugin to be
   -- run again since called inside the plugin
   logger.log_error('will not trigger plugin');  
 end;
@@ -150,8 +154,8 @@ as
   l_text logger_logs.text%type;
 begin
   dbms_output.put_line('In Plugin');
- 
-  raise_application_error(-20001, 'test error'); 
+
+  raise_application_error(-20001, 'test error');
 end;
 /
 
