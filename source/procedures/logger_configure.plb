@@ -144,7 +144,8 @@ begin
 	-- l_sql := q'[alter trigger BI_LOGGER_LOGS compile PLSQL_CCFLAGS=']'||l_variables||q'[' reuse settings]';
 	-- execute immediate l_sql;
 
-  l_sql := q'!alter trigger biu_logger_prefs compile PLSQL_CCFLAGS='CURRENTLY_INSTALLING:FALSE'!';
+  -- -- TODO mdsouza: 3.1.1 org l_sql := q'!alter trigger biu_logger_prefs compile PLSQL_CCFLAGS='CURRENTLY_INSTALLING:FALSE'!';
+  l_sql := q'!alter trigger biu_logger_prefs compile!';
   execute immediate l_sql;
 
   -- just in case this is a re-install / upgrade, the global contexts will persist so reset them

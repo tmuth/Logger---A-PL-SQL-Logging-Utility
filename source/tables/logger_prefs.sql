@@ -27,32 +27,33 @@ end;
 /
 
 
+-- #TODO:130 mdsouza: logger 3.1.1 fix. Removed currently_installing
 -- Append existing PLSQL_CCFLAGS
 -- Since may be set with existing flags (specifically no_op)
-var cur_plsql_ccflags varchar2(500);
-
-declare
-  parnam varchar2(256);
-  intval binary_integer;
-  strval varchar2(500);
-  partyp binary_integer;
-begin
-  partyp := dbms_utility.get_parameter_value('plsql_ccflags',intval, strval);
-
-  if strval is not null then
-    strval := ',' || strval;
-  end if;
-  :cur_plsql_ccflags := strval;
-end;
-/
-
--- Convert bind variable to substitution string
--- https://blogs.oracle.com/opal/entry/sqlplus_101_substitution_varia
-column cur_plsql_ccflags new_value cur_plsql_ccflags
-select :cur_plsql_ccflags cur_plsql_ccflags from dual;
-
-alter session set plsql_ccflags='currently_installing:true&cur_plsql_ccflags'
-/
+-- var cur_plsql_ccflags varchar2(500);
+--
+-- declare
+--   parnam varchar2(256);
+--   intval binary_integer;
+--   strval varchar2(500);
+--   partyp binary_integer;
+-- begin
+--   partyp := dbms_utility.get_parameter_value('plsql_ccflags',intval, strval);
+--
+--   if strval is not null then
+--     strval := ',' || strval;
+--   end if;
+--   :cur_plsql_ccflags := strval;
+-- end;
+-- /
+--
+-- -- Convert bind variable to substitution string
+-- -- https://blogs.oracle.com/opal/entry/sqlplus_101_substitution_varia
+-- column cur_plsql_ccflags new_value cur_plsql_ccflags
+-- select :cur_plsql_ccflags cur_plsql_ccflags from dual;
+--
+-- alter session set plsql_ccflags='currently_installing:true&cur_plsql_ccflags'
+-- /
 
 create or replace trigger biu_logger_prefs
   before insert or update on logger_prefs
@@ -70,7 +71,9 @@ begin
       :new.pref_value := upper(:new.pref_value);
     end if;
 
-    $if $$currently_installing is null or not $$currently_installing $then
+    -- #TODO:50 mdsouza: 3.1.1
+    -- #TODO:100 mdsouza: if removing then decrease indent
+    -- $if $$currently_installing is null or not $$currently_installing $then
       -- Since logger.pks may not be installed when this trigger is compiled, need to move some code here
       if 1=1
         and :new.pref_type = logger.g_pref_type_logger
@@ -114,7 +117,8 @@ begin
 
       -- this is because the logger package is not installed yet.  We enable it in logger_configure
       logger.null_global_contexts;
-    $end
+    -- #TODO:60 mdsouza: 3.1.1
+    -- $end
   $end -- $$logger_no_op_install
 end;
 /
