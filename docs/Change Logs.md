@@ -1,5 +1,24 @@
 This page contains all of Logger's Change Logs. Starting in version 3.0.0 onwards, only major tickets will be listed here. To see a complete list of all the issues for each version, review the appropriate release page.
 
+<a name="change-log-3.1.1"></a>
+##Change Log 3.1.1
+[Download](https://github.com/OraOpenSource/Logger/raw/master/releases/logger_3.1.1.zip)<br/>
+[Release Page](https://github.com/OraOpenSource/Logger/issues?utf8=%E2%9C%93&q=milestone%3A%22Release+3.1.1%22)<br/>
+Release Articles
+
+<table border="0">
+  <tr>
+  	<td>Issue#</td>
+    <td>Feature</td>
+    <td>Articles</td>
+  </tr>
+  <tr>
+    <td><a href="https://github.com/OraOpenSource/Logger/issues/136" target="_blank">136</a></td>
+    <td>ORA-1031 on install</td>
+    <td></td>
+  </tr>
+</table>
+
 <a name="change-log-3.1.0"></a>
 ##Change Log 3.1.0
 [Download](https://github.com/OraOpenSource/Logger/raw/master/releases/logger_3.1.0.zip)<br/>
