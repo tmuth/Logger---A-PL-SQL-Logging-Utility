@@ -7,3 +7,5 @@ releases/*
 !releases/*.zip
 #For developers
 temp/*
+#For IMDone Atom.io plugin
+.imdone/*
