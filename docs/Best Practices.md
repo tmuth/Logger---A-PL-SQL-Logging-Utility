@@ -10,7 +10,7 @@ For packages the recommended practice is as follows:
 create or replace package body pkg_example
 as
 
-  gc_scope_prefix constant VARCHAR2(31) := lower($$PLSQL_UNIT) || '.';
+  gc_scope_prefix constant varchar2(31) := lower($$plsql_unit) || '.';
 
   /**
    * TODO_Comments
