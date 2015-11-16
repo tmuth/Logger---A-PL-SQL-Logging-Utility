@@ -6,7 +6,7 @@
 <a name="installation"></a>
 #Installation
 
-If you're new to Logger it's recommended you simply [install into an existing schema](#install-into-existing-schema) on a development environment to get up and running as quickly as possible. You are encouraged to review the rest of the installation sections after you're more familiar with Logger. Once you are comfortable using Logger it is recommended that you read the [Best Practices](Best-Practices) section
+If you're new to Logger it's recommended you simply [install into an existing schema](#install-into-existing-schema) on a development environment to get up and running as quickly as possible. You are encouraged to review the rest of the installation sections after you're more familiar with Logger. Once you are comfortable using Logger it is recommended that you read the [Best Practices](Best Practices.md) section
 
 ##Important Notes
 
