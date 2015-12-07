@@ -1,7 +1,7 @@
 create or replace package logger
   authid definer
 as
-  -- This project using the following MIT License:
+  -- This project uses the following MIT License:
   --
   -- The MIT License (MIT)
   --
