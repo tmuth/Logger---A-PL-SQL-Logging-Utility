@@ -56,7 +56,7 @@ create trigger, create procedure, create any context to existing_user;
 
 <a name="install-no-op"></a>
 ##NO-OP Option for Production Environments
-To make sure there is no fear of leaving debug statements in production code, Logger comes with a [NO-OP](http://en.wikipedia.org/wiki/NOP) (No Operation) installation file (logger_no_op.sql). This installs only a shell of the Logger package. All procedures are essentially NO-OPs. It does not even create the tables so there is absolutely no chance it is doing any logging. It is recommended that you leave the full version installed and simply [set the Logger level](Logger-API#procedure-set_level) to ERROR as the performance hit is exceptionally small.
+To make sure there is no fear of leaving debug statements in production code, Logger comes with a [NO-OP](http://en.wikipedia.org/wiki/NOP) (No Operation) installation file (logger_no_op.sql). This installs only a shell of the Logger package. All procedures are essentially NO-OPs. It does not even create the tables so there is absolutely no chance it is doing any logging. It is recommended that you leave the full version installed and simply [set the Logger level](Logger API.md#procedure-set_level) to ERROR as the performance hit is exceptionally small.
 
 ##Objects
 The following database objects are installed with Logger:
