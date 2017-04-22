@@ -740,6 +740,19 @@ as
     $END
   end log_permanent;
 
+  procedure log_warn(
+    p_text    in varchar2,
+    p_scope   in varchar2 default null,
+    p_extra   in clob default null,
+    p_params  in tab_param default logger.gc_empty_tab_param)  
+  is
+  begin
+    log_warning(
+      p_text    => p_text,
+      p_scope   => p_scope,
+      p_extra   => p_extra,
+      p_params  => p_params); 
+  end;  
 
   procedure log_warning(
     p_text    in varchar2,
@@ -762,6 +775,20 @@ as
       end if;
     $END
   end log_warning;
+ 
+  procedure log_info(
+    p_text    in varchar2,
+    p_scope   in varchar2 default null,
+    p_extra   in clob default null,
+    p_params  in tab_param default logger.gc_empty_tab_param)
+  is
+  begin
+    log_information(
+      p_text    => p_text,
+      p_scope   => p_scope,
+      p_extra   => p_extra,
+      p_params  => p_params);
+  end;  
 
   procedure log_information(
     p_text    in varchar2,
@@ -2037,6 +2064,20 @@ as
     return l_return;
 
   end get_fmt_msg;  
+  
+  procedure print(
+    aSessionId in integer := null,
+    aNumberRows in integer := null)
+  is
+  begin
+    $if not $$RAC_LT_11_2 $then
+      dbms_output.put_line('RAC_LT_11_2');
+    $else
+      dbms_output.put_line('ELSE');
+    $end
+  end;  
+    
+  
   
 end logger;
 /
