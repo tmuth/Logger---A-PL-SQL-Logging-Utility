@@ -127,7 +127,7 @@ Release Articles
   <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/44" target="_blank">44</a></td>
     <td>Global Constants for Logger Level Names</td>
-    <td><a href="http://oraopensource/blog/2015/3/25/logger-300-global-names" target="_blank">Global Level Names</a></td>
+    <td><a href="http://www.oraopensource.com/blog/2015/3/25/logger-300-global-names" target="_blank">Global Level Names</a></td>
   </tr>
   <tr>
     <td><a href="https://github.com/oraopensource/logger/issues/47" target="_blank">47</a></td>
@@ -147,7 +147,7 @@ Release Articles
   <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/56" target="_blank">56</a></td>
     <td>Updated documentation format to use Flatdoc</td>
-    <td><a href="http://oraopensource/blog/2015/3/24/logger-300-better-documentation-navigation" target="_blank">Flatdoc Documentation</a></td>
+    <td><a href="http://www.oraopensource.com/blog/2015/3/24/logger-300-better-documentation-navigation" target="_blank">Flatdoc Documentation</a></td>
   </tr>
   <tr>
     <td><a href="https://github.com/oraopensource/logger/issues/57" target="_blank">57</a></td>
@@ -167,7 +167,7 @@ Release Articles
   <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/80" target="_blank">80</a></td>
     <td>Added log_warn and log_info shortcuts</td>
-    <td><a href="http://oraopensource/blog/2015/3/26/logger-300-logwarn-and-loginfo-shortcuts" target="_blank">log_warn and log_info shortcuts</a></td>
+    <td><a href="http://www.oraopensource.com/blog/2015/3/26/logger-300-logwarn-and-loginfo-shortcuts" target="_blank">log_warn and log_info shortcuts</a></td>
   </tr>
   <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/88" target="_blank">88</a></td>
@@ -182,7 +182,7 @@ Release Articles
   <tr>
     <td><a href="https://github.com/OraOpenSource/Logger/issues/90" target="_blank">90</a></td>
     <td>Change License</td>
-    <td><a href="http://oraopensource/blog/2015/3/23/logger-300-new-license" target="_blank">New License</a></td>
+    <td><a href="http://www.oraopensource.com/blog/2015/3/23/logger-300-new-license" target="_blank">New License</a></td>
   </tr>
 
 
