@@ -6,19 +6,19 @@
 - [Change Log](#change-log)
 - [License](#license)
 
-#What is Logger?
+# What is Logger?
 
 Logger is a PL/SQL logging and debugging framework. The goal of logger is to be as simple as possible to install and use. The primary use cases for this utility include:
 
-* **Debugging**: It's often difficult to track down the source of an error without some form of debugging instrumentation. This is particularly true in multi-tier, stateless architectures such as Application Exp qress.
+* **Debugging**: It's often difficult to track down the source of an error without some form of debugging instrumentation. This is particularly true in multi-tier, stateless architectures such as Application Express.
 * **Error Logging**: While most experts agree that it's important not to mask errors, it's also nice to have a persistent record of them.
 * **Timing: Logger** has a very simple timing framework built-in that makes it easy to benchmark sections of code.
 * **Instrumentation**: Because it's easy to "turn-off" logger globally with virtually no performance impact, it's easy to get in the habit of leaving debug calls in production code. Now, when something does go wrong, you simply flip the switch and logger is enabled making it much quicker to debug errors.
 
-##Feedback/Issues
+## Feedback/Issues
 Please submit any feedback, suggestions, or issues on the project's [issue page](https://github.com/oraopensource/logger/issues).
 
-##Demo
+## Demo
 ```sql
 exec logger.log('hello world');
 
@@ -28,23 +28,24 @@ select * from logger_logs;
 
 See the [Logger API](docs/Logger API.md) documentation for complete set of procedures.
 
-#Documentation
+# Documentation
 In order to keep this page relatively small and for ease of use, the documentation has been moved to the [Logger Docs](docs). In there you you will find the following sections:
+
 - [Installation](docs/Installation.md)
-- [Logger API](docs/Logger API.md)
+- [Logger API](docs/Logger%20API.md)
 - [Plugins](docs/Plugins.md)
-- [Best Practices](docs/Best Practices.md)
-- [Development Guide](docs/Development Guide.md)
+- [Best Practices](docs/Best%20Practices.md)
+- [Development Guide](docs/Development%20Guide.md)
 - [3rd Party Addons](docs/Addons.md)
 
-#Download
+# Download
 It is recommended that you download a certified release (from the [releases](https://github.com/OraOpenSource/Logger/tree/master/releases) folder). The files in the current repository are for the next release and should be considered unstable.
 
-#Change Log
+# Change Log
 The [Change Logs](docs/Change Logs.md) contain all the major updates for each release. Complete set of issues can be found on [Milestones](https://github.com/OraOpenSource/Logger/milestones?state=closed) page.
 
-#History
+# History
 Logger was originally created by [Tyler Muth](https://twitter.com/tmuth) and is now maintained by [OraOpenSource](http://www.oraopensource.com).
 
-#License
+# License
 This project is uses the [MIT license](LICENSE).
