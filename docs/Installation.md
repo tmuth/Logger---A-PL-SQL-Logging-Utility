@@ -4,13 +4,13 @@
 - [Maintenance](#maintenance)
 
 <a name="installation"></a>
-#Installation
+# Installation
 
 If you're new to Logger it's recommended you simply [install into an existing schema](#install-into-existing-schema) on a development environment to get up and running as quickly as possible. You are encouraged to review the rest of the installation sections after you're more familiar with Logger. Once you are comfortable using Logger it is recommended that you read the [Best Practices](Best Practices.md) section
 
-##Important Notes
+## Important Notes
 
-###Previous Installations
+### Previous Installations
 Version 2.0.0 build scripts were completely re-written to make it easier for future development. The new build scripts were built off Logger 1.4.0. As such, **if your current version is lower than 1.4.0 you need to run the uninstall script for your specific version**. If you're currently 1.4.0 or above the installation script will automatically update your current version. The following query will identify your current version.
 
 ```sql
@@ -21,11 +21,11 @@ where pref_name = 'LOGGER_VERSION';
 
 To uninstall an older version of logger, see the [Uninstall](#uninstall) instructions. If necessary, you can download the correct version from the [releases](https://github.com/oraopensource/logger/tree/master/releases) folder.
 
-###Install Through APEX
+### Install Through APEX
 Logger is no longer supported from a web-only installation if the schema was provisioned by APEX. Essentially the APEX team removed the "create any context" privilege when provisioning a new workspace, likely for security reasons. I agree with their choice, it unfortunately impacts logger.
 
 <a name="install-into-new-schema"></a>
-##Install into a new schema
+## Install into a new schema
 
 1. Using sql*plus or SQL Developer, connect to the database as system or a user with the DBA role.
 
@@ -41,7 +41,7 @@ Logger is no longer supported from a web-only installation if the schema was pro
 1. Follow the steps to install into an existing schema (below).  
 
 <a name="install-into-existing-schema"></a>
-##Install into an existing schema:
+## Install into an existing schema:
 1. If possible, connect as a privileged user and issue the following grants to your "existing_user":
 ```sql
 grant connect,create view, create job, create table, create sequence,
@@ -55,10 +55,10 @@ create trigger, create procedure, create any context to existing_user;
 1. Once installed, Logger is automatically set to **DEBUG** level. View the [configurations](#configuration) section to modify its settings.
 
 <a name="install-no-op"></a>
-##NO-OP Option for Production Environments
+## NO-OP Option for Production Environments
 To make sure there is no fear of leaving debug statements in production code, Logger comes with a [NO-OP](http://en.wikipedia.org/wiki/NOP) (No Operation) installation file (logger_no_op.sql). This installs only a shell of the Logger package. All procedures are essentially NO-OPs. It does not even create the tables so there is absolutely no chance it is doing any logging. It is recommended that you leave the full version installed and simply [set the Logger level](Logger API.md#procedure-set_level) to ERROR as the performance hit is exceptionally small.
 
-##Objects
+## Objects
 The following database objects are installed with Logger:
 
 ```sql
@@ -81,7 +81,7 @@ LOGGER_GLOBAL_CTX   CONTEXT -- Global Application Contexts are owned by SYS
 ```
 
 <a name="uninstall"></a>
-##Uninstall
+## Uninstall
 To uninstall Logger simple run the following script in the schema that Logger was installed in:
 
 ```sql
@@ -89,7 +89,7 @@ To uninstall Logger simple run the following script in the schema that Logger wa
 ```
 
 <a name="restrict-access"></a>
-##Restrict Access (Grants & Synonyms)
+## Restrict Access (Grants & Synonyms)
 You may want to [install Logger into it's own schema](#install-into-new-schema) for various reasons. Some of the most common ones are:
 
 - DBA does not want to give `CREATE ANY CONTEXT` access to your user.
@@ -118,19 +118,19 @@ Run as the user that needs to access Logger:
 
 
 <a name="configuration"></a>
-#Configuration
+# Configuration
 
 <a name="config-logger-levels"></a>
-###Logger Levels
+### Logger Levels
 They're various logger levels. To see the complete list, go to the [Constants](Logger API.md#constants) section in the Logger API.
 
-###Enable
+### Enable
 To enable logging for the entire schema:
 ```sql
 exec logger.set_level(logger.g_debug);
 ```
 
-###Disable
+### Disable
 To disable logging:
 ```sql
 exec logger.set_level(logger.g_off);
@@ -145,10 +145,10 @@ If you never want logger to run in an environment you can install the [NO-OP](#i
 
 
 
-###Client Specific Configuration
+### Client Specific Configuration
 Logger now supports client specific configuration. For more information and examples view the [Set Logging Level](Logger API.md#set-logging-level) section in the Logger API documentation.
 
-###Status
+### Status
 To view the status/configuration of the Logger:
 
 ```sql
@@ -170,7 +170,7 @@ For all client info see  : logger_prefs_by_client_id
 PL/SQL procedure successfully completed.
 ```
 
-###Preferences
+### Preferences
 Logger stores its configuration settings in LOGGER_PREFS. These are the following preferences:
 
 <table border="0">
@@ -216,7 +216,7 @@ Logger stores its configuration settings in LOGGER_PREFS. These are the followin
   </tr>
 </table>
 
-###Other Options
+### Other Options
 
 Once you perform the following described steps for the Flashback or APEX option, simply run the *logger_configure* procedure, then run *logger.status* to check validate your changes.
 
@@ -225,19 +225,19 @@ exec logger_configure;
 exec logger.status;
 ```
 
-####Flashback
+#### Flashback
 To enable this option, grant execute on *dbms_flashback* to the user that owns the logger packages. Every insert into *logger_logs* will include the SCN (System Commit Number). This allows you to flashback a session to the time when the error occurred to help debug it or even undo any data corruption. As SYS from sql*plus:
 
 ```sql
 grant execute on dbms_flashback to logger;
 ```
 
-####APEX
+#### APEX
 This option allows you to call logger.log_apex_items which grabs the names and values of all APEX items from the current session and stores them in the logger_logs_apex_items table. This is extremely useful in debugging APEX issues. This option is enabled automatically by logger_configure if APEX is installed in the database.
 
 
 <a name="maintenance"></a>
-#Maintenance
+# Maintenance
 
 By default, the DBMS\_SCHEDULER job "LOGGER\_PURGE\_JOB" runs every night at 1:00am and deletes any logs older than 7 days that are of error level *g_debug* or higher which includes *g_debug* and *g_timing*. This means logs with any lower level such as *g_error* or *g_permanent* will never be purged. You can also manually purge all logs using *logger.purge_all*, but this will not delete logs of error level *g_permanent*.
 

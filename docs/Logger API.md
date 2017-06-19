@@ -1,9 +1,9 @@
 ***This document is best viewed in [flatdoc format](http://oraopensource.github.io/flatdoc?repo=logger&path=docs%2FLogger+API.md)***
 <a name="constants"></a>
-#Constants
+# Constants
 
 <a name="constants-general"></a>
-##General
+## General
 <table border="0">
   <tr>
     <th>Name</th>
@@ -24,11 +24,11 @@
 </table>
 
 <a name="constants-logger-levels"></a>
-##Logger Levels
+## Logger Levels
 For historical purposes, logger levels supports both integers and names which are intergchangble when calling a function that requires a logger level.
 
 Note: If setting the Logger level to a deprecated level, it will automatically default to `g_debug`.
-###Numeric
+### Numeric
 This is the preferred method
 <table border="0">
   <tr>
@@ -73,7 +73,7 @@ This is the preferred method
 	</tr>
 </table>
 
-###Name
+### Name
 This will still work, however it is recommended that you use the numeric values.
 <table border="0">
   <tr>
@@ -115,7 +115,7 @@ This will still work, however it is recommended that you use the numeric values.
 </table>
 
 <a name="apex-item-types"></a>
-##APEX Item Types
+## APEX Item Types
 `log_apex_items` takes in an optional variable `p_item_scope`. This determines which items to log in APEX. Use the following global variables as valid vaules.
 <table>
   <tr>
@@ -141,7 +141,7 @@ This will still work, however it is recommended that you use the numeric values.
 </table>
 
 <a name="types"></a>
-#Types
+# Types
 <table border="0">
   <tr>
     <th>Name</th>
@@ -170,18 +170,18 @@ This will still work, however it is recommended that you use the numeric values.
 </table>
 
 <a name="subprograms"></a>
-#Subprograms
+# Subprograms
 
 <a name="main-logger-procedures"></a>
-##Main Logger Procedures
+## Main Logger Procedures
 Since the main Logger procedures all have the same syntax and behavior (except for the procedure names) the documentation has been combined to avoid replication.
 
 <a name="main-logger-best-practices"></a>
-###Best Practices
+### Best Practices
 The [Best Practices](Best%20Practices.md#logger-level-guide) guide covers which Logger procedure to use in different circumstances.
 
 <a name="main-logger-syntax"></a>
-###Syntax
+### Syntax
 The syntax for the main Logger procedures are all the same.
 
 ```sql
@@ -193,7 +193,7 @@ logger.procedure_name(
 ```
 
 <a name="main-logger-parameters"></a>
-###Parameters
+### Parameters
 All of the main Logger procedures have the same parameters
 
 <table border="0">
@@ -223,7 +223,7 @@ Since most production instances set the logging level to error, it is highly rec
 </table>
 
 <a name="main-logger-examples"></a>
-###Examples
+### Examples
 The following code snippet highlights the main Logger procedures. Since they all have the same parameters, this will serve as the general example for all the main Logger procedures.
 ```sql
 begin
@@ -271,40 +271,40 @@ end p_demo_procedure;
 
 
 <a name="procedure-log"></a>
-###LOG
+### LOG
 This procedure will log an entry into the LOGGER\_LOGS table when the logger_level is set to *debug*. See [Main Logger Procedures](#main-logger-procedures) for syntax, parameters, and examples.
 
 <a name="procedure-log_information"></a>
-###LOG_INFORMATION / LOG_INFO
+### LOG_INFORMATION / LOG_INFO
 This procedure will log an entry into the LOGGER\_LOGS table when the logger_level is set to *information*. See [Main Logger Procedures](#main-logger-procedures) for syntax, parameters, and examples.
 
 ```log_info``` is a shortcut wrapper for ```log_information```.
 
 <a name="procedure-log_warning"></a>
-###LOG_WARNING / LOG_WARN
+### LOG_WARNING / LOG_WARN
 This procedure will log an entry into the LOGGER\_LOGS table when the logger_level is set to *warning*. See [Main Logger Procedures](#main-logger-procedures) for syntax, parameters, and examples.
 
 ```log_warn``` is a shortcut wrapper for ```log_warning```.
 
 <a name="procedure-log_error"></a>
-###LOG_ERROR
+### LOG_ERROR
 This procedure will log an entry into the LOGGER\_LOGS table when the logger_level is set to *error*. See [Main Logger Procedures](#main-logger-procedures) for syntax, parameters, and examples.
 
 <a name="procedure-log_permanent"></a>
-###LOG_PERMANENT
+### LOG_PERMANENT
 This procedure will log an entry into the LOGGER\_LOGS table when the logger_level is set to *permanent*. See [Main Logger Procedures](#main-logger-procedures) for syntax, parameters, and examples.
 
 <a name="other-logger-procedures"></a>
-##Other Logger Procedures
+## Other Logger Procedures
 
 <a name="procedure-log_userenv"></a>
-###LOG_USERENV
+### LOG_USERENV
 
 There are many occasions when the value of one of the USERENV session variables (Documentation: [Overview](http://download.oracle.com/docs/cd/B28359_01/server.111/b28286/functions172.htm), [list of variables](http://download.oracle.com/docs/cd/B28359_01/server.111/b28286/functions172.htm#g1513460)) is a big step in the right direction of finding a problem. A simple call to the *logger.log_userenv* procedure is all it takes to save them in the EXTRA column of logger_logs.
 
 *log-userenv* will be logged using the *g\_sys\_context* level.
 
-####Syntax
+#### Syntax
 
 ```sql
 log_userenv(
@@ -314,7 +314,7 @@ log_userenv(
   p_level in logger_logs.logger_level%type default null);
 ```
 
-####Parameters
+#### Parameters
 
 <table border="0">
   <tr>
@@ -340,7 +340,7 @@ log_userenv(
 </table>
 
 
-####Example
+#### Example
 ```sql
 exec logger.log_userenv('NLS');
 
@@ -375,10 +375,10 @@ USERENV values stored in the EXTRA column          CURRENT_SCHEMA               
 ```
 
 <a name="procedure-log_cgi_env"></a>
-###LOG_CGI_ENV
+### LOG_CGI_ENV
 This option only works within a web session, but it's a great way to quickly take a look at an APEX environment.
 
-####Syntax
+#### Syntax
 
 ```sql
 logger.log_cgi_env(
@@ -387,7 +387,7 @@ logger.log_cgi_env(
   p_level in logger_logs.logger_level%type default null);
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Parameter</th>
@@ -407,7 +407,7 @@ logger.log_cgi_env(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 exec logger.log_cgi_env;
 
@@ -427,10 +427,10 @@ REMOTE_ADDR                   : 192.168.1.7
 ```
 
 <a name="procedure-log_character_codes"></a>
-###LOG_CHARACTER_CODES
+### LOG_CHARACTER_CODES
 Have you ever run into an issue with a string that contains control characters such as carriage returns, line feeds and tabs that are difficult to debug? The sql [dump()](http://download.oracle.com/docs/cd/B28359_01/server.111/b28286/functions048.htm#sthref1340) function is great for this, but the output is a bit hard to read as it outputs the character codes for each character, so you end up comparing the character code to an [ascii table](http://www.asciitable.com/) to figure out what it is. The function get_character_codes and the procedure log_character_codes make it much easier as they line up the characters in the original string under the corresponding character codes from dump. Additionally, all tabs are replaced with "^" and all other control characters such as carriage returns and line feeds are replaced with "~".
 
-####Syntax
+#### Syntax
 
 ```sql
 logger.log_character_codes(
@@ -440,7 +440,7 @@ logger.log_character_codes(
   p_level in logger_logs.logger_level%type default null);
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Parameter</th>
@@ -464,7 +464,7 @@ logger.log_character_codes(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 exec logger.log_character_codes('Hello World'||chr(9)||'Foo'||chr(13)||chr(10)||'Bar');
 
@@ -478,10 +478,10 @@ Common Codes: 13=Line Feed, 10=Carriage Return, 32=Space, 9=Tab
 ```
 
 <a name="procedure-log_apex_items"></a>
-###LOG_APEX_ITEMS
+### LOG_APEX_ITEMS
 This feature is useful in debugging issues in an APEX application that are related session state. The developers toolbar in APEX provides a place to view session state, but it won't tell you the value of items midway through page rendering or right before and after an AJAX call to an application process.
 
-####Syntax
+#### Syntax
 ```sql
 logger.log_apex_items(
   p_text in varchar2 default 'Log APEX Items',
@@ -491,7 +491,7 @@ logger.log_apex_items(
   p_level in logger_logs.logger_level%type default null);
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Parameter</th>
@@ -519,7 +519,7 @@ logger.log_apex_items(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 -- Include in your APEX code
 begin
@@ -572,24 +572,24 @@ ID      LOG_ID  APP_SESSION    ITEM_NAME                 ITEM_VALUE
 ```
 
 <a name="utility-functions"></a>
-##Utility Functions
+## Utility Functions
 
 
 <a name="procedure-tochar"></a>
-###TOCHAR
+### TOCHAR
 
 TOCHAR will convert the value to a string (varchar2). It is useful when wanting to log items, such as booleans, without having to explicitly convert them.
 
 **Note: ```tochar ``` does not use the *no_op* conditional compilation so it will always execute.** This means that you can use outside of Logger (i.e. within your own application business logic).
 
-####Syntax
+#### Syntax
 ```sql
 logger.tochar(
   p_val in number | date | timestamp | timestamp with time zone | timestamp with local time zone | boolean
   return varchar2);
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -605,7 +605,7 @@ logger.tochar(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 select logger.tochar(sysdate)
 from dual;
@@ -624,7 +624,7 @@ PL/SQL procedure successfully completed.
 ```
 
 <a name="procedure-sprintf"></a>
-###SPRINTF
+### SPRINTF
 
 ```sprintf``` is similar to the common procedure [```printf```](http://en.wikipedia.org/wiki/Printf_format_string) found in many programming languages. It replaces substitution strings for a given string. Substitution strings can be either ```%s``` or ```%s<n>``` where ```<n>``` is a number 1~10.
 
@@ -636,7 +636,7 @@ The following rules are used to handle substitution strings (in order):
 **Note: ```sprintf ``` does not use the *no_op* conditional compilation so it will always execute.** This means that you can use outside of Logger (i.e. within your own application business logic).
 
 
-####Syntax
+#### Syntax
 ```sql
 function sprintf(
   p_str in varchar2,
@@ -653,7 +653,7 @@ function sprintf(
   return varchar2;
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -673,7 +673,7 @@ function sprintf(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 select logger.sprintf('hello %s, how are you %s', 'martin', 'today') msg
 from dual;
@@ -703,16 +703,16 @@ one, two, one
 
 
 <a name="procedure-get_cgi_env"></a>
-###GET_CGI_ENV
+### GET_CGI_ENV
 TODO Description
 
-####Syntax
+#### Syntax
 ```sql
 logger.get_cgi_env(
   p_show_null   in boolean default false)
   return clob;
 ```
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -728,17 +728,17 @@ logger.get_cgi_env(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 TODO
 ```
 
 
 <a name="procedure-get_pref"></a>
-###GET_PREF
+### GET_PREF
 Returns the preference from LOGGER_PREFS. If `p_pref_type` is not defined then the system level preferences will be returned.
 
-####Syntax
+#### Syntax
 ```sql
 logger.get_pref(
   p_pref_name in logger_prefs.pref_name%type,
@@ -746,7 +746,7 @@ logger.get_pref(
   return varchar2
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -766,21 +766,21 @@ logger.get_pref(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 dbms_output.put_line('Logger level: ' || logger.get_pref('LEVEL'));
 ```
 
 
 <a name="procedure-set_pref"></a>
-###SET_PREF
+### SET_PREF
 In some cases you may want to store custom preferences in the `LOGGER_PREFS` table. A use case for this would be when creating a plugin that needs to reference some parameters.
 
 This procedure allows you to leverage the `LOGGER_PREFS` table to store your custom preferences. To avoid any naming conflicts with Logger, you must use a type (defined in `p_pref_type`). You can not use the type `LOGGER` as it is reserved for Logger system preferences.
 
 `SET_PREF` will either create or udpate a value. Values must contain data. If not, use [`DEL_PREF`](#procedure-del_pref) to delete unused preferences.
 
-####Syntax
+#### Syntax
 ```sql
 logger.set_pref(
   p_pref_type in logger_prefs.pref_type%type,
@@ -788,7 +788,7 @@ logger.set_pref(
   p_pref_value in logger_prefs.pref_value%type);
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -808,7 +808,7 @@ logger.set_pref(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 logger.set_pref(
   p_pref_type => 'CUSTOM'
@@ -818,17 +818,17 @@ logger.set_pref(
 
 
 <a name="procedure-del_pref"></a>
-###DEL_PREF
+### DEL_PREF
 Deletes a preference except for system level preferences.
 
-####Syntax
+#### Syntax
 ```sql
 logger.del_pref(
   p_pref_type in logger_prefs.pref_type%type,
   p_pref_name in logger_prefs.pref_name%type);
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -844,7 +844,7 @@ logger.del_pref(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 logger.del_pref(
   p_pref_type => 'CUSTOM'
@@ -853,16 +853,16 @@ logger.del_pref(
 
 
 <a name="procedure-purge"></a>
-###PURGE
+### PURGE
 TODO_DESC
 
-####Syntax
+#### Syntax
 ```sql
 logger.purge(
   p_purge_after_days  in varchar2 default null,
   p_purge_min_level in varchar2 default null);
 ```
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -878,26 +878,26 @@ logger.purge(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 TODO
 ```
 
 
 <a name="procedure-purge_all"></a>
-###PURGE_ALL
+### PURGE_ALL
 Purges all non-permanent entries in LOGGER_LOGS.
 
 
-####Syntax
+#### Syntax
 ```sql
 logger.purge_all;
 ```
 
-####Parameters
+#### Parameters
 No Parameters
 
-####Example
+#### Example
 ```sql
 TODO
 -- For this one show a count before of logger_logs. Then run, then show what's left in the table.
@@ -905,16 +905,16 @@ TODO
 
 
 <a name="procedure-status"></a>
-###STATUS
+### STATUS
 Prints the Logger's current status and configuration settings.
 
-####Syntax
+#### Syntax
 ```sql
 logger.status(
   p_output_format in varchar2 default null); -- SQL-DEVELOPER | HTML | DBMS_OUPUT
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -927,7 +927,7 @@ logger.status(
 </table>
 
 
-####Example
+#### Example
 ```sql
 set serveroutput on
 exec logger.status
@@ -949,51 +949,51 @@ PL/SQL procedure successfully completed.
 
 
 <a name="procedure-sqlplus_format"></a>
-###SQLPLUS_FORMAT
+### SQLPLUS_FORMAT
 TODO_DESC
 
-####Syntax
+#### Syntax
 ```sql
 logger.sqlplus_format;
 ```
 
-####Parameters
+#### Parameters
 No Parameters
 
-####Example
+#### Example
 ```sql
 TODO
 ```
 
 <a name="procedure-null_global_contexts"></a>
-###NULL_GLOBAL_CONTEXTS
+### NULL_GLOBAL_CONTEXTS
 TODO_DESC
 
-####Syntax
+#### Syntax
 ```sql
 logger.null_global_contexts;
 ```
 
-####Parameters
+#### Parameters
 No Parameters.
 
-####Example
+#### Example
 ```sql
 TODO
 ```
 
 <a name="procedure-convert_level_char_to_num"></a>
-###CONVERT_LEVEL_CHAR_TO_NUM
+### CONVERT_LEVEL_CHAR_TO_NUM
 Returns the number representing the given level (string).
 
-####Syntax
+#### Syntax
 ```sql
 logger.convert_level_char_to_num(
   p_level in varchar2)
   return number;
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -1009,7 +1009,7 @@ logger.convert_level_char_to_num(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 select logger.convert_level_char_to_num(p_level => 'DEBUG') level_number
 from dual;
@@ -1020,16 +1020,16 @@ LEVEL_NUMBER
 ```
 
 <a name="procedure-date_text_format"></a>
-###DATE_TEXT_FORMAT
+### DATE_TEXT_FORMAT
 Returns the time difference (in nicely formatted string) of *p\_date* compared to now (sysdate).
 
-####Syntax
+#### Syntax
 ```sql
 logger.date_text_format (p_date in date)
   return varchar2;
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -1045,7 +1045,7 @@ logger.date_text_format (p_date in date)
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 select logger.date_text_format(sysdate-1) date_diff
 from dual;
@@ -1056,10 +1056,10 @@ DATE_DIFF
 ```
 
 <a name="procedure-get_character_codes"></a>
-###GET_CHARACTER_CODES
+### GET_CHARACTER_CODES
 Similar to [log_character_codes](#procedure-log_character_codes) except will return the character codes instead of logging them.
 
-####Syntax
+#### Syntax
 ```sql
 logger.get_character_codes(
   p_string        in varchar2,
@@ -1067,7 +1067,7 @@ logger.get_character_codes(
   return varchar2;
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -1087,7 +1087,7 @@ logger.get_character_codes(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 select logger.get_character_codes('Hello World') char_codes
 from dual;
@@ -1101,10 +1101,10 @@ Common Codes: 13=Line Feed, 10=Carriage Return, 32=Space, 9=Tab
 
 
 <a name="procedure-append_param"></a>
-###APPEND_PARAM
+### APPEND_PARAM
 Logger has wrapper functions to quickly and easily log parameters. All primary log procedures take in a fourth parameter to support logging a parameter array. The values are explicitly converted to strings so you don't need to convert them. The parameter values will be stored n the *extra* column.
 
-####Syntax
+#### Syntax
 ```sql
 logger.append_param(
   p_params in out nocopy logger.tab_param,
@@ -1112,7 +1112,7 @@ logger.append_param(
   p_val in <various_data_types>);
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -1132,7 +1132,7 @@ logger.append_param(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 create or replace procedure p_demo_function(
   p_empno in emp.empno%type,
@@ -1153,7 +1153,7 @@ end p_demo_function;
 ```
 
 <a name="procedure-ok_to_log"></a>
-###OK_TO_LOG
+### OK_TO_LOG
 Though Logger internally handles when a statement is stored in the LOGGER_LOGS table there may be situations where you need to know if logger will log a statement before calling logger. This is useful when doing an expensive operation just to log the data.
 
 A classic example is looping over an array for the sole purpose of logging the data. In this case, there's no reason why the code should perform the additional computations when logging is disabled for a certain level.
@@ -1162,13 +1162,13 @@ A classic example is looping over an array for the sole purpose of logging the d
 
 *Note*: *ok\_to\_log* is not something that should be used frequently. All calls to logger run this command internally.
 
-####Syntax
+#### Syntax
 ```sql
 logger.ok_to_log(p_level  in  varchar2)
   return boolean;
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -1184,7 +1184,7 @@ logger.ok_to_log(p_level  in  varchar2)
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 declare
   type typ_array is table of number index by pls_integer;
@@ -1218,7 +1218,7 @@ end if;
 
 
 <a name="procedure-ins_logger_logs"></a>
-###INS_LOGGER_LOGS
+### INS_LOGGER_LOGS
 Similar to ```ok_to_log```, this procedure should be used very infrequently as the main Logger procedures should handle everything that is required for quickly logging information.
 
 As part of the 2.1.0 release, the trigger on ```LOGGER_LOGS``` was removed for both performance and other issues. Though inserting directly to the ```LOGGER_LOGS``` table is not a supported feature of Logger, you may have some code that does a direct insert. The primary reason that a manual insert into ```LOGGER_LOGS``` was done was to obtain the ```ID``` column for the log entry.
@@ -1230,7 +1230,7 @@ Important things to now about ```ins_logger_logs```:
  - It does not check the Logger level. This means it will always insert into the ```LOGGER_LOGS``` table. It is also an Autonomous Transaction procedure so a commit is always performed, however it will not affect the current session.
  - [Plugins](Plugins.md) will not be executed when calling this procedure. If you have critical processes which leverage plugin support you should use the proper log function instead.
 
-####Syntax
+#### Syntax
 ```sql
 logger.ins_logger_logs(
   p_logger_level in logger_logs.logger_level%type,
@@ -1243,7 +1243,7 @@ logger.ins_logger_logs(
   po_id out nocopy logger_logs.id%type);
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -1283,7 +1283,7 @@ logger.ins_logger_logs(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 set serveroutput on
 
@@ -1311,7 +1311,7 @@ ID: 2930650
 
 
 <a name="set-logging-level"></a>
-##Set Logging Level
+## Set Logging Level
 
 Logger allows you to configure both system logging levels and client specific logging levels. If a client specific logging level is defined, it will override the system level configuration. If no client level is defined Logger will defautl to the system level configuration.
 
@@ -1331,10 +1331,10 @@ logger_demo_session ERROR   TRUE         24-APR-2013 02:48:13 24-APR-2013 14:48:
 
 
 <a name="procedure-set_level"></a>
-###SET_LEVEL
+### SET_LEVEL
 Set both system and client logging levels.
 
-####Syntax
+#### Syntax
 ```sql
 logger.set_level(
   p_level in varchar2 default logger.g_debug_name,
@@ -1344,7 +1344,7 @@ logger.set_level(
 );
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -1368,7 +1368,7 @@ logger.set_level(
   </tr>
 </table>
 
-####Example
+#### Example
 Set system level logging level:
 ```sql
 exec logger.set_level(logger.g_debug_name);
@@ -1423,15 +1423,15 @@ In APEX the *client\_identifier* is
 
 
 <a name="procedure-unset_client_level"></a>
-###UNSET_CLIENT_LEVEL
+### UNSET_CLIENT_LEVEL
 Unset logger level by specific *client_id*.
 
-####Syntax
+#### Syntax
 ```sql
 logger.unset_client_level(p_client_id in varchar2);
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -1443,52 +1443,52 @@ logger.unset_client_level(p_client_id in varchar2);
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 exec logger.unset_client_level('my_client_id');
 ```
 
 <a name="procedure-unset_client_level2"></a>
-###UNSET_CLIENT_LEVEL
+### UNSET_CLIENT_LEVEL
 Unset all expired *client_id*s. Note this run automatically each hour by the *LOGGER\_UNSET\_PREFS\_BY\_CLIENT* job.
 
-####Syntax
+#### Syntax
 ```sql
 logger.unset_client_level;
 ```
 
-####Parameters
+#### Parameters
 No parameters.
 
-####Example
+#### Example
 ```sql
 exec logger.unset_client_level;
 ```
 
 <a name="procedure-unset_client_level_all"></a>
-###UNSET_CLIENT_LEVEL_ALL
+### UNSET_CLIENT_LEVEL_ALL
 Unset all client configurations (regardless of expiry time).
 
-####Syntax
+#### Syntax
 ```sql
 logger.unset_client_level_all;
 ```
 
-####Parameters
+#### Parameters
 No Parameters.
 
-####Example
+#### Example
 ```sql
 exec logger.unset_client_level_all;
 ```
 
 <a name="timing-procedures"></a>
-##Timing Procedures
+## Timing Procedures
 
 TODO description?
 
 <a name="timing-procedures-example"></a>
-###Example
+### Example
 Since all the timing procedures are tightly coupled, the following example will be used to cover all of them:
 
 ```sql
@@ -1522,34 +1522,34 @@ STOP : foo - 2.015953 seconds
 ```
 
 <a name="procedure-time_reset"></a>
-###TIME_RESET
+### TIME_RESET
 Resets all timers.
 
-####Syntax
+#### Syntax
 ```sql
 logger.time_reset;
 ```
 
-####Parameters
+#### Parameters
 No Parameters.
 
-####Example
+#### Example
 ```sql
 logger.time_reset;
 ```
 
 <a name="procedure-time_start"></a>
-###TIME_START
+### TIME_START
 Starts a timer.
 
-####Syntax
+#### Syntax
 ```sql
 logger.time_start(
   p_unit        IN VARCHAR2,
   p_log_in_table      IN boolean default true)
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -1565,21 +1565,21 @@ logger.time_start(
   </tr>
 </table>
 
-####Example
+#### Example
 See [Timing Procedures Example](#timing-procedures-example).
 
 <a name="procedure-time_stop"></a>
-###TIME_STOP
+### TIME_STOP
 Stops a timing event and logs in LOGGER_LOGS using level = logger.g_timing.
 
-####Syntax
+#### Syntax
 ```sql
 logger.time_stop(
   p_unit in varchar2,
   p_scope in varchar2 default null);
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -1595,14 +1595,14 @@ logger.time_stop(
   </tr>
 </table>
 
-####Example
+#### Example
 See [Timing Procedures Example](#timing-procedures-example).
 
 <a name="procedure-time_stop2"></a>
-###TIME_STOP
+### TIME_STOP
 Similar to [TIME_STOP](#time_stop) procedure, this function will stop a timer. Logging into LOGGER_LOGS is configurable. Returns the stop time string.
 
-####Syntax
+#### Syntax
 ```sql
 logger.time_stop(
   p_unit in varchar2,
@@ -1611,7 +1611,7 @@ logger.time_stop(
   return varchar2;
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -1635,16 +1635,16 @@ logger.time_stop(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 TODO
 ```
 
 <a name="procedure-time_stop_seconds"></a>
-###TIME_STOP_SECONDS
+### TIME_STOP_SECONDS
 TODO_DESC
 
-####Syntax
+#### Syntax
 ```sql
 logger.time_stop_seconds(
   p_unit        in varchar2,
@@ -1653,7 +1653,7 @@ logger.time_stop_seconds(
   return number;
 ```
 
-####Parameters
+#### Parameters
 <table border="0">
   <tr>
     <th>Prameter</th>
@@ -1673,7 +1673,7 @@ logger.time_stop_seconds(
   </tr>
 </table>
 
-####Example
+#### Example
 ```sql
 TODO
 ```

@@ -1,7 +1,7 @@
 This page contains all of Logger's Change Logs. Starting in version 3.0.0 onwards, only major tickets will be listed here. To see a complete list of all the issues for each version, review the appropriate release page.
 
 <a name="change-log-3.1.1"></a>
-##Change Log 3.1.1
+## Change Log 3.1.1
 [Download](https://github.com/OraOpenSource/Logger/raw/master/releases/logger_3.1.1.zip)<br/>
 [Release Page](https://github.com/OraOpenSource/Logger/issues?utf8=%E2%9C%93&q=milestone%3A%22Release+3.1.1%22)<br/>
 Release Articles
@@ -20,7 +20,7 @@ Release Articles
 </table>
 
 <a name="change-log-3.1.0"></a>
-##Change Log 3.1.0
+## Change Log 3.1.0
 [Download](https://github.com/OraOpenSource/Logger/raw/master/releases/logger_3.1.0.zip)<br/>
 [Release Page](https://github.com/OraOpenSource/Logger/issues?utf8=%E2%9C%93&q=milestone%3A%22Release+3.1.0%22+)<br/>
 Release Articles
@@ -91,7 +91,7 @@ Release Articles
 
 
 <a name="change-log-3.0.0"></a>
-##Change Log 3.0.0
+## Change Log 3.0.0
 [Download](https://github.com/OraOpenSource/Logger/raw/master/releases/logger_3.0.0.zip)<br/>
 [Release Page](https://github.com/OraOpenSource/Logger/issues?q=milestone%3A%22Release+3.0.0%22+)<br/>
 Release Articles
@@ -189,7 +189,7 @@ Release Articles
 </table>
 
 <a name="change-log-2.1.2"></a>
-##Change Log 2.1.2
+## Change Log 2.1.2
 [Download](https://github.com/oraopensource/logger/tree/master/releases/2.1.2)<br/>
 [Release Page](https://github.com/oraopensource/logger/issues?milestone=6&state=closed)<br/>
 
@@ -213,7 +213,7 @@ Release Articles
 </table>
 
 <a name="change-log-2.1.1"></a>
-##Change Log 2.1.1
+## Change Log 2.1.1
 [Download](https://github.com/oraopensource/logger/tree/master/releases/2.1.1)<br/>
 [Release Page](https://github.com/oraopensource/logger/issues?milestone=5&state=closed)<br/>
 
@@ -232,7 +232,7 @@ Release Articles
 
 
 <a name="change-log-2.1.0"></a>
-##Change Log 2.1.0
+## Change Log 2.1.0
 [Download](https://github.com/oraopensource/logger/tree/master/releases/2.1.0)<br/>
 [Release Page](https://github.com/oraopensource/logger/issues?milestone=3&state=closed)<br/>
 Release Articles
@@ -289,7 +289,7 @@ Release Articles
 </table>
 
 <a name="change-log-2.0.0"></a>
-##Change Log 2.0.0
+## Change Log 2.0.0
 [Download](https://github.com/oraopensource/logger/tree/master/releases/2.0.0)<br/>
 [Release Page](https://github.com/oraopensource/logger/issues?milestone=1&state=closed)<br/>
 Release Articles
@@ -326,7 +326,7 @@ Release Articles
 </table>
 
 <a name="change-log-1.4.0"></a>
-##Change Log 1.4.0
+## Change Log 1.4.0
 [Download](https://github.com/oraopensource/logger/tree/master/releases/1.4.0)
 
 <table border="0">
@@ -349,7 +349,7 @@ Release Articles
 
 
 <a name="change-log-1.3.0"></a>
-##Change Log 1.3.0
+## Change Log 1.3.0
 [Download](https://github.com/oraopensource/logger/tree/master/releases/1.3.0)
 
 <table border="0">
@@ -371,7 +371,7 @@ Release Articles
 </table>
 
 <a name="change-log-1.2.2"></a>
-##Change Log 1.2.2
+## Change Log 1.2.2
 
 <table border="0">
   <tr>
@@ -392,7 +392,7 @@ Release Articles
 </table>
 
 <a name="change-log-1.2.0"></a>
-##Change Log 1.2.0
+## Change Log 1.2.0
 [Download](https://github.com/oraopensource/logger/tree/master/releases/1.2.0)
 
 <table border="0">
@@ -439,10 +439,10 @@ Release Articles
 </table>
 
 
-#Template (ignore)
+# Template (ignore)
 
 <a name="change-log-TODOVERSION"></a>
-##Change Log TODOVERSION
+## Change Log TODOVERSION
 [Download](TODO_URL)<br/>
 [Release Page](TODO_URL)<br/>
 Release Articles
