@@ -1827,11 +1827,10 @@ as
               po_id => g_log_id);
           end if;
 
-          return l_time_string;
-
         end if;
       end if;
     $end
+    return l_time_string;
   end time_stop;
 
 
@@ -1883,11 +1882,10 @@ as
               po_id => g_log_id);
           end if;
 
-          return l_seconds;
-
         end if;
       end if;
     $end
+    return l_seconds;
   end time_stop_seconds;
 
 
